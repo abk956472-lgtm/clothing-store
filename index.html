@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMA | Boutique Mariage Algérienne</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        /* الهيدر */
+        header {
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+        }
+        header h1 {
+            color: #d4af37;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        header p {
+            font-size: 14px;
+            color: #ccc;
+        }
+        /* شريط المعلومات */
+        .info-bar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .info-bar span {
+            margin: 0 15px;
+            display: inline-block;
+        }
+        /* قسم الترحيب */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .hero h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #f3e5ab;
+        }
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #d4af37;
+            color: #1a1a1a;
+            padding: 12px 30px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background-color: #b59325;
+            color: #fff;
+        }
+        /* المنتجات */
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            color: #1a1a1a;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: #d4af37;
+            margin: 10px auto 0;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .product-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        .product-card h3 {
+            font-size: 18px;
+            margin: 15px 0 10px;
+        }
+        .product-card p {
+            color: #e67e22;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        /* الفوتر */
+        footer {
+            background-color: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+            border-top: 3px solid #d4af37;
+        }
+        footer p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .social-links a {
+            color: #d4af37;
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .social-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>BMA</h1>
+        <p>Boutique Mariage Algérienne</p>
+    </header>
+
+    <div class="info-bar">
+        <span>📍 باب الزوار، الطريق الوطني رقم 05، الجزائر</span>
+        <span>📞 0771 15 44 28 / 0551 49 48 79</span>
+    </div>
+
+    <section class="hero">
+        <h2>أرقى الألبسة التقليدية للعرائس والمناسبات</h2>
+        <p>تصنيع وبيع بالتفصيل والجملة لأجمل الأزياء التقليدية الجزائرية</p>
+        <a href="tel:0771154428" class="btn">اتصل بنا للطلب الآن</a>
+    </section>
+
+    <div class="container">
+        <h2 class="section-title">أحدث التشكيلات</h2>
+        <div class="products-grid">
+            
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=500&q=80" alt="كراكو جزائري">
+                <h3>كراكو عصري راقي</h3>
+                <p>متوفر جملة وتفصيل</p>
+                <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=500&q=80" alt="قفطان جزائري">
+                <h3>قفطان العروسة</h3>
+                <p>تصاميم عصرية تقليدية</p>
+                <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=500&q=80" alt="لباس تقليدي">
+                <h3>بلوزة وهران / قندورة</h3>
+                <p>جودة عالية بأفضل الأسعار</p>
+                <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>Boutique Mariage Algérienne (BMA)</strong></p>
+        <p>البيع بالجملة والتفصيل لكل ولايات الوطن</p>
+        <div class="social-links">
+            <a href="#" target="_blank">Facebook: Boutique Mariage Algérienne</a> | 
+            <a href="#" target="_blank">Instagram: Boutique Mariage Algérienne</a> | 
+            <a href="#" target="_blank">TikTok: Boutique Mariage Algérienne</a>
+        </div>
+        <p style="margin-top: 15px; color: #777; font-size: 12px;">© 2026 جميع الحقوق محفوظة</p>
+    </footer>
+
+</body>
+</html>
