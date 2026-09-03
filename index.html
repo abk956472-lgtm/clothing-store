@@ -58,15 +58,26 @@
         .info-bar {
             background-color: #333;
             color: #fff;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             font-size: 14px;
+            border-bottom: 1px solid #444;
         }
         .info-bar span {
             margin: 0 15px;
             display: inline-block;
         }
-        /* قسم الترحيب */
+        /* شريط التوصيل المكتوب */
+        .delivery-banner {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #faebcc;
+        }
+        /* قسم الترحيب (الخلفية تتغير ديناميكياً) */
         .hero {
             background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80');
             background-size: cover;
@@ -74,6 +85,7 @@
             color: #fff;
             text-align: center;
             padding: 80px 20px;
+            transition: background 0.5s ease;
         }
         .hero h2 {
             font-size: 32px;
@@ -115,38 +127,6 @@
         }
         .whatsapp-btn:hover {
             background-color: #1ebe5d;
-        }
-        /* قسم محاكاة التوصيل السريع */
-        .delivery-checker {
-            max-width: 800px;
-            margin: -30px auto 30px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            border: 2px solid #d4af37;
-        }
-        .delivery-checker h3 {
-            margin-bottom: 15px;
-            color: #1a1a1a;
-            font-size: 18px;
-        }
-        .delivery-row {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .delivery-row select, .delivery-row input {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            outline: none;
-            width: 250px;
         }
         /* نافذة تسجيل الدخول المنبثقة */
         .modal {
@@ -217,6 +197,18 @@
             color: #1a1a1a;
             text-align: center;
         }
+        .admin-section {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .admin-section h4 {
+            margin-bottom: 10px;
+            color: #d4af37;
+            font-size: 16px;
+        }
         .form-group {
             margin-bottom: 15px;
             text-align: right;
@@ -232,6 +224,23 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             outline: none;
+        }
+        /* زر الحذف الخاص بالمالك داخل البطاقة */
+        .delete-btn {
+            display: none;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
         }
         /* المنتجات */
         .container {
@@ -267,7 +276,7 @@
             text-align: center;
             padding-bottom: 20px;
         }
-        /* حاوية صور المنتج مع ميزة التصفح والتكبير */
+        /* حاوية صور المنتج */
         .product-img-container {
             position: relative;
             width: 100%;
@@ -314,7 +323,7 @@
         .product-card p {
             color: #e67e22;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         /* الفوتر */
         footer {
@@ -343,7 +352,7 @@
 <body>
 
     <header>
-        <button class="admin-login-btn" onclick="openLoginModal()">دخول المالك</button>
+        <button class="admin-login-btn" id="headerLoginBtn" onclick="openLoginModal()">دخول المالك</button>
         <h1>BMA</h1>
         <p>Boutique Mariage Algérienne</p>
     </header>
@@ -353,28 +362,17 @@
         <span>📞 0771 15 44 28 / 0551 49 48 79</span>
     </div>
 
-    <section class="hero">
+    <!-- شريط معلومات التوصيل المكتوب -->
+    <div class="delivery-banner">
+        🚚 خدمة التوصيل السريع متوفرة إلى جميع ولايات الوطن (58 ولاية) حتى باب البيت أو المكتب.
+    </div>
+
+    <!-- قسم الترحيب (خلفية ديناميكية) -->
+    <section class="hero" id="heroSection">
         <h2>أرقى الألبسة التقليدية للعرائس والمناسبات</h2>
         <p>تصنيع وبيع بالتفصيل والجملة لأجمل الأزياء التقليدية الجزائرية</p>
         <a href="https://wa.me/213551494879?text=السلام%20عليكم،%20أريد%20الاستفسار%20عن%20المنتجات" target="_blank" class="btn">تواصل معنا عبر واتساب</a>
     </section>
-
-    <div class="delivery-checker">
-        <h3>🚚 خدمة التوصيل متوفرة لـ 58 ولاية (إلى باب البيت أو المكتب) وجميع البلديات</h3>
-        <div class="delivery-row">
-            <select id="wilayaSelect">
-                <option value="">اختر الولاية (01 إلى 58)</option>
-                <script>
-                    for(let i=1; i<=58; i++) {
-                        document.write(`<option value="${i}">الولاية رقم ${i}</option>`);
-                    }
-                </script>
-            </select>
-            <input type="text" id="communeInput" placeholder="اكتب اسم البلدية هنا...">
-            <button class="btn" style="padding: 10px 20px; font-size: 14px;" onclick="checkDelivery()">تحقق من التوصيل</button>
-        </div>
-        <p id="deliveryResult" style="margin-top: 12px; font-weight: bold; color: #27ae60;"></p>
-    </div>
 
     <div id="loginModal" class="modal">
         <div class="modal-content">
@@ -398,23 +396,39 @@
         <img class="lightbox-content" id="lightboxImg">
     </div>
 
+    <!-- لوحة التحكم -->
     <div class="admin-box" id="adminDashboard">
-        <h3>✨ لوحة تحكم المالك: إضافة منتج جديد</h3>
-        <div class="form-group">
-            <label>اسم المنتج:</label>
-            <input type="text" id="pName" placeholder="مثال: قفطان ملكي مطرز">
+        <h3>✨ لوحة تحكم المالك</h3>
+
+        <!-- قسم تغيير صورة الغلاف -->
+        <div class="admin-section">
+            <h4>🖼️ تغيير صورة الواجهة (الخلفية الكبرى)</h4>
+            <div class="form-group">
+                <label>اختر صورة جديدة لواجهة الموقع من هاتفك:</label>
+                <input type="file" id="heroImageFile" accept="image/*" style="background: #f1f1f1; padding: 8px;">
+            </div>
+            <button class="btn" id="saveHeroBtn" style="width: 100%; background-color: #3498db; color: white; font-size: 14px;" onclick="updateHeroImage()">تحديث صورة الواجهة فوراً</button>
         </div>
-        <div class="form-group">
-            <label>وصف السعر أو النوع:</label>
-            <input type="text" id="pDesc" placeholder="مثال: متوفر جملة وتفصيل">
+
+        <!-- قسم إضافة منتج جديد -->
+        <div class="admin-section">
+            <h4>📦 إضافة منتج جديد</h4>
+            <div class="form-group">
+                <label>اسم المنتج:</label>
+                <input type="text" id="pName" placeholder="مثال: قفطان ملكي مطرز">
+            </div>
+            <div class="form-group">
+                <label>وصف السعر أو النوع:</label>
+                <input type="text" id="pDesc" placeholder="مثال: متوفر جملة وتفصيل">
+            </div>
+            <div class="form-group">
+                <label>صور المنتج (اختر من 1 إلى 5 صور من هاتفك):</label>
+                <input type="file" id="pImageFiles" accept="image/*" multiple style="background: #f1f1f1; padding: 8px;">
+            </div>
+            <button class="btn" id="saveProductBtn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">حفظ المنتج في قاعدة البيانات</button>
         </div>
-        <div class="form-group">
-            <label>صور المنتج (اختر من 1 إلى 5 صور من هاتفك):</label>
-            <input type="file" id="pImageFiles" accept="image/*" multiple style="background: #f1f1f1; padding: 8px;">
-            <p style="font-size: 12px; color: #666; margin-top: 4px;">يمكنك تحديد عدة صور دفعة واحدة (بحد أقصى 5 صور).</p>
-        </div>
-        <button class="btn" id="saveProductBtn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">حفظ المنتج في قاعدة البيانات</button>
-        <button class="btn" style="width: 100%; margin-top: 10px; background-color: #c0392b; color: white;" onclick="logoutAdmin()">تسجيل الخروج</button>
+
+        <button class="btn" style="width: 100%; margin-top: 5px; background-color: #c0392b; color: white;" onclick="logoutAdmin()">تسجيل الخروج</button>
     </div>
 
     <div class="container">
@@ -443,8 +457,90 @@
 
         const ADMIN_EMAIL = "bma@gmail.com";
         const ADMIN_PASS = "123456";
+        
+        // التحقق مما إذا كان المالك مسجل الدخول مسبقاً من ذاكرة الهاتف المحلية
+        let isAdminLoggedIn = localStorage.getItem('bma_admin_logged') === 'true';
 
-        window.addEventListener('DOMContentLoaded', fetchProducts);
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLoginStateUI();
+            fetchProducts();
+            loadHeroImage();
+        });
+
+        // ضبط واجهة المستخدم حسب حالة تسجيل الدخول
+        function checkLoginStateUI() {
+            if (isAdminLoggedIn) {
+                document.getElementById('adminDashboard').style.display = 'block';
+                document.getElementById('headerLoginBtn').style.display = 'none';
+            } else {
+                document.getElementById('adminDashboard').style.display = 'none';
+                document.getElementById('headerLoginBtn').style.display = 'block';
+            }
+        }
+
+        // جلب وتطبيق صورة الواجهة المحفوظة
+        async function loadHeroImage() {
+            const { data, error } = await _supabase
+                .from('bma_settings')
+                .select('value')
+                .eq('key', 'hero_bg')
+                .single();
+
+            if (data && data.value) {
+                document.getElementById('heroSection').style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${data.value}')`;
+                document.getElementById('heroSection').style.backgroundSize = 'cover';
+                document.getElementById('heroSection').style.backgroundPosition = 'center';
+            }
+        }
+
+        // تحديث صورة الواجهة من لوحة التحكم
+        async function updateHeroImage() {
+            const fileInput = document.getElementById('heroImageFile');
+            if (fileInput.files.length === 0) {
+                alert('الرجاء اختيار صورة من هاتفك أولاً!');
+                return;
+            }
+
+            const btn = document.getElementById('saveHeroBtn');
+            btn.innerText = "جاري رفع وتحديث الصورة...";
+            btn.disabled = true;
+
+            const file = fileInput.files[0];
+            const fileName = `hero_${Date.now()}_${file.name}`;
+
+            const { error: uploadError } = await _supabase.storage
+                .from('product-images')
+                .upload(fileName, file);
+
+            if (uploadError) {
+                alert('خطأ أثناء رفع الصورة: ' + uploadError.message);
+                btn.innerText = "تحديث صورة الواجهة فوراً";
+                btn.disabled = false;
+                return;
+            }
+
+            const { data: publicUrlData } = _supabase.storage
+                .from('product-images')
+                .getPublicUrl(fileName);
+
+            const imageUrl = publicUrlData.publicUrl;
+
+            const { error: dbError } = await _supabase
+                .from('bma_settings')
+                .upsert({ key: 'hero_bg', value: imageUrl }, { onConflict: 'key' });
+
+            btn.innerText = "تحديث صورة الواجهة فوراً";
+            btn.disabled = false;
+
+            if (dbError) {
+                alert('حدث خطأ أثناء حفظ الرابط في القاعدة: ' + dbError.message);
+                return;
+            }
+
+            alert('تم تغيير صورة واجهة الموقع بنجاح!');
+            fileInput.value = '';
+            loadHeroImage();
+        }
 
         async function fetchProducts() {
             const grid = document.getElementById('productsGrid');
@@ -467,7 +563,6 @@
             }
 
             data.forEach((product, index) => {
-                // معالجة صور المنتج (سواء كانت مصفوفة أو نص قديم)
                 let images = [];
                 try {
                     images = typeof product.image_url === 'string' && product.image_url.startsWith('[') ? JSON.parse(product.image_url) : [product.image_url];
@@ -475,7 +570,6 @@
                     images = [product.image_url];
                 }
                 
-                // تنقية الروابط الفارغة
                 images = images.filter(img => img && img.trim() !== "");
                 if(images.length === 0) images = ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80'];
 
@@ -503,12 +597,13 @@
                     <h3>${product.name}</h3>
                     <p>${product.description || 'متوفر جملة وتفصيل'}</p>
                     <a href="${whatsappUrl}" target="_blank" class="whatsapp-btn">💬 اطلب عبر واتساب</a>
+                    <br>
+                    <button class="delete-btn" id="del-btn-${product.id}" style="display: ${isAdminLoggedIn ? 'inline-block' : 'none'};" onclick="deleteProduct(${product.id})">🗑️ حذف المنتج</button>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // متغيرات تتبع الصورة الحالية لكل بطاقة منتج
         window.currentImgIndexes = {};
         function changeImage(cardIndex, direction, imagesArray) {
             if (!window.currentImgIndexes[cardIndex]) window.currentImgIndexes[cardIndex] = 0;
@@ -525,14 +620,12 @@
             const counterElement = document.getElementById(`counter-${cardIndex}`);
             
             imgElement.src = imagesArray[curr];
-            // تحديث رابط التكبير عند النقر على الصورة الحالية
             imgElement.parentElement.setAttribute('onclick', `openLightbox('${imagesArray[curr]}')`);
             if(counterElement) {
                 counterElement.innerText = `${curr + 1} / ${imagesArray.length}`;
             }
         }
 
-        // وظائف نافذة تكبير الصورة (Lightbox)
         function openLightbox(imgSrc) {
             const modal = document.getElementById('lightboxModal');
             const modalImg = document.getElementById('lightboxImg');
@@ -557,32 +650,48 @@
             const pass = document.getElementById('adminPass').value;
 
             if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
-                alert('مرحباً بك يا صاحب المتجر!');
-                document.getElementById('adminDashboard').style.display = 'block';
+                isAdminLoggedIn = true;
+                // حفظ حالة الدخول في ذاكرة الهاتف لتبقى مسجلة عند التحديث
+                localStorage.setItem('bma_admin_logged', 'true');
+                
+                alert('مرحباً بك يا صاحب المتجر! تم تسجيل الدخول بنجاح.');
+                checkLoginStateUI();
                 closeLoginModal();
                 document.getElementById('adminEmail').value = '';
                 document.getElementById('adminPass').value = '';
+                fetchProducts();
             } else {
                 alert('البريد الإلكتروني أو كلمة المرور غير صحيحة!');
             }
         }
 
         function logoutAdmin() {
-            document.getElementById('adminDashboard').style.display = 'none';
+            isAdminLoggedIn = false;
+            // مسح حالة الدخول من ذاكرة الهاتف
+            localStorage.removeItem('bma_admin_logged');
+            
+            checkLoginStateUI();
             alert('تم تسجيل الخروج بنجاح.');
+            fetchProducts();
         }
 
-        function checkDelivery() {
-            const wilaya = document.getElementById('wilayaSelect').value;
-            const commune = document.getElementById('communeInput').value;
-            const result = document.getElementById('deliveryResult');
-
-            if(!wilaya) {
-                alert('الرجاء اختيار الولاية أولاً!');
+        async function deleteProduct(productId) {
+            if(!confirm('هل أنت متأكد من رغبتك في حذف هذا المنتج نهائياً؟')) {
                 return;
             }
 
-            result.innerHTML = `✅ التوصيل متوفر إلى الولاية رقم ${wilaya} ${commune ? '(' + commune + ')' : ''} (إلى باب البيت أو المكتب). المدة: 2 إلى 4 أيام.`;
+            const { error } = await _supabase
+                .from('bma_products')
+                .delete()
+                .eq('id', productId);
+
+            if (error) {
+                alert('حدث خطأ أثناء حذف المنتج: ' + error.message);
+                return;
+            }
+
+            alert('تم حذف المنتج بنجاح!');
+            fetchProducts();
         }
 
         async function addProduct() {
@@ -615,7 +724,6 @@
                 const file = fileInput.files[i];
                 const fileName = `${Date.now()}_${i}_${file.name}`;
 
-                // رفع الملف إلى مساحة التخزين في Supabase (تأكد من إنشاء Bucket باسم product-images وجعله Public)
                 const { data: uploadData, error: uploadError } = await _supabase.storage
                     .from('product-images')
                     .upload(fileName, file);
@@ -627,7 +735,6 @@
                     return;
                 }
 
-                // جلب الرابط العام للصورة المرفوعة
                 const { data: publicUrlData } = _supabase.storage
                     .from('product-images')
                     .getPublicUrl(fileName);
@@ -637,7 +744,6 @@
                 }
             }
 
-            // تخزين الروابط في قاعدة البيانات كـ JSON Text
             const { error: dbError } = await _supabase
                 .from('bma_products')
                 .insert([
