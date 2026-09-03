@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BMA | Boutique Mariage Algérienne</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- مكتبة Supabase للربط بقاعدة البيانات -->
+    <!-- مكتبة Supabase للربط بقاعدة البيانات وتخزين الملفات -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -175,6 +175,32 @@
             cursor: pointer;
             color: #888;
         }
+        /* نافذة تكبير الصورة (Lightbox) */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: #fff;
+            font-size: 35px;
+            cursor: pointer;
+            font-weight: bold;
+        }
         /* لوحة التحكم (مخفية) */
         .admin-box {
             display: none;
@@ -230,7 +256,7 @@
         }
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
         }
         .product-card {
@@ -241,10 +267,45 @@
             text-align: center;
             padding-bottom: 20px;
         }
-        .product-card img {
+        /* حاوية صور المنتج مع ميزة التصفح والتكبير */
+        .product-img-container {
+            position: relative;
             width: 100%;
             height: 300px;
+            background: #000;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        .product-img-container img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .img-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 3px;
+        }
+        .prev-img { right: 10px; }
+        .next-img { left: 10px; }
+        .img-counter {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 10px;
         }
         .product-card h3 {
             font-size: 18px;
@@ -331,6 +392,12 @@
         </div>
     </div>
 
+    <!-- نافذة تكبير الصورة (Lightbox) -->
+    <div id="lightboxModal" class="lightbox-modal" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImg">
+    </div>
+
     <div class="admin-box" id="adminDashboard">
         <h3>✨ لوحة تحكم المالك: إضافة منتج جديد</h3>
         <div class="form-group">
@@ -342,17 +409,18 @@
             <input type="text" id="pDesc" placeholder="مثال: متوفر جملة وتفصيل">
         </div>
         <div class="form-group">
-            <label>رابط صورة المنتج (URL):</label>
-            <input type="text" id="pImg" placeholder="ضع رابط الصورة هنا">
+            <label>صور المنتج (اختر من 1 إلى 5 صور من هاتفك):</label>
+            <input type="file" id="pImageFiles" accept="image/*" multiple style="background: #f1f1f1; padding: 8px;">
+            <p style="font-size: 12px; color: #666; margin-top: 4px;">يمكنك تحديد عدة صور دفعة واحدة (بحد أقصى 5 صور).</p>
         </div>
-        <button class="btn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">حفظ المنتج في قاعدة البيانات</button>
+        <button class="btn" id="saveProductBtn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">حفظ المنتج في قاعدة البيانات</button>
         <button class="btn" style="width: 100%; margin-top: 10px; background-color: #c0392b; color: white;" onclick="logoutAdmin()">تسجيل الخروج</button>
     </div>
 
     <div class="container">
         <h2 class="section-title">أحدث التشكيلات</h2>
         <div class="products-grid" id="productsGrid">
-            <!-- سيتم جلب المنتجات تلقائياً من قاعدة البيانات مع زر طلب عبر واتساب -->
+            <!-- المنتجات -->
         </div>
     </div>
 
@@ -368,7 +436,6 @@
     </footer>
 
     <script>
-        // إعدادات الاتصال بـ Supabase
         const SUPABASE_URL = "https://lvthnzfubbrhyfnwqaxs.supabase.co";
         const SUPABASE_KEY = "sb_publishable_dxFosZXqkQfgc0qexLu0jw_FJ8xLY_G";
         
@@ -377,7 +444,6 @@
         const ADMIN_EMAIL = "bma@gmail.com";
         const ADMIN_PASS = "123456";
 
-        // جلب المنتجات تلقائياً عند فتح الموقع
         window.addEventListener('DOMContentLoaded', fetchProducts);
 
         async function fetchProducts() {
@@ -390,31 +456,92 @@
                 .order('id', { ascending: false });
 
             if (error) {
-                grid.innerHTML = '<p style="text-align:center; color: red; grid-column: 1/-1;">خطأ في الاتصال بقاعدة البيانات. تحقق من صحة البيانات.</p>';
+                grid.innerHTML = '<p style="text-align:center; color: red; grid-column: 1/-1;">خطأ في الاتصال بقاعدة البيانات.</p>';
                 return;
             }
 
             grid.innerHTML = '';
             if (!data || data.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">لا توجد منتجات حالياً. قم بتسجيل الدخول كمالك لإضافة منتجات جديدة.</p>';
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">لا توجد منتجات حالياً. سجل دخولك كمالك لإضافة منتجات جديدة.</p>';
                 return;
             }
 
-            data.forEach(product => {
-                // تجهيز رسالة الواتساب التلقائية باسم المنتج
+            data.forEach((product, index) => {
+                // معالجة صور المنتج (سواء كانت مصفوفة أو نص قديم)
+                let images = [];
+                try {
+                    images = typeof product.image_url === 'string' && product.image_url.startsWith('[') ? JSON.parse(product.image_url) : [product.image_url];
+                } catch(e) {
+                    images = [product.image_url];
+                }
+                
+                // تنقية الروابط الفارغة
+                images = images.filter(img => img && img.trim() !== "");
+                if(images.length === 0) images = ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80'];
+
+                const cardId = `p-card-${index}`;
                 const whatsappMsg = encodeURIComponent(`السلام عليكم، أهلاً BMA، أريد طلب هذا المنتج: ${product.name}`);
                 const whatsappUrl = `https://wa.me/213551494879?text=${whatsappMsg}`;
 
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                card.id = cardId;
+                
+                let imgHtml = `
+                    <div class="product-img-container" onclick="openLightbox('${images[0]}')">
+                        <img src="${images[0]}" alt="${product.name}" id="img-display-${index}">
+                        ${images.length > 1 ? `<span class="img-counter" id="counter-${index}">1 / ${images.length}</span>` : ''}
+                        ${images.length > 1 ? `
+                            <button class="img-nav-btn prev-img" onclick="event.stopPropagation(); changeImage(${index}, -1, ${JSON.stringify(images).replace(/"/g, '&quot;')})">‹</button>
+                            <button class="img-nav-btn next-img" onclick="event.stopPropagation(); changeImage(${index}, 1, ${JSON.stringify(images).replace(/"/g, '&quot;')})">›</button>
+                        ` : ''}
+                    </div>
+                `;
+
                 card.innerHTML = `
-                    <img src="${product.image_url}" alt="${product.name}">
+                    ${imgHtml}
                     <h3>${product.name}</h3>
                     <p>${product.description || 'متوفر جملة وتفصيل'}</p>
                     <a href="${whatsappUrl}" target="_blank" class="whatsapp-btn">💬 اطلب عبر واتساب</a>
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        // متغيرات تتبع الصورة الحالية لكل بطاقة منتج
+        window.currentImgIndexes = {};
+        function changeImage(cardIndex, direction, imagesArray) {
+            if (!window.currentImgIndexes[cardIndex]) window.currentImgIndexes[cardIndex] = 0;
+            
+            window.currentImgIndexes[cardIndex] += direction;
+            if (window.currentImgIndexes[cardIndex] >= imagesArray.length) {
+                window.currentImgIndexes[cardIndex] = 0;
+            } else if (window.currentImgIndexes[cardIndex] < 0) {
+                window.currentImgIndexes[cardIndex] = imagesArray.length - 1;
+            }
+
+            const curr = window.currentImgIndexes[cardIndex];
+            const imgElement = document.getElementById(`img-display-${cardIndex}`);
+            const counterElement = document.getElementById(`counter-${cardIndex}`);
+            
+            imgElement.src = imagesArray[curr];
+            // تحديث رابط التكبير عند النقر على الصورة الحالية
+            imgElement.parentElement.setAttribute('onclick', `openLightbox('${imagesArray[curr]}')`);
+            if(counterElement) {
+                counterElement.innerText = `${curr + 1} / ${imagesArray.length}`;
+            }
+        }
+
+        // وظائف نافذة تكبير الصورة (Lightbox)
+        function openLightbox(imgSrc) {
+            const modal = document.getElementById('lightboxModal');
+            const modalImg = document.getElementById('lightboxImg');
+            modal.style.display = 'flex';
+            modalImg.src = imgSrc;
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightboxModal').style.display = 'none';
         }
 
         function openLoginModal() {
@@ -461,29 +588,79 @@
         async function addProduct() {
             const name = document.getElementById('pName').value;
             const desc = document.getElementById('pDesc').value;
-            const img = document.getElementById('pImg').value;
+            const fileInput = document.getElementById('pImageFiles');
 
-            if(!name || !img) {
-                alert('الرجاء إدخال اسم المنتج ورابط الصورة على الأقل!');
+            if(!name) {
+                alert('الرجاء إدخال اسم المنتج على الأقل!');
                 return;
             }
 
-            const { data, error } = await _supabase
+            if(fileInput.files.length === 0) {
+                alert('الرجاء اختيار صورة واحدة على الأقل من هاتفك!');
+                return;
+            }
+
+            if(fileInput.files.length > 5) {
+                alert('الحد الأقصى المسموح به هو 5 صور لكل منتج!');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveProductBtn');
+            saveBtn.innerText = "جاري رفع الصور وحفظ المنتج...";
+            saveBtn.disabled = true;
+
+            let uploadedImageUrls = [];
+
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const fileName = `${Date.now()}_${i}_${file.name}`;
+
+                // رفع الملف إلى مساحة التخزين في Supabase (تأكد من إنشاء Bucket باسم product-images وجعله Public)
+                const { data: uploadData, error: uploadError } = await _supabase.storage
+                    .from('product-images')
+                    .upload(fileName, file);
+
+                if (uploadError) {
+                    alert(`خطأ في رفع الصورة رقم ${i+1}: ` + uploadError.message);
+                    saveBtn.innerText = "حفظ المنتج في قاعدة البيانات";
+                    saveBtn.disabled = false;
+                    return;
+                }
+
+                // جلب الرابط العام للصورة المرفوعة
+                const { data: publicUrlData } = _supabase.storage
+                    .from('product-images')
+                    .getPublicUrl(fileName);
+
+                if (publicUrlData && publicUrlData.publicUrl) {
+                    uploadedImageUrls.push(publicUrlData.publicUrl);
+                }
+            }
+
+            // تخزين الروابط في قاعدة البيانات كـ JSON Text
+            const { error: dbError } = await _supabase
                 .from('bma_products')
                 .insert([
-                    { name: name, description: desc, image_url: img }
+                    { 
+                        name: name, 
+                        description: desc, 
+                        image_url: JSON.stringify(uploadedImageUrls) 
+                    }
                 ]);
 
-            if (error) {
-                alert('حدث خطأ أثناء حفظ المنتج في قاعدة البيانات: ' + error.message);
+            saveBtn.innerText = "حفظ المنتج في قاعدة البيانات";
+            saveBtn.disabled = false;
+
+            if (dbError) {
+                alert('حدث خطأ أثناء حفظ المنتج في جدول القاعدة: ' + dbError.message);
                 return;
             }
 
-            alert('تمت إضافة المنتج بنجاح وحفظه في قاعدة البيانات!');
+            alert('تمت إضافة المنتج وصوره بنجاح!');
             
             document.getElementById('pName').value = '';
             document.getElementById('pDesc').value = '';
-            document.getElementById('pImg').value = '';
+            fileInput.value = '';
             
             fetchProducts();
         }
