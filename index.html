@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BMA | Boutique Mariage Algérienne</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- مكتبة Supabase للربط بقاعدة البيانات -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -98,7 +100,39 @@
             background-color: #b59325;
             color: #fff;
         }
-        /* نافذة تسجيل الدخول المنبثقة (Modal) */
+        /* قسم محاكاة التوصيل السريع */
+        .delivery-checker {
+            max-width: 800px;
+            margin: -30px auto 30px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            border: 2px solid #d4af37;
+        }
+        .delivery-checker h3 {
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            font-size: 18px;
+        }
+        .delivery-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .delivery-row select, .delivery-row input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            width: 250px;
+        }
+        /* نافذة تسجيل الدخول المنبثقة */
         .modal {
             display: none;
             position: fixed;
@@ -125,7 +159,7 @@
             cursor: pointer;
             color: #888;
         }
-        /* صندوق إضافة المنتجات (مخفي افتراضياً) */
+        /* لوحة التحكم (مخفية) */
         .admin-box {
             display: none;
             max-width: 600px;
@@ -156,9 +190,6 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             outline: none;
-        }
-        .form-group input:focus {
-            border-color: #d4af37;
         }
         /* المنتجات */
         .container {
@@ -251,13 +282,30 @@
         <a href="tel:0771154428" class="btn">اتصل بنا للطلب الآن</a>
     </section>
 
+    <div class="delivery-checker">
+        <h3>🚚 خدمة التوصيل متوفرة لـ 58 ولاية (إلى باب البيت أو المكتب) وجميع البلديات</h3>
+        <div class="delivery-row">
+            <select id="wilayaSelect">
+                <option value="">اختر الولاية (01 إلى 58)</option>
+                <script>
+                    for(let i=1; i<=58; i++) {
+                        document.write(`<option value="${i}">الولاية رقم ${i}</option>`);
+                    }
+                </script>
+            </select>
+            <input type="text" id="communeInput" placeholder="اكتب اسم البلدية هنا...">
+            <button class="btn" style="padding: 10px 20px; font-size: 14px;" onclick="checkDelivery()">تحقق من التوصيل</button>
+        </div>
+        <p id="deliveryResult" style="margin-top: 12px; font-weight: bold; color: #27ae60;"></p>
+    </div>
+
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeLoginModal()">&times;</span>
             <h3 style="margin-bottom: 20px; color: #1a1a1a;">تسجيل دخول المالك</h3>
             <div class="form-group">
                 <label>البريد الإلكتروني:</label>
-                <input type="email" id="adminEmail" placeholder="admin@bma.com">
+                <input type="email" id="adminEmail" placeholder="bma@gmail.com">
             </div>
             <div class="form-group">
                 <label>كلمة المرور:</label>
@@ -281,41 +329,20 @@
             <label>رابط صورة المنتج (URL):</label>
             <input type="text" id="pImg" placeholder="ضع رابط الصورة هنا">
         </div>
-        <button class="btn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">إضافة المنتج للمتجر</button>
+        <button class="btn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">حفظ المنتج في قاعدة البيانات</button>
         <button class="btn" style="width: 100%; margin-top: 10px; background-color: #c0392b; color: white;" onclick="logoutAdmin()">تسجيل الخروج</button>
     </div>
 
     <div class="container">
         <h2 class="section-title">أحدث التشكيلات</h2>
         <div class="products-grid" id="productsGrid">
-            
-            <div class="product-card">
-                <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=500&q=80" alt="كراكو جزائري">
-                <h3>كراكو عصري راقي</h3>
-                <p>متوفر جملة وتفصيل</p>
-                <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
-            </div>
-
-            <div class="product-card">
-                <img src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=500&q=80" alt="قفطان جزائري">
-                <h3>قفطان العروسة</h3>
-                <p>تصاميم عصرية تقليدية</p>
-                <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
-            </div>
-
-            <div class="product-card">
-                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=500&q=80" alt="لباس تقليدي">
-                <h3>بلوزة وهران / قندورة</h3>
-                <p>جودة عالية بأفضل الأسعار</p>
-                <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
-            </div>
-
+            <!-- سيتم جلب المنتجات تلقائياً من جدول bma_products في قاعدة البيانات -->
         </div>
     </div>
 
     <footer>
         <p><strong>Boutique Mariage Algérienne (BMA)</strong></p>
-        <p>البيع بالجملة والتفصيل لكل ولايات الوطن</p>
+        <p>البيع بالجملة والتفصيل لكل ولايات الوطن (58 ولاية)</p>
         <div class="social-links">
             <a href="#" target="_blank">Facebook: Boutique Mariage Algérienne</a> | 
             <a href="#" target="_blank">Instagram: Boutique Mariage Algérienne</a> | 
@@ -325,9 +352,50 @@
     </footer>
 
     <script>
-        // البريد وكلمة المرور الخاصة بالمالك (يمكنك تغييرها هنا بما يناسبك)
+        // إعدادات الاتصال بـ Supabase (مدمجة بنجاح)
+        const SUPABASE_URL = "https://lvthnzfubbrhyfnwqaxs.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_dxFosZXqkQfgc0qexLu0jw_FJ8xLY_G";
+        
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const ADMIN_EMAIL = "bma@gmail.com";
         const ADMIN_PASS = "123456";
+
+        // جلب المنتجات تلقائياً من جدول bma_products عند فتح الموقع
+        window.addEventListener('DOMContentLoaded', fetchProducts);
+
+        async function fetchProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">جاري تحميل المنتجات من قاعدة البيانات...</p>';
+
+            const { data, error } = await _supabase
+                .from('bma_products')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error) {
+                grid.innerHTML = '<p style="text-align:center; color: red; grid-column: 1/-1;">خطأ في الاتصال بقاعدة البيانات. تحقق من صحة البيانات.</p>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">لا توجد منتجات حالياً. قم بتسجيل الدخول كمالك لإضافة منتجات جديدة.</p>';
+                return;
+            }
+
+            data.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${product.image_url}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>${product.description || 'متوفر جملة وتفصيل'}</p>
+                    <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
+                `;
+                grid.appendChild(card);
+            });
+        }
 
         function openLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -345,7 +413,6 @@
                 alert('مرحباً بك يا صاحب المتجر!');
                 document.getElementById('adminDashboard').style.display = 'block';
                 closeLoginModal();
-                // تفريغ الحقول
                 document.getElementById('adminEmail').value = '';
                 document.getElementById('adminPass').value = '';
             } else {
@@ -358,7 +425,20 @@
             alert('تم تسجيل الخروج بنجاح.');
         }
 
-        function addProduct() {
+        function checkDelivery() {
+            const wilaya = document.getElementById('wilayaSelect').value;
+            const commune = document.getElementById('communeInput').value;
+            const result = document.getElementById('deliveryResult');
+
+            if(!wilaya) {
+                alert('الرجاء اختيار الولاية أولاً!');
+                return;
+            }
+
+            result.innerHTML = `✅ التوصيل متوفر إلى الولاية رقم ${wilaya} ${commune ? '(' + commune + ')' : ''} (إلى باب البيت أو المكتب). المدة: 2 إلى 4 أيام.`;
+        }
+
+        async function addProduct() {
             const name = document.getElementById('pName').value;
             const desc = document.getElementById('pDesc').value;
             const img = document.getElementById('pImg').value;
@@ -368,24 +448,26 @@
                 return;
             }
 
-            const grid = document.getElementById('productsGrid');
+            // إرسال المنتج إلى جدول bma_products في قاعدة البيانات
+            const { data, error } = await _supabase
+                .from('bma_products')
+                .insert([
+                    { name: name, description: desc, image_url: img }
+                ]);
+
+            if (error) {
+                alert('حدث خطأ أثناء حفظ المنتج في قاعدة البيانات: ' + error.message);
+                return;
+            }
+
+            alert('تمت إضافة المنتج بنجاح وحفظه في قاعدة البيانات!');
             
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.innerHTML = `
-                <img src="${img}" alt="${name}">
-                <h3>${name}</h3>
-                <p>${desc || 'متوفر جملة وتفصيل'}</p>
-                <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
-            `;
-
-            grid.prepend(card);
-
             document.getElementById('pName').value = '';
             document.getElementById('pDesc').value = '';
             document.getElementById('pImg').value = '';
             
-            alert('تمت إضافة المنتج بنجاح للمتجر!');
+            // إعادة جلب وتحديث المنتجات فوراً لتظهر في الموقع
+            fetchProducts();
         }
     </script>
 
