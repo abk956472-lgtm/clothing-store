@@ -23,6 +23,7 @@
             padding: 20px;
             text-align: center;
             border-bottom: 3px solid #d4af37;
+            position: relative;
         }
         header h1 {
             color: #d4af37;
@@ -32,6 +33,24 @@
         header p {
             font-size: 14px;
             color: #ccc;
+        }
+        /* زر تسجيل الدخول العلوي */
+        .admin-login-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: transparent;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+        .admin-login-btn:hover {
+            background: #d4af37;
+            color: #1a1a1a;
         }
         /* شريط المعلومات */
         .info-bar {
@@ -79,8 +98,36 @@
             background-color: #b59325;
             color: #fff;
         }
-        /* صندوق إضافة المنتجات */
+        /* نافذة تسجيل الدخول المنبثقة (Modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+        }
+        /* صندوق إضافة المنتجات (مخفي افتراضياً) */
         .admin-box {
+            display: none;
             max-width: 600px;
             margin: 30px auto;
             background: #fff;
@@ -96,6 +143,7 @@
         }
         .form-group {
             margin-bottom: 15px;
+            text-align: right;
         }
         .form-group label {
             display: block;
@@ -187,6 +235,7 @@
 <body>
 
     <header>
+        <button class="admin-login-btn" onclick="openLoginModal()">دخول المالك</button>
         <h1>BMA</h1>
         <p>Boutique Mariage Algérienne</p>
     </header>
@@ -202,8 +251,24 @@
         <a href="tel:0771154428" class="btn">اتصل بنا للطلب الآن</a>
     </section>
 
-    <div class="admin-box">
-        <h3>✨ إضافة منتج جديد للتشكيلة</h3>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeLoginModal()">&times;</span>
+            <h3 style="margin-bottom: 20px; color: #1a1a1a;">تسجيل دخول المالك</h3>
+            <div class="form-group">
+                <label>البريد الإلكتروني:</label>
+                <input type="email" id="adminEmail" placeholder="admin@bma.com">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور:</label>
+                <input type="password" id="adminPass" placeholder="********">
+            </div>
+            <button class="btn" style="width: 100%;" onclick="loginAdmin()">دخول</button>
+        </div>
+    </div>
+
+    <div class="admin-box" id="adminDashboard">
+        <h3>✨ لوحة تحكم المالك: إضافة منتج جديد</h3>
         <div class="form-group">
             <label>اسم المنتج:</label>
             <input type="text" id="pName" placeholder="مثال: قفطان ملكي مطرز">
@@ -216,7 +281,8 @@
             <label>رابط صورة المنتج (URL):</label>
             <input type="text" id="pImg" placeholder="ضع رابط الصورة هنا">
         </div>
-        <button class="btn" style="width: 100%;" onclick="addProduct()">إضافة المنتج للمتجر</button>
+        <button class="btn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">إضافة المنتج للمتجر</button>
+        <button class="btn" style="width: 100%; margin-top: 10px; background-color: #c0392b; color: white;" onclick="logoutAdmin()">تسجيل الخروج</button>
     </div>
 
     <div class="container">
@@ -259,6 +325,39 @@
     </footer>
 
     <script>
+        // البريد وكلمة المرور الخاصة بالمالك (يمكنك تغييرها هنا بما يناسبك)
+        const ADMIN_EMAIL = "bma@gmail.com";
+        const ADMIN_PASS = "123456";
+
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function loginAdmin() {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+
+            if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+                alert('مرحباً بك يا صاحب المتجر!');
+                document.getElementById('adminDashboard').style.display = 'block';
+                closeLoginModal();
+                // تفريغ الحقول
+                document.getElementById('adminEmail').value = '';
+                document.getElementById('adminPass').value = '';
+            } else {
+                alert('البريد الإلكتروني أو كلمة المرور غير صحيحة!');
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('adminDashboard').style.display = 'none';
+            alert('تم تسجيل الخروج بنجاح.');
+        }
+
         function addProduct() {
             const name = document.getElementById('pName').value;
             const desc = document.getElementById('pDesc').value;
@@ -280,14 +379,13 @@
                 <a href="tel:0771154428" class="btn" style="padding: 8px 20px; font-size: 14px;">اطلب الآن</a>
             `;
 
-            grid.prepend(card); // إضافة المنتج الجديد في أول القائمة
+            grid.prepend(card);
 
-            // تفريغ الحقول بعد الإضافة
             document.getElementById('pName').value = '';
             document.getElementById('pDesc').value = '';
             document.getElementById('pImg').value = '';
             
-            alert('تمت إضافة المنتج بنجاح!');
+            alert('تمت إضافة المنتج بنجاح للمتجر!');
         }
     </script>
 
