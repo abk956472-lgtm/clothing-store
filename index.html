@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HUMAN OS v5.0 // FULL PERSONAL OPERATING SYSTEM</title>
+<title>HUMAN OS v6.0 // ADVANCED PERSONAL OPERATING SYSTEM</title>
 
 <!-- Three.js Engine for 3D Hologram Core -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -11,8 +11,8 @@
 <style>
 :root {
   --bg: #030508;
-  --panel: rgba(8, 14, 26, 0.88);
-  --panel-border: rgba(0, 240, 255, 0.22);
+  --panel: rgba(8, 14, 26, 0.92);
+  --panel-border: rgba(0, 240, 255, 0.25);
   --sidebar-bg: #050810;
   --cyan: #00f0ff;
   --cyan-glow: rgba(0, 240, 255, 0.35);
@@ -21,9 +21,12 @@
   --green: #00ff9d;
   --green-glow: rgba(0, 255, 157, 0.35);
   --yellow: #ffd000;
+  --yellow-glow: rgba(255, 208, 0, 0.35);
+  --purple: #9d00ff;
+  --purple-glow: rgba(157, 0, 255, 0.4);
   --text: #e1eaf2;
   --muted: #62758a;
-  --dark-accent: rgba(0, 0, 0, 0.6);
+  --dark-accent: rgba(0, 0, 0, 0.65);
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-mono: 'Consolas', 'Courier New', monospace;
 }
@@ -44,7 +47,7 @@ body {
   background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
 }
 
-/* Scanline Effect */
+/* HUD Scanline & Grid Effect */
 body::before {
   content: " ";
   display: block;
@@ -54,14 +57,20 @@ body::before {
   background-size: 100% 4px;
   z-index: 999;
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
-/* Scrollbars */
+/* Custom HUD Scrollbars */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.6); }
 ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
+
+/* Accessibility Focus States */
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
 
 /* ================= SIDEBAR & NAVIGATION ================= */
 aside {
@@ -96,7 +105,7 @@ aside {
   border: 1px solid var(--pink);
   padding: 2px 6px;
   border-radius: 3px;
-  text-shadow: none;
+  text-shadow: 0 0 8px var(--pink-glow);
 }
 
 .nav-menu {
@@ -109,6 +118,8 @@ aside {
 }
 
 .nav-item {
+  width: 100%;
+  background: transparent;
   padding: 10px 14px;
   border-radius: 4px;
   color: var(--muted);
@@ -120,6 +131,8 @@ aside {
   gap: 10px;
   border: 1px solid transparent;
   user-select: none;
+  text-align: right;
+  justify-content: flex-start;
 }
 
 .nav-item:hover, .nav-item.active {
@@ -136,15 +149,35 @@ aside {
   box-shadow: inset 0 0 10px var(--pink-glow);
 }
 
-/* Mobile Toggle */
-.mobile-nav-toggle {
+/* Mobile Nav Elements */
+.mobile-header-bar {
   display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--panel-border);
+  z-index: 101;
+}
+
+.mobile-nav-toggle {
   background: transparent;
   border: 1px solid var(--cyan);
   color: var(--cyan);
-  padding: 5px 10px;
-  font-size: 1.2rem;
+  padding: 6px 12px;
+  font-size: 1.1rem;
   cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 99;
 }
 
 /* ================= MAIN CONTAINER ================= */
@@ -166,7 +199,8 @@ header {
   align-items: center;
   background: rgba(5, 8, 16, 0.92);
   backdrop-filter: blur(12px);
-  sticky: top;
+  position: sticky;
+  top: 0;
   z-index: 90;
   flex-wrap: wrap;
   gap: 10px;
@@ -183,32 +217,99 @@ header {
 .system-status {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
   font-size: 0.85rem;
+  flex-wrap: wrap;
 }
 
-.clock { font-family: var(--font-mono); color: #fff; font-size: 0.95rem; letter-spacing: 1px; }
+.clock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
 
-/* Notification Toast */
-#toast {
+.clock { font-family: var(--font-mono); color: #fff; font-size: 1.05rem; letter-spacing: 1px; font-weight: bold; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+.date-display { font-family: var(--font-mono); color: var(--muted); font-size: 0.75rem; }
+
+/* Notification Toast Container */
+#toastContainer {
   position: fixed;
   bottom: 20px;
   left: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 350px;
+  pointer-events: none;
+}
+
+.toast {
   background: rgba(5, 8, 16, 0.95);
   border: 1px solid var(--cyan);
   color: var(--cyan);
-  padding: 12px 20px;
+  padding: 12px 18px;
   border-radius: 4px;
   box-shadow: 0 0 20px var(--cyan-glow);
-  z-index: 1000;
-  display: none;
   font-size: 0.88rem;
   animation: slideUp 0.3s ease;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
+
+.toast.pink { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 20px var(--pink-glow); }
+.toast.green { border-color: var(--green); color: var(--green); box-shadow: 0 0 20px var(--green-glow); }
+.toast.yellow { border-color: var(--yellow); color: var(--yellow); box-shadow: 0 0 20px var(--yellow-glow); }
 
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* Quick Action Command Center & Search Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-card {
+  background: var(--panel);
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 30px var(--cyan-glow);
+  width: 100%;
+  max-width: 650px;
+  border-radius: 6px;
+  padding: 25px;
+  position: relative;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 10px;
+  color: var(--cyan);
+  font-weight: bold;
+}
+
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
 }
 
 /* ================= MODULE VIEW ================= */
@@ -264,6 +365,7 @@ header {
   font-weight: bold;
 }
 
+.grid-1 { display: grid; grid-template-columns: 1fr; gap: 20px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
@@ -322,6 +424,18 @@ button.btn-pink:hover {
   box-shadow: 0 0 15px var(--pink);
 }
 
+button.btn-green {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(0, 255, 157, 0.1);
+}
+
+button.btn-green:hover {
+  background: var(--green);
+  color: #000;
+  box-shadow: 0 0 15px var(--green);
+}
+
 /* Progress bar */
 .bar-container {
   height: 10px;
@@ -351,7 +465,7 @@ button.btn-pink:hover {
 .stat-title { font-size: 0.78rem; color: var(--muted); letter-spacing: 1px; }
 .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--cyan); margin-top: 5px; font-family: var(--font-mono); }
 
-/* Avatar Base64 / SVG Display */
+/* Avatar Display */
 .avatar-box {
   width: 90px;
   height: 90px;
@@ -386,6 +500,7 @@ button.btn-pink:hover {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--cyan);
+  z-index: 10;
 }
 
 .hud-scanner {
@@ -395,6 +510,7 @@ button.btn-pink:hover {
   box-shadow: 0 0 8px var(--cyan);
   animation: scanAnim 4s linear infinite;
   pointer-events: none;
+  z-index: 10;
 }
 
 @keyframes scanAnim {
@@ -409,43 +525,83 @@ button.btn-pink:hover {
   border-radius: 3px;
   font-size: 0.72rem;
   font-weight: bold;
+  display: inline-block;
 }
 .badge-low { background: rgba(0,255,157,0.15); color: var(--green); border: 1px solid var(--green); }
 .badge-medium { background: rgba(255,208,0,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
 .badge-high { background: rgba(255,0,85,0.15); color: var(--pink); border: 1px solid var(--pink); }
+.badge-tag { background: rgba(0,240,255,0.15); color: var(--cyan); border: 1px solid var(--cyan); margin-left: 4px; }
+
+/* Search Result Items */
+.search-result-item {
+  padding: 10px 14px;
+  border: 1px solid var(--panel-border);
+  background: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.search-result-item:hover {
+  border-color: var(--cyan);
+  background: rgba(0,240,255,0.08);
+}
 
 /* Responsive adjustments */
 @media(max-width: 992px) {
   body { flex-direction: column; }
-  aside { width: 100%; height: auto; border-left: none; border-bottom: 1px solid var(--panel-border); }
+  .mobile-header-bar { display: flex; }
+  aside {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 280px;
+    z-index: 200;
+    transform: translateX(100%);
+  }
+  aside.active { transform: translateX(0); }
+  .sidebar-overlay.active { display: block; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  .mobile-nav-toggle { display: block; }
-  .nav-menu.collapsed { display: none; }
+  #hologram-viewport { height: 350px; }
+  header { padding: 10px 15px; }
+  .content-area { padding: 15px; }
 }
 </style>
 </head>
 
 <body>
 
+<!-- MOBILE HEADER BAR -->
+<div class="mobile-header-bar">
+  <div class="brand" style="border:none; padding:0;">
+    HUMAN OS <span class="ver">v6.0</span>
+  </div>
+  <button class="mobile-nav-toggle" onclick="toggleMobileNav()" aria-label="فتح القائمة">☰ القائمة</button>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileNav()"></div>
+
 <!-- ================= SIDEBAR NAVIGATION ================= -->
-<aside>
+<aside id="sidebar">
   <div class="brand">
-    HUMAN OS <span class="ver">v5.0</span>
-    <button class="mobile-nav-toggle" onclick="toggleMobileNav()">☰</button>
+    HUMAN OS <span class="ver">v6.0</span>
   </div>
   <ul class="nav-menu" id="navMenu">
-    <li class="nav-item active" onclick="switchTab('dashboard')">📊 Dashboard // الرئيسية</li>
-    <li class="nav-item" onclick="switchTab('profile')">👤 Profile // الملف الشخصي</li>
-    <li class="nav-item pink-item" onclick="switchTab('core')">🫀 Human Core // النواة</li>
-    <li class="nav-item" onclick="switchTab('tasks')">⚡ Tasks // المهام</li>
-    <li class="nav-item" onclick="switchTab('habits')">🔄 Habits // العادات</li>
-    <li class="nav-item" onclick="switchTab('goals')">🎯 Goals // الأهداف</li>
-    <li class="nav-item" onclick="switchTab('finance')">💳 Finance // المالية</li>
-    <li class="nav-item" onclick="switchTab('calendar')">📅 Calendar // التقويم</li>
-    <li class="nav-item" onclick="switchTab('notes')">📝 Notes // الملاحظات</li>
-    <li class="nav-item" onclick="switchTab('stats')">📈 Statistics // الإحصائيات</li>
-    <li class="nav-item" onclick="switchTab('settings')">⚙️ Settings // الإعدادات</li>
+    <li><button class="nav-item active" onclick="switchTab('dashboard')">📊 Dashboard // الرئيسية</button></li>
+    <li><button class="nav-item" onclick="switchTab('profile')">👤 Profile // الملف الشخصي</button></li>
+    <li><button class="nav-item pink-item" onclick="switchTab('core')">🫀 Human Core // النواة</button></li>
+    <li><button class="nav-item" onclick="switchTab('tasks')">⚡ Tasks // المهام</button></li>
+    <li><button class="nav-item" onclick="switchTab('habits')">🔄 Habits // العادات</button></li>
+    <li><button class="nav-item" onclick="switchTab('goals')">🎯 Goals // الأهداف</button></li>
+    <li><button class="nav-item" onclick="switchTab('finance')">💳 Finance // المالية</button></li>
+    <li><button class="nav-item" onclick="switchTab('calendar')">📅 Calendar // التقويم</button></li>
+    <li><button class="nav-item" onclick="switchTab('notes')">📝 Notes // الملاحظات</button></li>
+    <li><button class="nav-item" onclick="switchTab('stats')">📈 Statistics // الإحصائيات</button></li>
+    <li><button class="nav-item" onclick="switchTab('settings')">⚙️ Settings // الإعدادات</button></li>
   </ul>
+  <div style="margin-top:auto; padding-top:10px; border-top:1px solid var(--panel-border);">
+    <button onclick="openQuickActionModal()" style="width:100%; margin-bottom:8px;" class="btn-green">⚡ Command Center</button>
+    <button onclick="openGlobalSearchModal()" style="width:100%;">🔍 Global Search</button>
+  </div>
 </aside>
 
 <!-- ================= MAIN DISPLAY AREA ================= -->
@@ -453,9 +609,11 @@ button.btn-pink:hover {
   <header>
     <div class="page-title" id="pageTitle">DASHBOARD MODULE</div>
     <div class="system-status">
-      <span class="clock" id="clock">00:00:00</span>
-      <span id="dateDisplay" style="color:var(--muted); font-size:0.8rem;"></span>
-      <span style="color: var(--green);">● ONLINE</span>
+      <div class="clock-container">
+        <span class="clock" id="clock">00:00:00</span>
+        <span class="date-display" id="dateDisplay"></span>
+      </div>
+      <span style="color: var(--green); font-size:0.8rem; font-weight:bold;">● SYS.ONLINE</span>
     </div>
   </header>
 
@@ -465,9 +623,9 @@ button.btn-pink:hover {
     <section id="view-dashboard" class="view-section active">
       <div class="grid-4" style="margin-bottom: 20px;">
         <div class="stat-card">
-          <div class="stat-title">USER LEVEL</div>
+          <div class="stat-title">SYSTEM LEVEL</div>
           <div class="stat-value" id="dashLevel">1</div>
-          <div style="font-size:0.75rem; color:var(--muted); margin-top:3px;">XP: <span id="dashXP">0</span>/100</div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:3px;">XP: <span id="dashXP">0</span> / <span id="dashXPReq">100</span></div>
         </div>
         <div class="stat-card">
           <div class="stat-title">TASK COMPLETION</div>
@@ -477,37 +635,41 @@ button.btn-pink:hover {
         <div class="stat-card">
           <div class="stat-title">FINANCIAL BALANCE</div>
           <div class="stat-value" id="dashBalance" style="color:var(--yellow)">0 DZD</div>
-          <div style="font-size:0.75rem; color:var(--muted); margin-top:3px;">Net Local Balance</div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:3px;">Net System Resource</div>
         </div>
         <div class="stat-card">
-          <div class="stat-title">CORE STATE</div>
-          <div class="stat-value" id="dashCoreState" style="color:var(--pink); font-size:1.2rem; margin-top:10px;">NORMAL</div>
-          <div style="font-size:0.7rem; color:var(--muted);">Simulation Engine</div>
+          <div class="stat-title">CORE HEALTH & STABILITY</div>
+          <div class="stat-value" id="dashCoreState" style="color:var(--pink); font-size:1.2rem; margin-top:8px;">NORMAL</div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:2px;">Stability: <span id="dashStability">100%</span></div>
         </div>
       </div>
 
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-title">SYSTEM OVERVIEW // نظرة عامة</div>
+          <div class="panel-title">SYSTEM OVERVIEW // نظرة عامة شاملة</div>
           <div style="display:flex; flex-direction:column; gap:12px; font-size:0.9rem;">
             <div>
               <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                <span>🎯 Goal Progression Average:</span>
+                <span>🎯 Goals Progression Average:</span>
                 <span id="dashGoalAvg">0%</span>
               </div>
               <div class="bar-container"><div class="bar-fill" id="dashGoalBar"></div></div>
             </div>
             <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
-              <span>🔄 Active Habits Streak Total:</span>
+              <span>🔄 Active Habits Best Streak:</span>
               <strong id="dashHabitStreak" style="color:var(--green)">0 Days</strong>
             </div>
             <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
-              <span>📅 Upcoming Events Count:</span>
-              <strong id="dashEventCount" style="color:var(--cyan)">0</strong>
+              <span>📅 Upcoming Events:</span>
+              <strong id="dashEventCount" style="color:var(--cyan)">0 Events</strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
               <span>📝 Knowledge Base Size:</span>
               <strong id="dashNoteWords" style="color:var(--yellow)">0 Words</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>🛡️ System Integrity:</span>
+              <strong id="dashSysHealth" style="color:var(--green)">100% OPTIMAL</strong>
             </div>
           </div>
         </div>
@@ -516,10 +678,14 @@ button.btn-pink:hover {
           <div class="panel-title">HYDRATION TRACKER // عداد السوائل</div>
           <div style="text-align:center;">
             <div style="font-size:2.2rem; font-weight:bold; color:var(--cyan); font-family:var(--font-mono); margin:10px 0;">
-              <span id="dashWaterVal">0</span> / 8 <span style="font-size:1rem; color:var(--muted)">CUPS</span>
+              <span id="dashWaterVal">0</span> / <span id="dashWaterGoal">8</span> <span style="font-size:1rem; color:var(--muted)">CUPS</span>
             </div>
-            <p style="font-size:0.75rem; color:var(--muted); margin-bottom:15px;">يتم التصفير تلقائياً مع بداية كل يوم جديد</p>
-            <button onclick="addWater()">+ تسجيل كوب ماء</button>
+            <div class="bar-container" style="margin-bottom:15px;"><div class="bar-fill" id="dashWaterBar"></div></div>
+            <p style="font-size:0.75rem; color:var(--muted); margin-bottom:15px;">تؤثر السوائل على درجة ترطيب النواة (Hydration Dynamic) وتُصفر يومياً تلقائياً</p>
+            <div style="display:flex; gap:10px; justify-content:center;">
+              <button onclick="addWater()">+ تسجيل كوب ماء</button>
+              <button onclick="setWaterGoalPrompt()" style="padding:4px 8px; font-size:0.75rem;">تعديل الهدف</button>
+            </div>
           </div>
         </div>
       </div>
@@ -548,7 +714,7 @@ button.btn-pink:hover {
             <div class="panel-title">LEVEL & XP STATUS // المستوى والخبرة</div>
             <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:5px;">
               <span>CURRENT LEVEL: <strong id="userLevel" style="color:var(--cyan)">1</strong></span>
-              <span>XP: <strong id="userXP">0</strong> / 100</span>
+              <span>XP: <strong id="userXP">0</strong> / <span id="userXPReq">100</span></span>
             </div>
             <div class="bar-container"><div class="bar-fill" id="xpBar"></div></div>
           </div>
@@ -556,12 +722,15 @@ button.btn-pink:hover {
 
         <div class="panel">
           <div class="panel-title">EDIT PROFILE // تعديل البيانات</div>
-          <label style="font-size:0.8rem; color:var(--muted);">الاسم الكامل</label>
+          <label style="font-size:0.8rem; color:var(--muted);" for="inputProfName">الاسم الكامل</label>
           <input type="text" id="inputProfName" placeholder="الاسم الكامل...">
-          <label style="font-size:0.8rem; color:var(--muted);">التخصص / المهنة</label>
+          
+          <label style="font-size:0.8rem; color:var(--muted);" for="inputProfRole">التخصص / المهنة</label>
           <input type="text" id="inputProfRole" placeholder="التخصص...">
-          <label style="font-size:0.8rem; color:var(--muted);">صورة رمزية (صيغة Base64 أو رابط SVG محلي)</label>
-          <input type="text" id="inputAvatar" placeholder="data:image/png;base64,... أو اتركه فارغاً">
+          
+          <label style="font-size:0.8rem; color:var(--muted);" for="inputAvatar">صورة رمزية (صيغة Base64 أو رابط صورة)</label>
+          <input type="text" id="inputAvatar" placeholder="https://... أو data:image/png;base64,...">
+          
           <button onclick="updateProfile()">حفظ بيانات الملف الشخصي</button>
         </div>
       </div>
@@ -577,7 +746,8 @@ button.btn-pink:hover {
           </div>
           <div id="hologram-viewport">
             <div class="hud-overlay">
-              <div>SYS.CORE // v5.0</div>
+              <div>SYS.CORE // v6.0</div>
+              <div>HYDRATION: <span id="hudHydration">0%</span></div>
               <div>SCANNER: ACTIVE</div>
             </div>
             <div class="hud-scanner"></div>
@@ -587,7 +757,7 @@ button.btn-pink:hover {
         <div class="panel">
           <div class="panel-title" style="color:var(--pink)">BIOMETRIC SIMULATION // محاكاة العلامات الحيوية</div>
           <div style="background:rgba(255,0,85,0.05); border:1px solid rgba(255,0,85,0.2); padding:10px; border-radius:4px; font-size:0.75rem; color:var(--pink); margin-bottom:15px;">
-            ⚠️ تنبيه هام: جميع البيانات الحيوية والمؤشرات الظاهرة في هذه الشاشة هي محاكاة برمجية (SIMULATION) وليست قياسات طبية حقيقية.
+            ⚠️ تنبيه هام: جميع البيانات الحيوية والمؤشرات الظاهرة في هذه الشاشة هي محاكاة برمجية ديناميكية (SIMULATION) تعتمد على تفاعلك مع النظام وليست قياسات طبية حقيقية.
           </div>
 
           <div class="grid-2" style="margin-bottom:15px;">
@@ -598,6 +768,14 @@ button.btn-pink:hover {
             <div class="stat-card">
               <div class="stat-title">ENERGY / STAMINA</div>
               <div class="stat-value" id="stamina" style="color:var(--green)">85%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">HABIT STABILITY</div>
+              <div class="stat-value" id="coreStability" style="color:var(--cyan)">100%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">CORE LEVEL POWER</div>
+              <div class="stat-value" id="coreLevelPower" style="color:var(--yellow)">LVL 1</div>
             </div>
           </div>
 
@@ -617,22 +795,36 @@ button.btn-pink:hover {
       <div class="panel">
         <div class="panel-title">TASK MANAGEMENT ENGINE // إدارة المهام الاحترافية</div>
         
-        <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:10px;">
-          <input type="text" id="taskInput" placeholder="أدخل وصف المهمة الجديد..." style="margin:0;">
+        <form onsubmit="event.preventDefault(); addTask();" style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap:10px; margin-bottom:10px;">
+          <input type="text" id="taskInput" placeholder="وصف المهمة الجديد..." style="margin:0;" required>
+          <input type="date" id="taskDueDate" style="margin:0;" required>
+          <input type="time" id="taskDueTime" style="margin:0;">
+          <input type="text" id="taskTags" placeholder="الوسوم (مثال: عمل, برمجة)" style="margin:0;">
           <select id="taskPriority" style="margin:0;">
-            <option value="Low">أولوية منخفضة (+10 XP)</option>
-            <option value="Medium">أولوية متوسطة (+20 XP)</option>
-            <option value="High">أولوية عالية (+30 XP)</option>
+            <option value="Low">منخفضة (+10 XP)</option>
+            <option value="Medium">متوسطة (+20 XP)</option>
+            <option value="High">عالية (+30 XP)</option>
           </select>
-          <button onclick="addTask()">+ إضافة المهمة</button>
-        </div>
+          <button type="submit" style="grid-column: span 5; margin-top:5px;">+ إضافة المهمة</button>
+        </form>
 
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-          <input type="text" id="taskSearch" placeholder="🔍 بحث في المهام..." oninput="renderTasks()" style="margin:0; flex:2;">
-          <select id="taskFilter" onchange="renderTasks()" style="margin:0; flex:1;">
-            <option value="all">جميع المهام</option>
+        <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+          <input type="text" id="taskSearch" placeholder="🔍 بحث في المهام..." oninput="renderTasks()" style="margin:0; flex:2; min-width:180px;">
+          <select id="taskFilterPrio" onchange="renderTasks()" style="margin:0; flex:1; min-width:130px;">
+            <option value="all">كل الأولويات</option>
+            <option value="Low">أولوية منخفضة</option>
+            <option value="Medium">أولوية متوسطة</option>
+            <option value="High">أولوية عالية</option>
+          </select>
+          <select id="taskFilterStatus" onchange="renderTasks()" style="margin:0; flex:1; min-width:130px;">
+            <option value="all">جميع الحالات</option>
             <option value="pending">قيد الانتظار</option>
             <option value="completed">المكتملة</option>
+          </select>
+          <select id="taskSort" onchange="renderTasks()" style="margin:0; flex:1; min-width:130px;">
+            <option value="dateAsc">تاريخ الاستحقاق (الأقرب)</option>
+            <option value="dateDesc">تاريخ الاستحقاق (الأبعد)</option>
+            <option value="prio">الأولوية</option>
           </select>
         </div>
 
@@ -643,11 +835,11 @@ button.btn-pink:hover {
     <!-- 5. HABITS VIEW -->
     <section id="view-habits" class="view-section">
       <div class="panel">
-        <div class="panel-title">HABIT TRACKER // متابع العادات والروتين</div>
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-          <input type="text" id="habitInput" placeholder="اسم العادة الجديدة (مثل: قراءة 20 صفحة)..." style="margin:0;">
-          <button onclick="addHabit()">+ إضافة عادة</button>
-        </div>
+        <div class="panel-title">HABIT TRACKER // متابع العادات والروتين اليومي</div>
+        <form onsubmit="event.preventDefault(); addHabit();" style="display:flex; gap:10px; margin-bottom:15px;">
+          <input type="text" id="habitInput" placeholder="اسم العادة الجديدة (مثل: قراءة 20 صفحة)..." style="margin:0;" required>
+          <button type="submit">+ إضافة عادة</button>
+        </form>
         <div id="habitList" class="grid-3"></div>
       </div>
     </section>
@@ -657,13 +849,15 @@ button.btn-pink:hover {
       <div class="panel">
         <div class="panel-title">STRATEGIC GOALS // الأهداف الاستراتيجية</div>
         
-        <div style="display:grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap:10px; margin-bottom:10px;">
-          <input type="text" id="goalTitle" placeholder="عنوان الهدف..." style="margin:0;">
-          <input type="text" id="goalDesc" placeholder="وصف مختصر..." style="margin:0;">
-          <input type="date" id="goalStartDate" style="margin:0;">
-          <input type="date" id="goalDeadline" style="margin:0;">
-        </div>
-        <button onclick="addGoal()" style="margin-bottom:15px;">+ إنشاء هدف استراتيجي</button>
+        <form onsubmit="event.preventDefault(); addGoal();" style="margin-bottom:15px;">
+          <div style="display:grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <input type="text" id="goalTitle" placeholder="عنوان الهدف..." style="margin:0;" required>
+            <input type="text" id="goalDesc" placeholder="وصف مختصر..." style="margin:0;">
+            <input type="date" id="goalStartDate" style="margin:0;" required>
+            <input type="date" id="goalDeadline" style="margin:0;" required>
+          </div>
+          <button type="submit">+ إنشاء هدف استراتيجي (+50 XP عند الإنجاز الكامل)</button>
+        </form>
 
         <div id="goalList" style="display:flex; flex-direction:column; gap:12px;"></div>
       </div>
@@ -674,34 +868,46 @@ button.btn-pink:hover {
       <div class="grid-2">
         <div class="panel">
           <div class="panel-title">ADD TRANSACTION // تسجيل معاملة مالية</div>
-          <input type="text" id="finTitle" placeholder="وصف المعاملة (مثل: مشروع برمجة / شراء أدوات)...">
-          <input type="number" id="finAmount" placeholder="المبلغ بـ DZD...">
-          <input type="text" id="finCategory" placeholder="التصنيف (عمل، معدات، طعام...)...">
-          <select id="finType">
-            <option value="income">دخل (+ DZD)</option>
-            <option value="expense">مصروف (- DZD)</option>
-          </select>
-          <button onclick="addFinance()">تسجيل في السجل</button>
+          <form onsubmit="event.preventDefault(); addFinance();">
+            <input type="text" id="finTitle" placeholder="وصف المعاملة..." required>
+            <input type="number" step="any" id="finAmount" placeholder="المبلغ بـ DZD..." required>
+            <input type="text" id="finCategory" placeholder="التصنيف (عمل، خدمات، تسوق...)..." required>
+            <input type="date" id="finDate" required>
+            <select id="finType">
+              <option value="income">دخل (+ DZD)</option>
+              <option value="expense">مصروف (- DZD)</option>
+            </select>
+            <button type="submit" style="width:100%;">تسجيل المعاملة</button>
+          </form>
         </div>
 
         <div class="panel">
-          <div class="panel-title">FINANCIAL SUMMARY // الملخص المالي المحاد</div>
+          <div class="panel-title">FINANCIAL SUMMARY & LOGS // الملخص والسجل المالي</div>
           <div class="grid-3" style="margin-bottom:15px;">
             <div class="stat-card">
               <div class="stat-title">INCOME</div>
-              <div class="stat-value" id="finTotalIncome" style="color:var(--green); font-size:1.1rem;">0</div>
+              <div class="stat-value" id="finTotalIncome" style="color:var(--green); font-size:1.1rem;">0 DZD</div>
             </div>
             <div class="stat-card">
               <div class="stat-title">EXPENSES</div>
-              <div class="stat-value" id="finTotalExpenses" style="color:var(--pink); font-size:1.1rem;">0</div>
+              <div class="stat-value" id="finTotalExpenses" style="color:var(--pink); font-size:1.1rem;">0 DZD</div>
             </div>
             <div class="stat-card">
-              <div class="stat-title">BALANCE</div>
-              <div class="stat-value" id="finNetBalance" style="color:var(--cyan); font-size:1.1rem;">0</div>
+              <div class="stat-title">NET BALANCE</div>
+              <div class="stat-value" id="finNetBalance" style="color:var(--cyan); font-size:1.1rem;">0 DZD</div>
             </div>
           </div>
 
-          <div id="finList" style="max-height:250px; overflow-y:auto; font-size:0.85rem; display:flex; flex-direction:column; gap:6px;"></div>
+          <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="text" id="finSearch" placeholder="🔍 بحث بالوصف أو التصنيف..." oninput="renderFinance()" style="margin:0; flex:2;">
+            <select id="finFilterType" onchange="renderFinance()" style="margin:0; flex:1;">
+              <option value="all">الكل</option>
+              <option value="income">الدخل</option>
+              <option value="expense">المصاريف</option>
+            </select>
+          </div>
+
+          <div id="finList" style="max-height:280px; overflow-y:auto; font-size:0.85rem; display:flex; flex-direction:column; gap:6px;"></div>
         </div>
       </div>
     </section>
@@ -709,14 +915,16 @@ button.btn-pink:hover {
     <!-- 8. CALENDAR VIEW -->
     <section id="view-calendar" class="view-section">
       <div class="panel">
-        <div class="panel-title">CALENDAR & EVENTS // التقويم والمواعيد</div>
-        <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap:10px; margin-bottom:15px;">
-          <input type="text" id="eventTitle" placeholder="عنوان الموعد..." style="margin:0;">
-          <input type="date" id="eventDate" style="margin:0;">
-          <input type="time" id="eventTime" style="margin:0;">
-          <input type="text" id="eventDesc" placeholder="تفاصيل الموعد..." style="margin:0;">
-        </div>
-        <button onclick="addEvent()" style="margin-bottom:15px;">+ تسجيل موعد جديد</button>
+        <div class="panel-title">CALENDAR & EVENTS // التقويم والمواعيد المستقبليّة</div>
+        <form onsubmit="event.preventDefault(); addEvent();" style="margin-bottom:15px;">
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap:10px; margin-bottom:10px;">
+            <input type="text" id="eventTitle" placeholder="عنوان الموعد..." style="margin:0;" required>
+            <input type="date" id="eventDate" style="margin:0;" required>
+            <input type="time" id="eventTime" style="margin:0;">
+            <input type="text" id="eventDesc" placeholder="تفاصيل الموعد..." style="margin:0;">
+          </div>
+          <button type="submit">+ تسجيل موعد جديد</button>
+        </form>
 
         <div id="eventList" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
@@ -726,11 +934,11 @@ button.btn-pink:hover {
     <section id="view-notes" class="view-section">
       <div class="panel">
         <div class="panel-title">
-          KNOWLEDGE BASE // قاعدة الملاحظات
-          <span style="font-size:0.75rem; color:var(--muted);" id="noteMeta">0 كلمات | آخر تعديل: -</span>
+          KNOWLEDGE BASE // قاعدة الملاحظات التلقائية
+          <span style="font-size:0.75rem; color:var(--muted);" id="noteMeta">0 كلمات | 0 أحرف | آخر تعديل: -</span>
         </div>
         <input type="text" id="noteSearch" placeholder="🔍 بحث في الملاحظات..." oninput="filterNotes()" style="margin-bottom:10px;">
-        <textarea id="mainNotes" style="min-height:350px; font-family:var(--font-mono); line-height:1.5;" placeholder="اكتب أفكارك، الأكواد البرمجية، الملاحظات والمشاريع هنا... يتم الحفظ التلقائي لحظياً"></textarea>
+        <textarea id="mainNotes" style="min-height:380px; font-family:var(--font-mono); line-height:1.5;" placeholder="اكتب أفكارك، الأكواد البرمجية، الملاحظات والمشاريع هنا... يتم الحفظ التلقائي لحظياً دون فقدان للبيانات"></textarea>
       </div>
     </section>
 
@@ -757,7 +965,7 @@ button.btn-pink:hover {
           </div>
         </div>
 
-        <div class="grid-2">
+        <div class="grid-2" style="margin-bottom:20px;">
           <div class="panel" style="margin:0;">
             <div class="panel-title">TASK COMPLETION CHART</div>
             <div class="bar-container" style="height:20px; margin-top:15px;">
@@ -769,9 +977,14 @@ button.btn-pink:hover {
             <div class="panel-title">XP SYSTEM LEVEL LOG</div>
             <div style="font-size:0.9rem; margin-top:10px;">
               <div>LEVEL: <strong id="stLevel" style="color:var(--cyan)">1</strong></div>
-              <div>CURRENT XP: <strong id="stXP">0</strong> / 100</div>
+              <div>CURRENT XP: <strong id="stXP">0</strong> / <span id="stXPReq">100</span></div>
             </div>
           </div>
+        </div>
+
+        <div class="panel" style="margin:0;">
+          <div class="panel-title">XP EARNED RECENT HISTORY LOG // سجل المكافآت</div>
+          <div id="stXPLog" style="max-height:180px; overflow-y:auto; font-size:0.8rem; font-family:var(--font-mono); display:flex; flex-direction:column; gap:4px;"></div>
         </div>
       </div>
     </section>
@@ -779,15 +992,25 @@ button.btn-pink:hover {
     <!-- 11. SETTINGS VIEW -->
     <section id="view-settings" class="view-section">
       <div class="panel">
-        <div class="panel-title">SYSTEM BACKUP & SECURITY // النسخ الاحتياطي والأمان</div>
+        <div class="panel-title">SYSTEM BACKUP, MIGRATION & SECURITY // إعدادات النظام والأمان</div>
         <p style="font-size:0.85rem; color:var(--muted); margin-bottom:15px;">
-          🔒 جميع البيانات مخزنة محلياً بالكامل على متصفحك (Local Storage) دون استخدام أي سيرفرات أو خدمات خارجية.
+          🔒 جميع البيانات مخزنة محلياً بالكامل (Local Storage v6.0) مع ميزات التحقق التلقائي، التعديل الآمن، والدعم البرمجي لبيئة Client-Side.
         </p>
-        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
           <button onclick="exportData()">📥 تصدير البيانات (Export JSON)</button>
           <button onclick="document.getElementById('importFile').click()">📤 استرجاع بيانات (Import JSON)</button>
           <input type="file" id="importFile" style="display:none;" onchange="importData(event)" accept=".json">
-          <button onclick="resetSystem()" class="btn-pink">⚠️ إعادة ضبط النظام بالكامل (Reset)</button>
+          <button onclick="resetSystem()" class="btn-pink">⚠️ إعادة ضبط النظام بالكامل (Reset System)</button>
+        </div>
+
+        <div class="panel-title">SYSTEM INFORMATION // معلومات النظام البرمجية</div>
+        <div style="font-size:0.85rem; font-family:var(--font-mono); display:flex; flex-direction:column; gap:6px;">
+          <div>CORE OS VERSION: <span style="color:var(--cyan);">6.0.0-ADVANCED</span></div>
+          <div>DATABASE VERSION: <span style="color:var(--green);" id="sysDbVersion">6.0</span></div>
+          <div>LOCAL STORAGE KEY: <span style="color:var(--yellow);">HUMAN_OS_v6_DATA</span></div>
+          <div>GRAPHICS ENGINE: <span style="color:var(--pink);">Three.js WebGL Hologram</span></div>
+          <div>TARGET DEPLOYMENT: <span style="color:var(--purple);">GitHub Pages Static Web</span></div>
         </div>
       </div>
     </section>
@@ -795,20 +1018,116 @@ button.btn-pink:hover {
   </div>
 </main>
 
-<!-- Toast Alert Element -->
-<div id="toast">SYSTEM NOTIFICATION</div>
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
+
+<!-- COMMAND CENTER MODAL -->
+<div class="modal-overlay" id="quickActionModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>⚡ QUICK COMMAND CENTER // مركز الأوامر السريعة</span>
+      <button onclick="closeQuickActionModal()" class="btn-pink" style="padding:2px 8px;">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <button onclick="quickActionTrigger('task')" style="padding:15px; text-align:right;">⚡ إضافة مهمة سريعة</button>
+        <button onclick="quickActionTrigger('habit')" style="padding:15px; text-align:right;">🔄 إضافة عادة سريعة</button>
+        <button onclick="quickActionTrigger('goal')" style="padding:15px; text-align:right;">🎯 إنشاء هدف جديد</button>
+        <button onclick="quickActionTrigger('finance')" style="padding:15px; text-align:right;">💳 تسجيل معاملة مالية</button>
+        <button onclick="quickActionTrigger('event')" style="padding:15px; text-align:right;">📅 تسجيل موعد جديد</button>
+        <button onclick="quickActionTrigger('water')" style="padding:15px; text-align:right;">🥤 تسجيل كوب ماء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GLOBAL SEARCH MODAL -->
+<div class="modal-overlay" id="globalSearchModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>🔍 GLOBAL SYSTEM SEARCH // البحث الشامل في النظام</span>
+      <button onclick="closeGlobalSearchModal()" class="btn-pink" style="padding:2px 8px;">×</button>
+    </div>
+    <input type="text" id="globalSearchInput" placeholder="اكتب للبحث في جميع المهام، العادات، الأهداف، المواعيد والملاحظات..." oninput="executeGlobalSearch()" style="margin:0;">
+    <div class="modal-body" id="globalSearchResults">
+      <div style="text-align:center; color:var(--muted); padding:20px;">أدخل كلمة البحث لعرض النتائج...</div>
+    </div>
+  </div>
+</div>
+
+<!-- TASK EDIT MODAL -->
+<div class="modal-overlay" id="editTaskModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>✏️ EDIT TASK // تعديل المهمة</span>
+      <button onclick="closeEditTaskModal()" class="btn-pink" style="padding:2px 8px;">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editTaskId">
+      <label style="font-size:0.8rem; color:var(--muted);" for="editTaskText">وصف المهمة</label>
+      <input type="text" id="editTaskText" required>
+      
+      <label style="font-size:0.8rem; color:var(--muted);" for="editTaskDueDate">تاريخ الاستحقاق</label>
+      <input type="date" id="editTaskDueDate" required>
+      
+      <label style="font-size:0.8rem; color:var(--muted);" for="editTaskDueTime">وقت الاستحقاق</label>
+      <input type="time" id="editTaskDueTime">
+      
+      <label style="font-size:0.8rem; color:var(--muted);" for="editTaskTags">الوسوم (مفصولة بفواصل)</label>
+      <input type="text" id="editTaskTags">
+      
+      <label style="font-size:0.8rem; color:var(--muted);" for="editTaskPriority">الأولوية</label>
+      <select id="editTaskPriority">
+        <option value="Low">منخفضة (+10 XP)</option>
+        <option value="Medium">متوسطة (+20 XP)</option>
+        <option value="High">عالية (+30 XP)</option>
+      </select>
+      
+      <button onclick="saveTaskEdit()" style="width:100%; margin-top:10px;">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOAL EDIT MODAL -->
+<div class="modal-overlay" id="editGoalModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span>🎯 EDIT GOAL // تعديل الهدف الاستراتيجي</span>
+      <button onclick="closeEditGoalModal()" class="btn-pink" style="padding:2px 8px;">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editGoalId">
+      <label style="font-size:0.8rem; color:var(--muted);" for="editGoalTitle">عنوان الهدف</label>
+      <input type="text" id="editGoalTitle" required>
+      
+      <label style="font-size:0.8rem; color:var(--muted);" for="editGoalDesc">الوصف</label>
+      <input type="text" id="editGoalDesc">
+      
+      <label style="font-size:0.8rem; color:var(--muted);" for="editGoalStartDate">تاريخ البداية</label>
+      <input type="date" id="editGoalStartDate" required>
+      
+      <label style="font-size:0.8rem; color:var(--muted);" for="editGoalDeadline">تاريخ الانتهاء</label>
+      <input type="date" id="editGoalDeadline" required>
+      
+      <button onclick="saveGoalEdit()" style="width:100%; margin-top:10px;">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* =====================================================
-   1. STATE & STORAGE MANAGEMENT
+   1. STATE & SECURE STORAGE MANAGEMENT (v6.0)
 ===================================================== */
-const STORAGE_KEY = "HUMAN_OS_v5_DATA";
+const STORAGE_KEY = "HUMAN_OS_v6_DATA";
+const OLD_STORAGE_KEY = "HUMAN_OS_v5_DATA"; // For migration support
+const CURRENT_SYSTEM_VERSION = "6.0";
 
 let state = {
-  profile: { name: "المستخدم الرئيسي", role: "مطور نظام / مهندس", avatar: "", createdDate: new Date().toLocaleDateString('ar-EG') },
+  version: CURRENT_SYSTEM_VERSION,
+  profile: { name: "عبد الحميد بوكبوية", role: "مطور نظام / مهندس", avatar: "", createdDate: new Date().toLocaleDateString('ar-DZ') },
   xpSystem: { level: 1, xp: 0, log: [] },
   coreState: "NORMAL",
-  biometrics: { water: 0, lastWaterDate: new Date().toDateString() },
+  biometrics: { water: 0, waterGoal: 8, lastWaterDate: new Date().toDateString() },
   tasks: [],
   habits: [],
   goals: [],
@@ -818,43 +1137,86 @@ let state = {
   lastNoteEdit: "-"
 };
 
+function getRequiredXP(level) {
+  return 100 + (level - 1) * 50;
+}
+
 function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if(saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      state = { ...state, ...parsed };
-    } catch(e) {
-      console.error("Storage corruption detected:", e);
+  let saved = localStorage.getItem(STORAGE_KEY);
+  
+  // Migration fallback from v5 if present
+  if (!saved) {
+    const oldSaved = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldSaved) {
+      try {
+        const parsedOld = JSON.parse(oldSaved);
+        saved = JSON.stringify({ ...parsedOld, version: CURRENT_SYSTEM_VERSION });
+        showToast("🚀 تم إجراء الهجرة والترقية التلقائية لبيانات v5.0 إلى v6.0 بنجاح", "green");
+      } catch(e) {
+        console.error("Migration failed:", e);
+      }
     }
   }
-  
-  // Check daily water reset
+
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      // Validate Data Integrity
+      state = {
+        version: CURRENT_SYSTEM_VERSION,
+        profile: { ...state.profile, ...(parsed.profile || {}) },
+        xpSystem: { ...state.xpSystem, ...(parsed.xpSystem || {}) },
+        coreState: parsed.coreState || "NORMAL",
+        biometrics: { ...state.biometrics, ...(parsed.biometrics || {}) },
+        tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+        habits: Array.isArray(parsed.habits) ? parsed.habits : [],
+        goals: Array.isArray(parsed.goals) ? parsed.goals : [],
+        finance: Array.isArray(parsed.finance) ? parsed.finance : [],
+        events: Array.isArray(parsed.events) ? parsed.events : [],
+        notes: typeof parsed.notes === 'string' ? parsed.notes : "",
+        lastNoteEdit: parsed.lastNoteEdit || "-"
+      };
+    } catch (e) {
+      console.error("Storage corruption detected, loading defaults:", e);
+      showToast("⚠️ تم اكتشاف تلف في البيانات، تم تحميل الإعدادات الافتراضية الآمنة", "pink");
+    }
+  }
+
+  // Check Daily Water Reset
   const today = new Date().toDateString();
-  if(state.biometrics.lastWaterDate !== today) {
+  if (state.biometrics.lastWaterDate !== today) {
     state.biometrics.water = 0;
     state.biometrics.lastWaterDate = today;
   }
+
+  // Validate Habit Streaks Daily Check
+  checkHabitMissedDays();
 
   saveState(false);
   renderAll();
 }
 
 function saveState(triggerRender = true) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  if(triggerRender) renderAll();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {
+    showToast("⚠️ فشل في الحفظ المحلي (مساحة التخزين ممتلئة)", "pink");
+  }
+  if (triggerRender) renderAll();
 }
 
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 3000);
+function showToast(msg, type = "cyan") {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${sanitize(msg)}</span><button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; cursor:pointer;">×</button>`;
+  container.appendChild(toast);
+  setTimeout(() => { if(toast.parentElement) toast.remove(); }, 3500);
 }
 
 // Security Helper against XSS
 function sanitize(str) {
-  if(!str) return "";
+  if (str === null || str === undefined) return "";
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -864,51 +1226,79 @@ function sanitize(str) {
 }
 
 /* =====================================================
-   2. NAVIGATION
+   2. SYSTEM CLOCK & NAVIGATION
 ===================================================== */
+function startClock() {
+  function update() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('ar-DZ');
+    document.getElementById('dateDisplay').textContent = now.toLocaleDateString('ar-DZ', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  update();
+  setInterval(update, 1000);
+}
+
 function switchTab(tabId) {
   document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
 
   const targetView = document.getElementById(`view-${tabId}`);
-  if(targetView) {
+  if (targetView) {
     targetView.classList.add('active');
     document.getElementById('pageTitle').textContent = `${tabId.toUpperCase()} MODULE`;
   }
 
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
-    if(item.getAttribute('onclick') && item.getAttribute('onclick').includes(tabId)) {
+    if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(tabId)) {
       item.classList.add('active');
     }
   });
 
-  if(tabId === 'core' && !threeScene) {
+  if (tabId === 'core') {
     setTimeout(init3DCore, 50);
   }
-  
-  // Mobile auto collapse
-  if(window.innerWidth <= 992) {
-    document.getElementById('navMenu').classList.add('collapsed');
-  }
+
+  // Close Mobile Drawer if open
+  closeMobileNav();
 }
 
 function toggleMobileNav() {
-  document.getElementById('navMenu').classList.toggle('collapsed');
+  document.getElementById('sidebar').classList.toggle('active');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
+function closeMobileNav() {
+  document.getElementById('sidebar').classList.remove('active');
+  document.getElementById('sidebarOverlay').classList.remove('active');
 }
 
 /* =====================================================
-   3. XP & LEVEL ENGINE
+   3. XP & LEVEL ENGINE (SECURE & ANTI-EXPLOIT)
 ===================================================== */
 function addXP(amount, source) {
+  if (amount <= 0) return;
+  
   state.xpSystem.xp += amount;
-  state.xpSystem.log.push({ amount, source, date: new Date().toLocaleTimeString('ar-EG') });
+  state.xpSystem.log.unshift({ amount, source, date: new Date().toLocaleTimeString('ar-DZ') });
+  if (state.xpSystem.log.length > 50) state.xpSystem.log.pop();
 
-  while(state.xpSystem.xp >= 100) {
+  let req = getRequiredXP(state.xpSystem.level);
+  let leveledUp = false;
+
+  while (state.xpSystem.xp >= req) {
     state.xpSystem.level += 1;
-    state.xpSystem.xp -= 100;
-    showToast(`🎉 LEVEL UP! المستوى الجديد: ${state.xpSystem.level}`);
+    state.xpSystem.xp -= req;
+    req = getRequiredXP(state.xpSystem.level);
+    leveledUp = true;
   }
+
+  if (leveledUp) {
+    showToast(`🎉 LEVEL UP! تمت ترقية النظام إلى المستوى: ${state.xpSystem.level}`, "yellow");
+  } else {
+    showToast(`+${amount} XP // ${source}`, "green");
+  }
+
   saveState();
 }
 
@@ -920,41 +1310,51 @@ function updateProfile() {
   const role = document.getElementById('inputProfRole').value.trim();
   const avatar = document.getElementById('inputAvatar').value.trim();
 
-  if(name) state.profile.name = name;
-  if(role) state.profile.role = role;
-  if(avatar !== undefined) state.profile.avatar = avatar;
+  if (name) state.profile.name = name;
+  if (role) state.profile.role = role;
+  state.profile.avatar = avatar;
 
   saveState();
-  showToast("تم تحديث بيانات الملف الشخصي بنجاح");
+  showToast("تم تحديث بيانات الملف الشخصي بنجاح", "cyan");
 }
 
 /* =====================================================
-   5. TASKS ENGINE
+   5. TASKS ENGINE (v6.0 ENHANCED)
 ===================================================== */
 function addTask() {
   const input = document.getElementById('taskInput');
+  const dueDate = document.getElementById('taskDueDate').value;
+  const dueTime = document.getElementById('taskDueTime').value;
+  const tagsInput = document.getElementById('taskTags').value.trim();
   const prio = document.getElementById('taskPriority').value;
-  if(!input.value.trim()) return;
+
+  if (!input.value.trim() || !dueDate) return;
+
+  const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
 
   state.tasks.push({
     id: Date.now(),
     text: input.value.trim(),
+    dueDate,
+    dueTime,
+    tags,
     priority: prio,
     completed: false,
     xpClaimed: false
   });
 
   input.value = "";
+  document.getElementById('taskTags').value = "";
   saveState();
-  showToast("تم إضافة المهمة بنجاح");
+  showToast("تم إضافة المهمة بنجاح", "cyan");
 }
 
 function toggleTask(id) {
   const task = state.tasks.find(t => t.id === id);
-  if(!task) return;
+  if (!task) return;
 
   task.completed = !task.completed;
-  if(task.completed && !task.xpClaimed) {
+  if (task.completed && !task.xpClaimed) {
     const xpMap = { Low: 10, Medium: 20, High: 30 };
     const xpEarned = xpMap[task.priority] || 10;
     task.xpClaimed = true;
@@ -967,71 +1367,169 @@ function toggleTask(id) {
 function deleteTask(id) {
   state.tasks = state.tasks.filter(t => t.id !== id);
   saveState();
+  showToast("تم حذف المهمة", "pink");
+}
+
+function openEditTaskModal(id) {
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+
+  document.getElementById('editTaskId').value = task.id;
+  document.getElementById('editTaskText').value = task.text;
+  document.getElementById('editTaskDueDate').value = task.dueDate || "";
+  document.getElementById('editTaskDueTime').value = task.dueTime || "";
+  document.getElementById('editTaskTags').value = task.tags ? task.tags.join(', ') : "";
+  document.getElementById('editTaskPriority').value = task.priority;
+
+  document.getElementById('editTaskModal').style.display = 'flex';
+}
+
+function closeEditTaskModal() {
+  document.getElementById('editTaskModal').style.display = 'none';
+}
+
+function saveTaskEdit() {
+  const id = parseInt(document.getElementById('editTaskId').value);
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+
+  const text = document.getElementById('editTaskText').value.trim();
+  const dueDate = document.getElementById('editTaskDueDate').value;
+  const dueTime = document.getElementById('editTaskDueTime').value;
+  const tagsInput = document.getElementById('editTaskTags').value.trim();
+  const prio = document.getElementById('editTaskPriority').value;
+
+  if (!text || !dueDate) return;
+
+  task.text = text;
+  task.dueDate = dueDate;
+  task.dueTime = dueTime;
+  task.tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+  task.priority = prio;
+
+  closeEditTaskModal();
+  saveState();
+  showToast("تم تحديث المهمة بنجاح", "cyan");
 }
 
 function renderTasks() {
   const search = document.getElementById('taskSearch').value.toLowerCase();
-  const filter = document.getElementById('taskFilter').value;
+  const filterPrio = document.getElementById('taskFilterPrio').value;
+  const filterStatus = document.getElementById('taskFilterStatus').value;
+  const sort = document.getElementById('taskSort').value;
   const container = document.getElementById('taskList');
 
-  let filtered = state.tasks.filter(t => t.text.toLowerCase().includes(search));
-  if(filter === 'pending') filtered = filtered.filter(t => !t.completed);
-  if(filter === 'completed') filtered = filtered.filter(t => t.completed);
+  let filtered = state.tasks.filter(t => t.text.toLowerCase().includes(search) || (t.tags && t.tags.some(tag => tag.toLowerCase().includes(search))));
+
+  if (filterPrio !== 'all') filtered = filtered.filter(t => t.priority === filterPrio);
+  if (filterStatus === 'pending') filtered = filtered.filter(t => !t.completed);
+  if (filterStatus === 'completed') filtered = filtered.filter(t => t.completed);
+
+  // Sorting
+  filtered.sort((a, b) => {
+    if (sort === 'dateAsc') return new Date(`${a.dueDate} ${a.dueTime || '00:00'}`) - new Date(`${b.dueDate} ${b.dueTime || '00:00'}`);
+    if (sort === 'dateDesc') return new Date(`${b.dueDate} ${b.dueTime || '00:00'}`) - new Date(`${a.dueDate} ${a.dueTime || '00:00'}`);
+    if (sort === 'prio') {
+      const pWeight = { High: 3, Medium: 2, Low: 1 };
+      return pWeight[b.priority] - pWeight[a.priority];
+    }
+    return 0;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:var(--muted); padding:15px;">لا توجد مهام مطابقة للشروط...</div>`;
+    return;
+  }
 
   container.innerHTML = filtered.map(t => `
-    <div style="padding:10px 14px; border:1px solid var(--panel-border); background:rgba(0,0,0,0.4); border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
-      <div style="display:flex; align-items:center; gap:10px;">
+    <div style="padding:10px 14px; border:1px solid var(--panel-border); background:rgba(0,0,0,0.4); border-radius:4px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:200px;">
         <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${t.id})" style="width:auto; margin:0; cursor:pointer;">
-        <span style="${t.completed ? 'text-decoration:line-through; color:var(--muted)' : ''}">${sanitize(t.text)}</span>
-        <span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span>
+        <div>
+          <span style="${t.completed ? 'text-decoration:line-through; color:var(--muted)' : 'font-weight:bold;'}">${sanitize(t.text)}</span>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:2px;">
+            📅 ${t.dueDate} ${t.dueTime ? '| ⏰ ' + t.dueTime : ''}
+            ${t.tags && t.tags.length ? t.tags.map(tag => `<span class="badge badge-tag">#${sanitize(tag)}</span>`).join('') : ''}
+          </div>
+        </div>
       </div>
-      <button onclick="deleteTask(${t.id})" class="btn-pink" style="padding:3px 8px; font-size:0.75rem;">حذف</button>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span>
+        <button onclick="openEditTaskModal(${t.id})" style="padding:3px 8px; font-size:0.75rem;">تعديل</button>
+        <button onclick="deleteTask(${t.id})" class="btn-pink" style="padding:3px 8px; font-size:0.75rem;">حذف</button>
+      </div>
     </div>
   `).join('');
 }
 
 /* =====================================================
-   6. HABITS ENGINE
+   6. HABITS ENGINE (REAL STREAK & MISSED DAY DETECTION)
 ===================================================== */
 function addHabit() {
   const input = document.getElementById('habitInput');
-  if(!input.value.trim()) return;
+  if (!input.value.trim()) return;
 
   state.habits.push({
     id: Date.now(),
     title: input.value.trim(),
     streak: 0,
-    lastCompletedDate: null
+    bestStreak: 0,
+    lastCompletedDate: null,
+    history: []
   });
 
   input.value = "";
   saveState();
+  showToast("تم إضافة العادة بنجاح", "cyan");
+}
+
+function checkHabitMissedDays() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  state.habits.forEach(h => {
+    if (h.lastCompletedDate) {
+      const last = new Date(h.lastCompletedDate);
+      last.setHours(0,0,0,0);
+      const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+      if (diffDays > 1) {
+        // Missed day -> reset streak
+        h.streak = 0;
+      }
+    }
+  });
 }
 
 function logHabitToday(id) {
   const habit = state.habits.find(h => h.id === id);
-  if(!habit) return;
+  if (!habit) return;
 
-  const today = new Date().toDateString();
-  if(habit.lastCompletedDate === today) {
-    showToast("⚠️ تم تسجيل هذه العادة اليوم بالفعل!");
+  const todayStr = new Date().toDateString();
+  if (habit.lastCompletedDate === todayStr) {
+    showToast("⚠️ تم تسجيل هذه العادة اليوم بالفعل!", "yellow");
     return;
   }
 
   habit.streak += 1;
-  habit.lastCompletedDate = today;
-  addXP(10, `عادات: ${habit.title}`);
+  if (habit.streak > (habit.bestStreak || 0)) {
+    habit.bestStreak = habit.streak;
+  }
+  habit.lastCompletedDate = todayStr;
+  if (!habit.history) habit.history = [];
+  habit.history.push(todayStr);
+
+  addXP(15, `عادات: ${habit.title} (Streak ${habit.streak})`);
   saveState();
-  showToast("🔥 تم تسجيل العادة وإضافة +10 XP");
 }
 
 function deleteHabit(id) {
   state.habits = state.habits.filter(h => h.id !== id);
   saveState();
+  showToast("تم حذف العادة", "pink");
 }
 
 /* =====================================================
-   7. GOALS ENGINE
+   7. GOALS ENGINE (v6.0 REAL PROGRESS & SINGLE XP)
 ===================================================== */
 function addGoal() {
   const title = document.getElementById('goalTitle').value.trim();
@@ -1039,66 +1537,153 @@ function addGoal() {
   const startDate = document.getElementById('goalStartDate').value;
   const deadline = document.getElementById('goalDeadline').value;
 
-  if(!title) return;
+  if (!title || !startDate || !deadline) return;
 
   state.goals.push({
     id: Date.now(),
     title, desc, startDate, deadline,
-    progress: 0
+    progress: 0,
+    xpClaimed: false
   });
 
   document.getElementById('goalTitle').value = "";
   document.getElementById('goalDesc').value = "";
   saveState();
+  showToast("تم إنشاء الهدف الاستراتيجي بنجاح", "cyan");
 }
 
 function updateGoalProgress(id, delta) {
   const goal = state.goals.find(g => g.id === id);
-  if(!goal) return;
+  if (!goal) return;
 
   goal.progress = Math.min(100, Math.max(0, goal.progress + delta));
-  if(goal.progress === 100) {
-    addXP(50, `إكمال هدف استراتيجي: ${goal.title}`);
+  if (goal.progress === 100 && !goal.xpClaimed) {
+    goal.xpClaimed = true;
+    addXP(50, `إكمال هدف استراتيجي بنسبة 100%: ${goal.title}`);
   }
+
   saveState();
+}
+
+function openEditGoalModal(id) {
+  const goal = state.goals.find(g => g.id === id);
+  if (!goal) return;
+
+  document.getElementById('editGoalId').value = goal.id;
+  document.getElementById('editGoalTitle').value = goal.title;
+  document.getElementById('editGoalDesc').value = goal.desc || "";
+  document.getElementById('editGoalStartDate').value = goal.startDate || "";
+  document.getElementById('editGoalDeadline').value = goal.deadline || "";
+
+  document.getElementById('editGoalModal').style.display = 'flex';
+}
+
+function closeEditGoalModal() {
+  document.getElementById('editGoalModal').style.display = 'none';
+}
+
+function saveGoalEdit() {
+  const id = parseInt(document.getElementById('editGoalId').value);
+  const goal = state.goals.find(g => g.id === id);
+  if (!goal) return;
+
+  const title = document.getElementById('editGoalTitle').value.trim();
+  const desc = document.getElementById('editGoalDesc').value.trim();
+  const startDate = document.getElementById('editGoalStartDate').value;
+  const deadline = document.getElementById('editGoalDeadline').value;
+
+  if (!title || !startDate || !deadline) return;
+
+  goal.title = title;
+  goal.desc = desc;
+  goal.startDate = startDate;
+  goal.deadline = deadline;
+
+  closeEditGoalModal();
+  saveState();
+  showToast("تم تعديل الهدف بنجاح", "cyan");
 }
 
 function deleteGoal(id) {
   state.goals = state.goals.filter(g => g.id !== id);
   saveState();
+  showToast("تم حذف الهدف", "pink");
 }
 
 /* =====================================================
-   8. FINANCE
+   8. FINANCE ENGINE (v6.0 ENHANCED)
 ===================================================== */
 function addFinance() {
   const title = document.getElementById('finTitle').value.trim();
-  const amount = parseFloat(document.getElementById('finAmount').value);
-  const category = document.getElementById('finCategory').value.trim() || "عام";
+  const amountVal = parseFloat(document.getElementById('finAmount').value);
+  const category = document.getElementById('finCategory').value.trim();
+  const date = document.getElementById('finDate').value;
   const type = document.getElementById('finType').value;
 
-  if(!title || isNaN(amount)) return;
+  if (!title || isNaN(amountVal) || !category || !date) return;
+
+  const amount = type === 'expense' ? -Math.abs(amountVal) : Math.abs(amountVal);
 
   state.finance.push({
     id: Date.now(),
     title,
     category,
-    amount: type === 'expense' ? -Math.abs(amount) : Math.abs(amount),
-    date: new Date().toLocaleDateString('ar-EG')
+    amount,
+    date
   });
 
   document.getElementById('finTitle').value = "";
   document.getElementById('finAmount').value = "";
   saveState();
+  showToast("تم تسجيل المعاملة المالية", "cyan");
 }
 
 function deleteFinance(id) {
   state.finance = state.finance.filter(f => f.id !== id);
   saveState();
+  showToast("تم حذف المعاملة المالية", "pink");
+}
+
+function renderFinance() {
+  const search = document.getElementById('finSearch').value.toLowerCase();
+  const typeFilter = document.getElementById('finFilterType').value;
+  const container = document.getElementById('finList');
+
+  const totalInc = state.finance.filter(f => f.amount > 0).reduce((a,b) => a + b.amount, 0);
+  const totalExp = state.finance.filter(f => f.amount < 0).reduce((a,b) => a + Math.abs(b.amount), 0);
+  const netBalance = totalInc - totalExp;
+
+  document.getElementById('finTotalIncome').textContent = `${totalInc.toLocaleString()} DZD`;
+  document.getElementById('finTotalExpenses').textContent = `${totalExp.toLocaleString()} DZD`;
+  document.getElementById('finNetBalance').textContent = `${netBalance.toLocaleString()} DZD`;
+
+  let filtered = state.finance.filter(f => f.title.toLowerCase().includes(search) || f.category.toLowerCase().includes(search));
+  if (typeFilter === 'income') filtered = filtered.filter(f => f.amount > 0);
+  if (typeFilter === 'expense') filtered = filtered.filter(f => f.amount < 0);
+
+  filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:var(--muted); padding:10px;">لا توجد معاملات مطابقة...</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(f => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--panel-border); background:rgba(0,0,0,0.3); border-radius:4px;">
+      <div>
+        <strong>${sanitize(f.title)}</strong>
+        <span style="font-size:0.75rem; color:var(--muted); margin-right:8px;">[${sanitize(f.category)}] ${f.date}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="color:${f.amount >= 0 ? 'var(--green)' : 'var(--pink)'}; font-weight:bold;">${f.amount >= 0 ? '+' : ''}${f.amount.toLocaleString()} DZD</span>
+        <button onclick="deleteFinance(${f.id})" class="btn-pink" style="padding:2px 6px; font-size:0.7rem;">×</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 /* =====================================================
-   9. CALENDAR
+   9. CALENDAR ENGINE (EVENTS & TIMELINE)
 ===================================================== */
 function addEvent() {
   const title = document.getElementById('eventTitle').value.trim();
@@ -1106,27 +1691,30 @@ function addEvent() {
   const time = document.getElementById('eventTime').value;
   const desc = document.getElementById('eventDesc').value.trim();
 
-  if(!title || !date) return;
+  if (!title || !date) return;
 
   state.events.push({
     id: Date.now(), title, date, time, desc
   });
 
   document.getElementById('eventTitle').value = "";
+  document.getElementById('eventDesc').value = "";
   saveState();
+  showToast("تم تسجيل الموعد بنجاح", "cyan");
 }
 
 function deleteEvent(id) {
   state.events = state.events.filter(e => e.id !== id);
   saveState();
+  showToast("تم حذف الموعد", "pink");
 }
 
 /* =====================================================
-   10. NOTES & WATER
+   10. NOTES & WATER ENGINE
 ===================================================== */
 document.getElementById('mainNotes').addEventListener('input', (e) => {
   state.notes = e.target.value;
-  state.lastNoteEdit = new Date().toLocaleTimeString('ar-EG');
+  state.lastNoteEdit = new Date().toLocaleTimeString('ar-DZ');
   saveState(false);
   updateNoteMeta();
 });
@@ -1134,7 +1722,7 @@ document.getElementById('mainNotes').addEventListener('input', (e) => {
 function filterNotes() {
   const query = document.getElementById('noteSearch').value.toLowerCase();
   const textarea = document.getElementById('mainNotes');
-  if(!query) {
+  if (!query) {
     textarea.value = state.notes;
     return;
   }
@@ -1143,40 +1731,153 @@ function filterNotes() {
 }
 
 function updateNoteMeta() {
-  const words = state.notes.trim() ? state.notes.trim().split(/\s+/).length : 0;
-  document.getElementById('noteMeta').textContent = `${words} كلمات | آخر تعديل: ${state.lastNoteEdit || '-'}`;
+  const text = state.notes || "";
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars = text.length;
+  document.getElementById('noteMeta').textContent = `${words} كلمات | ${chars} أحرف | آخر تعديل: ${state.lastNoteEdit || '-'}`;
 }
 
 function addWater() {
-  if(state.biometrics.water < 8) {
+  const goal = state.biometrics.waterGoal || 8;
+  if (state.biometrics.water < goal) {
     state.biometrics.water += 1;
     saveState();
-    showToast("🥤 تم تسجيل كوب ماء");
+    showToast("🥤 تم تسجيل كوب ماء", "cyan");
   } else {
-    showToast("✅ تم وصول الحد اليومي الموصى به (8/8 أكواب)");
+    showToast(`✅ تم الوصول للهدف اليومي (${goal}/${goal} أكواب)`, "green");
+  }
+}
+
+function setWaterGoalPrompt() {
+  const current = state.biometrics.waterGoal || 8;
+  const val = prompt("أدخل هدف الأكواب اليومية الجديد:", current);
+  if (val && !isNaN(val) && parseInt(val) > 0) {
+    state.biometrics.waterGoal = parseInt(val);
+    saveState();
+    showToast("تم تحديث الهدف اليومي للماء", "cyan");
   }
 }
 
 /* =====================================================
-   11. HUMAN CORE 3D HOLOGRAM ENGINE
+   11. COMMAND CENTER & GLOBAL SEARCH
 ===================================================== */
-let threeScene, threeCamera, threeRenderer, humanGroup, heartMesh;
+function openQuickActionModal() {
+  document.getElementById('quickActionModal').style.display = 'flex';
+}
+
+function closeQuickActionModal() {
+  document.getElementById('quickActionModal').style.display = 'none';
+}
+
+function quickActionTrigger(type) {
+  closeQuickActionModal();
+  if (type === 'task') { switchTab('tasks'); document.getElementById('taskInput').focus(); }
+  if (type === 'habit') { switchTab('habits'); document.getElementById('habitInput').focus(); }
+  if (type === 'goal') { switchTab('goals'); document.getElementById('goalTitle').focus(); }
+  if (type === 'finance') { switchTab('finance'); document.getElementById('finTitle').focus(); }
+  if (type === 'event') { switchTab('calendar'); document.getElementById('eventTitle').focus(); }
+  if (type === 'water') { addWater(); }
+}
+
+function openGlobalSearchModal() {
+  document.getElementById('globalSearchModal').style.display = 'flex';
+  document.getElementById('globalSearchInput').focus();
+}
+
+function closeGlobalSearchModal() {
+  document.getElementById('globalSearchModal').style.display = 'none';
+}
+
+function executeGlobalSearch() {
+  const q = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+  const resultsContainer = document.getElementById('globalSearchResults');
+
+  if (!q) {
+    resultsContainer.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px;">أدخل كلمة البحث لعرض النتائج...</div>`;
+    return;
+  }
+
+  let results = [];
+
+  // Tasks
+  state.tasks.forEach(t => {
+    if (t.text.toLowerCase().includes(q)) {
+      results.push({ type: 'Task ⚡', text: t.text, tab: 'tasks' });
+    }
+  });
+
+  // Habits
+  state.habits.forEach(h => {
+    if (h.title.toLowerCase().includes(q)) {
+      results.push({ type: 'Habit 🔄', text: h.title, tab: 'habits' });
+    }
+  });
+
+  // Goals
+  state.goals.forEach(g => {
+    if (g.title.toLowerCase().includes(q) || (g.desc && g.desc.toLowerCase().includes(q))) {
+      results.push({ type: 'Goal 🎯', text: g.title, tab: 'goals' });
+    }
+  });
+
+  // Finance
+  state.finance.forEach(f => {
+    if (f.title.toLowerCase().includes(q) || f.category.toLowerCase().includes(q)) {
+      results.push({ type: 'Finance 💳', text: `${f.title} (${f.amount} DZD)`, tab: 'finance' });
+    }
+  });
+
+  // Events
+  state.events.forEach(e => {
+    if (e.title.toLowerCase().includes(q) || (e.desc && e.desc.toLowerCase().includes(q))) {
+      results.push({ type: 'Event 📅', text: `${e.title} [${e.date}]`, tab: 'calendar' });
+    }
+  });
+
+  // Notes
+  if (state.notes.toLowerCase().includes(q)) {
+    results.push({ type: 'Notes 📝', text: 'تم العثور على التطابق داخل الملاحظات', tab: 'notes' });
+  }
+
+  if (results.length === 0) {
+    resultsContainer.innerHTML = `<div style="text-align:center; color:var(--pink); padding:20px;">لم يتم العثور على أي نتائج مطابقة لكلمة البحث.</div>`;
+    return;
+  }
+
+  resultsContainer.innerHTML = results.map(r => `
+    <div class="search-result-item" onclick="closeGlobalSearchModal(); switchTab('${r.tab}');">
+      <div style="font-size:0.75rem; color:var(--cyan); font-weight:bold;">${r.type}</div>
+      <div style="font-size:0.9rem; color:#fff;">${sanitize(r.text)}</div>
+    </div>
+  `).join('');
+}
+
+/* =====================================================
+   12. HUMAN CORE 3D HOLOGRAM ENGINE (Three.js Advanced)
+===================================================== */
+let threeScene, threeCamera, threeRenderer, humanGroup, heartMesh, ringMesh, particlesMesh;
 
 function setCoreMode(mode) {
   state.coreState = mode;
   saveState();
-  showToast(`تم تغيير حالة النواة إلى: ${mode}`);
+  showToast(`تم تغيير حالة النواة إلى: ${mode}`, "pink");
 }
 
 function init3DCore() {
   const container = document.getElementById('hologram-viewport');
-  if(!container || threeScene) return;
+  if (!container || threeScene) return;
+
+  if (typeof THREE === 'undefined') {
+    container.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:var(--pink);">⚠️ Three.js Engine Offline (Fallback View)</div>`;
+    return;
+  }
 
   threeScene = new THREE.Scene();
   threeCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
   threeCamera.position.z = 18;
 
   threeRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   threeRenderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(threeRenderer.domElement);
 
@@ -1184,27 +1885,23 @@ function init3DCore() {
   const wireMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.55 });
   const heartMat = new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: false });
 
-  // Head
+  // Hologram Body Structure
   const head = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1, 2), wireMat);
   head.position.y = 4.2;
   humanGroup.add(head);
 
-  // Neck
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 0.8, 8), wireMat);
   neck.position.y = 3.1;
   humanGroup.add(neck);
 
-  // Torso
   const torso = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.0, 3.8, 8), wireMat);
   torso.position.y = 1.0;
   humanGroup.add(torso);
 
-  // Heart
-  heartMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 8), heartMat);
+  heartMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), heartMat);
   heartMesh.position.set(0.2, 1.8, 0.3);
   humanGroup.add(heartMesh);
 
-  // Arms
   const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.25, 3.5, 8), wireMat);
   armL.position.set(-2.0, 1.0, 0);
   armL.rotation.z = 0.2;
@@ -1214,7 +1911,6 @@ function init3DCore() {
   humanGroup.add(armL);
   humanGroup.add(armR);
 
-  // Legs
   const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.3, 4.2, 8), wireMat);
   legL.position.set(-0.7, -2.8, 0);
   const legR = legL.clone();
@@ -1222,13 +1918,25 @@ function init3DCore() {
   humanGroup.add(legL);
   humanGroup.add(legR);
 
-  // HUD Rings
+  // HUD Dynamic Rings
   const ringGeo = new THREE.RingGeometry(3.5, 3.6, 32);
   const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
-  const ring = new THREE.Mesh(ringGeo, ringMat);
-  ring.rotation.x = Math.PI / 2;
-  ring.position.y = -4.8;
-  humanGroup.add(ring);
+  ringMesh = new THREE.Mesh(ringGeo, ringMat);
+  ringMesh.rotation.x = Math.PI / 2;
+  ringMesh.position.y = -4.8;
+  humanGroup.add(ringMesh);
+
+  // Hologram Particles
+  const pGeo = new THREE.BufferGeometry();
+  const pCount = 120;
+  const posArray = new Float32Array(pCount * 3);
+  for(let i=0; i<pCount*3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 12;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  const pMat = new THREE.PointsMaterial({ size: 0.08, color: 0x00f0ff, transparent: true, opacity: 0.6 });
+  particlesMesh = new THREE.Points(pGeo, pMat);
+  humanGroup.add(particlesMesh);
 
   threeScene.add(humanGroup);
 
@@ -1237,24 +1945,26 @@ function init3DCore() {
     requestAnimationFrame(animate);
     clockCounter += 0.05;
 
-    // Rotation
+    // Rotation Speed based on Core State
     let speed = 0.008;
-    if(state.coreState === 'ACTIVE') speed = 0.015;
-    if(state.coreState === 'HIGH PERFORMANCE') speed = 0.025;
-    if(state.coreState === 'OVERDRIVE') speed = 0.04;
+    if (state.coreState === 'ACTIVE') speed = 0.015;
+    if (state.coreState === 'HIGH PERFORMANCE') speed = 0.025;
+    if (state.coreState === 'OVERDRIVE') speed = 0.04;
 
     humanGroup.rotation.y += speed;
+    if (particlesMesh) particlesMesh.rotation.y -= speed * 0.5;
 
-    // Heartbeat Pulse
-    const pulse = 1 + Math.sin(clockCounter * (state.coreState === 'OVERDRIVE' ? 4 : 2)) * 0.15;
-    if(heartMesh) heartMesh.scale.set(pulse, pulse, pulse);
+    // Heartbeat Dynamic Simulation
+    const pulseFactor = state.coreState === 'OVERDRIVE' ? 4 : 2;
+    const pulse = 1 + Math.sin(clockCounter * pulseFactor) * 0.18;
+    if (heartMesh) heartMesh.scale.set(pulse, pulse, pulse);
 
     threeRenderer.render(threeScene, threeCamera);
   }
   animate();
 
   window.addEventListener('resize', () => {
-    if(!container) return;
+    if (!container || !threeCamera || !threeRenderer) return;
     threeCamera.aspect = container.clientWidth / container.clientHeight;
     threeCamera.updateProjectionMatrix();
     threeRenderer.setSize(container.clientWidth, container.clientHeight);
@@ -1262,24 +1972,37 @@ function init3DCore() {
 }
 
 /* =====================================================
-   12. RENDER ALL PANELS
+   13. RENDER ALL PANELS & UI SYNCHRONIZATION
 ===================================================== */
 function renderAll() {
+  // Today Date Setup for Forms Default
+  const todayISO = new Date().toISOString().split('T')[0];
+  if (!document.getElementById('taskDueDate').value) document.getElementById('taskDueDate').value = todayISO;
+  if (!document.getElementById('goalStartDate').value) document.getElementById('goalStartDate').value = todayISO;
+  if (!document.getElementById('goalDeadline').value) document.getElementById('goalDeadline').value = todayISO;
+  if (!document.getElementById('finDate').value) document.getElementById('finDate').value = todayISO;
+  if (!document.getElementById('eventDate').value) document.getElementById('eventDate').value = todayISO;
+
   // Profile & XP
   document.getElementById('profName').textContent = state.profile.name;
   document.getElementById('profRole').textContent = state.profile.role;
   document.getElementById('profCreated').textContent = state.profile.createdDate || '-';
+  
+  const reqXP = getRequiredXP(state.xpSystem.level);
   document.getElementById('userLevel').textContent = state.xpSystem.level;
   document.getElementById('userXP').textContent = state.xpSystem.xp;
-  document.getElementById('xpBar').style.width = `${state.xpSystem.xp}%`;
+  document.getElementById('userXPReq').textContent = reqXP;
+  const xpPercent = Math.min(100, Math.round((state.xpSystem.xp / reqXP) * 100));
+  document.getElementById('xpBar').style.width = `${xpPercent}%`;
 
-  if(state.profile.avatar) {
-    document.getElementById('avatarDisplay').innerHTML = `<img src="${sanitize(state.profile.avatar)}">`;
+  if (state.profile.avatar) {
+    document.getElementById('avatarDisplay').innerHTML = `<img src="${sanitize(state.profile.avatar)}" alt="Avatar">`;
   }
 
   // Dashboard Sync
   document.getElementById('dashLevel').textContent = state.xpSystem.level;
   document.getElementById('dashXP').textContent = state.xpSystem.xp;
+  document.getElementById('dashXPReq').textContent = reqXP;
 
   const doneTasks = state.tasks.filter(t => t.completed).length;
   const taskRate = state.tasks.length ? Math.round((doneTasks / state.tasks.length) * 100) : 0;
@@ -1290,7 +2013,7 @@ function renderAll() {
   const totalInc = state.finance.filter(f => f.amount > 0).reduce((a,b) => a + b.amount, 0);
   const totalExp = state.finance.filter(f => f.amount < 0).reduce((a,b) => a + Math.abs(b.amount), 0);
   const netBalance = totalInc - totalExp;
-  document.getElementById('dashBalance').textContent = `${netBalance} DZD`;
+  document.getElementById('dashBalance').textContent = `${netBalance.toLocaleString()} DZD`;
 
   document.getElementById('dashCoreState').textContent = state.coreState;
   document.getElementById('coreStatusBadge').textContent = state.coreState;
@@ -1299,81 +2022,120 @@ function renderAll() {
   document.getElementById('dashGoalAvg').textContent = `${goalAvg}%`;
   document.getElementById('dashGoalBar').style.width = `${goalAvg}%`;
 
-  const habitStreakTotal = state.habits.reduce((a,b) => a + b.streak, 0);
-  document.getElementById('dashHabitStreak').textContent = `${habitStreakTotal} أيام`;
-  document.getElementById('dashEventCount').textContent = state.events.length;
+  const bestStreak = state.habits.length ? Math.max(...state.habits.map(h => h.bestStreak || h.streak)) : 0;
+  document.getElementById('dashHabitStreak').textContent = `${bestStreak} Days`;
+  document.getElementById('dashEventCount').textContent = `${state.events.length} Events`;
 
   const noteWords = state.notes.trim() ? state.notes.trim().split(/\s+/).length : 0;
-  document.getElementById('dashNoteWords').textContent = `${noteWords} كلمة`;
-  document.getElementById('dashWaterVal').textContent = state.biometrics.water;
+  document.getElementById('dashNoteWords').textContent = `${noteWords} Words`;
+  
+  const wVal = state.biometrics.water || 0;
+  const wGoal = state.biometrics.waterGoal || 8;
+  document.getElementById('dashWaterVal').textContent = wVal;
+  document.getElementById('dashWaterGoal').textContent = wGoal;
+  const waterPct = Math.min(100, Math.round((wVal / wGoal) * 100));
+  document.getElementById('dashWaterBar').style.width = `${waterPct}%`;
+  document.getElementById('hudHydration').textContent = `${waterPct}%`;
+
+  // Biometrics Dynamic Simulation
+  const baseBPM = state.coreState === 'OVERDRIVE' ? 115 : state.coreState === 'HIGH PERFORMANCE' ? 95 : state.coreState === 'ACTIVE' ? 85 : 72;
+  document.getElementById('bpm').textContent = `${baseBPM} BPM`;
+  document.getElementById('stamina').textContent = `${Math.min(100, 50 + xpPercent / 2)}%`;
+  
+  // Habit Stability
+  const totalHabits = state.habits.length;
+  const activeHabits = state.habits.filter(h => h.streak > 0).length;
+  const stabilityPct = totalHabits ? Math.round((activeHabits / totalHabits) * 100) : 100;
+  document.getElementById('dashStability').textContent = `${stabilityPct}%`;
+  document.getElementById('coreStability').textContent = `${stabilityPct}%`;
+  document.getElementById('coreLevelPower').textContent = `LVL ${state.xpSystem.level}`;
 
   // Render Tasks
   renderTasks();
 
   // Render Habits
-  document.getElementById('habitList').innerHTML = state.habits.map(h => `
-    <div class="panel" style="margin:0; text-align:center;">
-      <div style="font-weight:bold; margin-bottom:5px;">${sanitize(h.title)}</div>
-      <div style="font-size:1.3rem; color:var(--green); margin:8px 0; font-family:var(--font-mono);">🔥 ${h.streak} DAYS</div>
-      <div style="display:flex; gap:5px; justify-content:center;">
-        <button onclick="logHabitToday(${h.id})" style="padding:4px 8px;">+ إنجاز اليوم</button>
-        <button onclick="deleteHabit(${h.id})" class="btn-pink" style="padding:4px 8px;">حذف</button>
-      </div>
-    </div>
-  `).join('');
+  const habitContainer = document.getElementById('habitList');
+  if (state.habits.length === 0) {
+    habitContainer.innerHTML = `<div style="grid-column:span 3; text-align:center; color:var(--muted); padding:20px;">لا توجد عادات مسجلة بعد...</div>`;
+  } else {
+    habitContainer.innerHTML = state.habits.map(h => {
+      const todayStr = new Date().toDateString();
+      const doneToday = h.lastCompletedDate === todayStr;
+      return `
+        <div class="panel" style="margin:0; text-align:center;">
+          <div style="font-weight:bold; margin-bottom:5px; color:var(--cyan);">${sanitize(h.title)}</div>
+          <div style="font-size:1.3rem; color:var(--green); margin:8px 0; font-family:var(--font-mono);">🔥 ${h.streak} DAYS</div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-bottom:10px;">Best Streak: ${h.bestStreak || h.streak} Days</div>
+          <div style="display:flex; gap:5px; justify-content:center;">
+            <button onclick="logHabitToday(${h.id})" ${doneToday ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''} style="padding:4px 8px;">
+              ${doneToday ? '✓ تم اليوم' : '+ إنجاز اليوم'}
+            </button>
+            <button onclick="deleteHabit(${h.id})" class="btn-pink" style="padding:4px 8px;">حذف</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
   // Render Goals
-  document.getElementById('goalList').innerHTML = state.goals.map(g => `
-    <div class="panel" style="margin:0;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <strong style="color:var(--cyan);">${sanitize(g.title)}</strong>
-        <span style="font-size:0.85rem; color:var(--yellow);">${g.progress}%</span>
-      </div>
-      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:8px;">${sanitize(g.desc || '')} | الموعد: ${g.deadline || 'غير محدد'}</div>
-      <div class="bar-container" style="margin-bottom:10px;"><div class="bar-fill" style="width:${g.progress}%"></div></div>
-      <div style="display:flex; gap:6px;">
-        <button onclick="updateGoalProgress(${g.id}, 5)">+5%</button>
-        <button onclick="updateGoalProgress(${g.id}, 10)">+10%</button>
-        <button onclick="updateGoalProgress(${g.id}, -5)">-5%</button>
-        <button onclick="deleteGoal(${g.id})" class="btn-pink">حذف</button>
-      </div>
-    </div>
-  `).join('');
+  const goalContainer = document.getElementById('goalList');
+  if (state.goals.length === 0) {
+    goalContainer.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px;">لا توجد أهداف استراتيجية مسجلة...</div>`;
+  } else {
+    goalContainer.innerHTML = state.goals.map(g => {
+      const deadlineDate = new Date(g.deadline);
+      const today = new Date();
+      const diffDays = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+      const countdownText = diffDays > 0 ? `${diffDays} أيام متبقية` : diffDays === 0 ? `اليوم هو الموعد النهائي!` : `انتهى الموعد النهائي`;
+
+      return `
+        <div class="panel" style="margin:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:5px;">
+            <strong style="color:var(--cyan); font-size:1rem;">${sanitize(g.title)}</strong>
+            <span class="badge ${g.progress === 100 ? 'badge-low' : 'badge-medium'}">${g.progress === 100 ? 'مكتمل 100%' : countdownText}</span>
+          </div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-bottom:8px;">${sanitize(g.desc || '')} | المدى: ${g.startDate} ⬅️ ${g.deadline}</div>
+          <div class="bar-container" style="margin-bottom:10px;"><div class="bar-fill" style="width:${g.progress}%"></div></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:5px;">
+            <div style="display:flex; gap:6px;">
+              <button onclick="updateGoalProgress(${g.id}, 10)">+10%</button>
+              <button onclick="updateGoalProgress(${g.id}, 25)">+25%</button>
+              <button onclick="updateGoalProgress(${g.id}, -10)">-10%</button>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="openEditGoalModal(${g.id})" style="padding:4px 8px;">تعديل</button>
+              <button onclick="deleteGoal(${g.id})" class="btn-pink" style="padding:4px 8px;">حذف</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
   // Render Finance
-  document.getElementById('finTotalIncome').textContent = `${totalInc} DZD`;
-  document.getElementById('finTotalExpenses').textContent = `${totalExp} DZD`;
-  document.getElementById('finNetBalance').textContent = `${netBalance} DZD`;
-
-  document.getElementById('finList').innerHTML = state.finance.map(f => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border:1px solid var(--panel-border); background:rgba(0,0,0,0.3); border-radius:4px;">
-      <div>
-        <strong>${sanitize(f.title)}</strong>
-        <span style="font-size:0.75rem; color:var(--muted); margin-right:8px;">[${sanitize(f.category)}] ${f.date}</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="color:${f.amount >= 0 ? 'var(--green)' : 'var(--pink)'}; font-weight:bold;">${f.amount} DZD</span>
-        <button onclick="deleteFinance(${f.id})" class="btn-pink" style="padding:2px 6px; font-size:0.7rem;">×</button>
-      </div>
-    </div>
-  `).join('');
+  renderFinance();
 
   // Render Calendar Events
-  document.getElementById('eventList').innerHTML = state.events.map(e => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid var(--panel-border); background:rgba(0,0,0,0.3); border-radius:4px;">
-      <div>
-        <strong style="color:var(--cyan);">📅 ${e.date} (${e.time || '00:00'})</strong> - ${sanitize(e.title)}
-        <div style="font-size:0.8rem; color:var(--muted);">${sanitize(e.desc || '')}</div>
+  const eventContainer = document.getElementById('eventList');
+  if (state.events.length === 0) {
+    eventContainer.innerHTML = `<div style="text-align:center; color:var(--muted); padding:20px;">لا توجد مواعيد مسجلة في التقويم...</div>`;
+  } else {
+    const sortedEvents = [...state.events].sort((a,b) => new Date(`${a.date} ${a.time||'00:00'}`) - new Date(`${b.date} ${b.time||'00:00'}`));
+    eventContainer.innerHTML = sortedEvents.map(e => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border:1px solid var(--panel-border); background:rgba(0,0,0,0.3); border-radius:4px;">
+        <div>
+          <strong style="color:var(--cyan);">📅 ${e.date} ${e.time ? '| ⏰ ' + e.time : ''}</strong> - ${sanitize(e.title)}
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${sanitize(e.desc || '')}</div>
+        </div>
+        <button onclick="deleteEvent(${e.id})" class="btn-pink" style="padding:3px 8px;">حذف</button>
       </div>
-      <button onclick="deleteEvent(${e.id})" class="btn-pink" style="padding:2px 6px;">حذف</button>
-    </div>
-  `).join('');
+    `).join('');
+  }
 
   // Render Statistics Page
   document.getElementById('stTasksTotal').textContent = state.tasks.length;
   document.getElementById('stTasksDone').textContent = doneTasks;
-  const maxStreak = state.habits.length ? Math.max(...state.habits.map(h => h.streak)) : 0;
-  document.getElementById('stBestStreak').textContent = `${maxStreak} DAYS`;
+  document.getElementById('stBestStreak').textContent = `${bestStreak} DAYS`;
   document.getElementById('stEventsTotal').textContent = state.events.length;
 
   document.getElementById('stTaskChartBar').style.width = `${taskRate}%`;
@@ -1381,62 +2143,77 @@ function renderAll() {
 
   document.getElementById('stLevel').textContent = state.xpSystem.level;
   document.getElementById('stXP').textContent = state.xpSystem.xp;
+  document.getElementById('stXPReq').textContent = reqXP;
 
+  // XP Log
+  const xpLogContainer = document.getElementById('stXPLog');
+  if (state.xpSystem.log && state.xpSystem.log.length) {
+    xpLogContainer.innerHTML = state.xpSystem.log.map(item => `
+      <div style="padding:4px 8px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between;">
+        <span>+${item.amount} XP // ${sanitize(item.source)}</span>
+        <span style="color:var(--muted);">${item.date}</span>
+      </div>
+    `).join('');
+  } else {
+    xpLogContainer.innerHTML = `<div style="color:var(--muted);">لا يوجد سجل مكافآت بعد...</div>`;
+  }
+
+  // Notes Meta
+  if (document.getElementById('mainNotes').value !== state.notes) {
+    document.getElementById('mainNotes').value = state.notes;
+  }
   updateNoteMeta();
 }
 
 /* =====================================================
-   13. BACKUP & RESET
+   14. BACKUP, IMPORT & RESET
 ===================================================== */
 function exportData() {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `HUMAN_OS_v5_BACKUP_${new Date().toISOString().slice(0,10)}.json`);
+  downloadAnchor.setAttribute("download", `HUMAN_OS_v6_BACKUP_${new Date().toISOString().split('T')[0]}.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
-  showToast("📥 تم تصدير النسخة الاحتياطية بنجاح");
+  showToast("تم تصدير نسخة احتياطية من بيانات النظام (JSON)", "cyan");
 }
 
 function importData(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
+  const fileReader = new FileReader();
+  fileReader.onload = function(e) {
     try {
-      const importedState = JSON.parse(e.target.result);
-      state = { ...state, ...importedState };
-      saveState();
-      showToast("📤 تم استرجاع البيانات بنجاح");
+      const parsed = JSON.parse(e.target.result);
+      if (typeof parsed === 'object' && parsed !== null) {
+        state = { ...state, ...parsed, version: CURRENT_SYSTEM_VERSION };
+        saveState();
+        showToast("تم استرجاع بيانات النظام بنجاح!", "green");
+      } else {
+        throw new Error("Invalid file format");
+      }
     } catch(err) {
-      alert("⚠️ الملف المحدد غير صالح أو تالف!");
+      showToast("❌ ملف JSON غير صالح أو تالف!", "pink");
     }
   };
-  reader.readAsText(file);
+  if(event.target.files && event.target.files[0]) {
+    fileReader.readAsText(event.target.files[0]);
+  }
 }
 
 function resetSystem() {
-  if(confirm("⚠️ هل أنت متأكد تماماً من إعادة ضبط النظام؟ سيتم مسح كافة البيانات المخزنة محلياً!")) {
+  if (confirm("⚠️ هل أنت تأكد تماماً من إعادة ضبط النظام بالكامل؟ سيتم مسح كافة البيانات المخزنة محلياً!")) {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(OLD_STORAGE_KEY);
     location.reload();
   }
 }
 
 /* =====================================================
-   14. INITIALIZATION & CLOCK
+   15. INITIALIZATION
 ===================================================== */
-setInterval(() => {
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
-  document.getElementById('dateDisplay').textContent = now.toLocaleDateString('ar-EG');
-}, 1000);
-
-// Initialize System on DOM Load
 window.addEventListener('DOMContentLoaded', () => {
+  startClock();
   loadState();
-  document.getElementById('mainNotes').value = state.notes || "";
 });
 </script>
 </body>
