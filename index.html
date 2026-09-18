@@ -2,1150 +2,1739 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>إمبراطور الظلام والنور</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #030308;
-    font-family: Arial, sans-serif;
-    touch-action: none;
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
 }
 
-canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
+body{
+    font-family:Arial,"Tahoma",sans-serif;
 }
 
-.title {
-    position: fixed;
-    top: 15px;
-    right: 20px;
-    z-index: 5;
-    color: white;
-    text-align: right;
-    pointer-events: none;
+canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+}
+
+#cinema{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:5;
+}
+
+.bar{
+    position:absolute;
+    left:0;
+    width:100%;
+    height:8vh;
+    background:#000;
+}
+
+.bar.top{
+    top:0;
+}
+
+.bar.bottom{
+    bottom:0;
+}
+
+#title{
+    position:absolute;
+    top:14%;
+    width:100%;
+    text-align:center;
+    color:white;
+    opacity:0;
+    transform:scale(.8);
+    transition:opacity 1s,transform 1s;
     text-shadow:
-        0 0 8px #00e5ff,
-        0 0 18px #ff0055;
+        0 0 10px #00e5ff,
+        0 0 30px #ff0055;
 }
 
-.title h1 {
-    font-size: clamp(18px, 4vw, 32px);
+#title h1{
+    font-size:clamp(25px,6vw,70px);
 }
 
-.title p {
-    margin-top: 4px;
-    color: #ddd;
-    font-size: clamp(11px, 2vw, 15px);
+#title p{
+    margin-top:12px;
+    font-size:clamp(12px,2vw,22px);
 }
 
-.hud {
-    position: fixed;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(700px, 75vw);
-    z-index: 5;
-    pointer-events: none;
+#subtitle{
+    position:absolute;
+    bottom:13%;
+    width:100%;
+    text-align:center;
+    color:white;
+    font-size:clamp(13px,2.5vw,28px);
+    opacity:0;
+    text-shadow:0 0 15px #fff;
 }
 
-.names {
-    display: flex;
-    justify-content: space-between;
-    color: white;
-    font-weight: bold;
-    margin-bottom: 5px;
-    font-size: 14px;
+#flash{
+    position:absolute;
+    inset:0;
+    background:white;
+    opacity:0;
 }
 
-.healthBox {
-    width: 100%;
-    height: 18px;
-    background: #15151c;
-    border: 2px solid #555;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.health {
-    height: 100%;
-    width: 100%;
-    transition: width .15s linear;
-}
-
-#playerHealth {
-    background: linear-gradient(90deg, #00bfff, #00ffff);
-    box-shadow: 0 0 15px #00e5ff;
-}
-
-#enemyHealth {
-    background: linear-gradient(90deg, #ff0055, #ff0033);
-    box-shadow: 0 0 15px #ff0055;
-}
-
-.energyBox {
-    margin-top: 6px;
-    width: 100%;
-    height: 7px;
-    background: #111;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.energy {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #ffe600, #ff9d00);
-    box-shadow: 0 0 10px #ffe600;
-}
-
-.centerText {
-    position: fixed;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 6;
-    color: white;
-    font-size: clamp(30px, 8vw, 80px);
-    font-weight: bold;
-    opacity: 0;
-    pointer-events: none;
-    text-shadow:
-        0 0 10px #fff,
-        0 0 30px #00e5ff;
-}
-
-.controls {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    z-index: 10;
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-}
-
-.controlGroup {
-    display: flex;
-    gap: 10px;
-    pointer-events: auto;
-}
-
-.btn {
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,.35);
-    background: rgba(15,15,25,.75);
-    color: white;
-    font-size: 22px;
-    font-weight: bold;
-    box-shadow: 0 0 12px rgba(0,229,255,.25);
-    backdrop-filter: blur(5px);
-    user-select: none;
-}
-
-.btn:active {
-    transform: scale(.9);
-    background: rgba(255,255,255,.2);
-}
-
-.attack {
-    border-color: #ff0055;
-    box-shadow: 0 0 15px rgba(255,0,85,.5);
-}
-
-.special {
-    border-color: #ffe600;
-    box-shadow: 0 0 15px rgba(255,230,0,.5);
-}
-
-.defend {
-    border-color: #00e5ff;
-}
-
-#gameOver {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 20;
-    background: rgba(0,0,0,.72);
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    color: white;
-    text-align: center;
-}
-
-#gameOver h2 {
-    font-size: clamp(35px, 9vw, 80px);
-    text-shadow: 0 0 25px #ff0055;
-}
-
-#gameOver p {
-    margin: 15px 0;
-    font-size: 18px;
-}
-
-#restart {
-    padding: 13px 30px;
-    border: 0;
-    border-radius: 30px;
-    color: white;
-    background: linear-gradient(90deg,#00aaff,#ff0055);
-    font-size: 17px;
-    font-weight: bold;
+#scene{
+    position:absolute;
+    top:15px;
+    left:20px;
+    color:#aaa;
+    font-size:12px;
+    opacity:.7;
 }
 </style>
 </head>
 
 <body>
 
-<div class="title">
-    <h1>إمبراطور الظلام والنور</h1>
-    <p>أيومي أشيا ⚔️ قائد الشياطين</p>
-</div>
+<canvas id="canvas"></canvas>
 
-<div class="hud">
-    <div class="names">
-        <span>أيومي — النور</span>
-        <span>قائد الشياطين — الظلام</span>
+<div id="cinema">
+    <div class="bar top"></div>
+    <div class="bar bottom"></div>
+
+    <div id="title">
+        <h1>إمبراطور الظلام والنور</h1>
+        <p>أيومي أشيا ضد قائد الشياطين</p>
     </div>
 
-    <div class="healthBox">
-        <div id="playerHealth" class="health"></div>
-    </div>
-
-    <div class="energyBox">
-        <div id="energy" class="energy"></div>
-    </div>
-
-    <div style="margin-top:4px" class="healthBox">
-        <div id="enemyHealth" class="health"></div>
-    </div>
-</div>
-
-<div id="centerText"></div>
-
-<canvas id="stage"></canvas>
-
-<div class="controls">
-    <div class="controlGroup">
-        <button class="btn" data-key="left">←</button>
-        <button class="btn" data-key="right">→</button>
-    </div>
-
-    <div class="controlGroup">
-        <button class="btn defend" data-key="defend">🛡</button>
-        <button class="btn attack" data-key="attack">⚔</button>
-        <button class="btn special" data-key="special">✦</button>
-    </div>
-</div>
-
-<div id="gameOver">
-    <h2 id="result"></h2>
-    <p id="resultText"></p>
-    <button id="restart">إعادة المعركة</button>
+    <div id="subtitle"></div>
+    <div id="flash"></div>
+    <div id="scene">SCENE 01</div>
 </div>
 
 <script>
-const canvas = document.getElementById("stage");
+/* =========================================================
+   إمبراطور الظلام والنور
+   Animated Anime Cinematic
+   يعمل تلقائياً بدون أي تحكم
+========================================================= */
+
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-let W = 0;
-let H = 0;
-let frame = 0;
-let shake = 0;
-let gameEnded = false;
+let W,H,dpr;
+let frame=0;
+let time=0;
 
-const keys = {};
+const FPS=60;
 
-const player = {
-    x: 0,
-    y: 0,
-    vx: 0,
-    hp: 100,
-    energy: 100,
-    state: "idle",
-    facing: 1,
-    attackTimer: 0,
-    cooldown: 0,
-    specialTimer: 0,
-    defend: false,
-    aura: "#00e5ff",
-    weapon: "#ffe600"
+/* -----------------------------
+   الشخصيات
+----------------------------- */
+
+const ayumi={
+    x:0,
+    y:0,
+    scale:1,
+    angle:0,
+    aura:"#00e5ff",
+    light:"#ffe600",
+    hair:"#101b38",
+    attacking:false
 };
 
-const enemy = {
-    x: 0,
-    y: 0,
-    vx: 0,
-    hp: 100,
-    state: "idle",
-    facing: -1,
-    attackTimer: 0,
-    cooldown: 0,
-    aura: "#ff0055",
-    weapon: "#a000ff"
+const demon={
+    x:0,
+    y:0,
+    scale:1,
+    angle:0,
+    aura:"#ff0055",
+    light:"#a000ff",
+    hair:"#16000b",
+    attacking:false
 };
 
-const particles = [];
-const slashes = [];
-const texts = [];
+/* -----------------------------
+   الجزيئات
+----------------------------- */
 
-function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+const particles=[];
 
-    if (!player.x) {
-        player.x = W * .28;
-        enemy.x = W * .72;
+class Particle{
+
+    constructor(x,y,color,options={}){
+
+        const angle=
+            options.angle ??
+            Math.random()*Math.PI*2;
+
+        const speed=
+            options.speed ??
+            Math.random()*6+1;
+
+        this.x=x;
+        this.y=y;
+
+        this.vx=Math.cos(angle)*speed;
+        this.vy=Math.sin(angle)*speed;
+
+        this.color=color;
+
+        this.size=
+            options.size ??
+            Math.random()*4+1;
+
+        this.life=
+            options.life ??
+            Math.random()*50+20;
+
+        this.maxLife=this.life;
+
+        this.gravity=
+            options.gravity ??
+            .05;
     }
 
-    player.y = H * .74;
-    enemy.y = H * .74;
-}
+    update(){
 
-window.addEventListener("resize", resize);
-resize();
+        this.x+=this.vx;
+        this.y+=this.vy;
 
-/* ================= PARTICLES ================= */
+        this.vy+=this.gravity;
 
-class Particle {
-    constructor(x,y,color) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 7 + 2;
+        this.vx*=.985;
+        this.vy*=.985;
 
-        this.x = x;
-        this.y = y;
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
-        this.color = color;
-        this.size = Math.random() * 5 + 2;
-        this.life = Math.random() * 35 + 20;
-        this.maxLife = this.life;
-        this.gravity = .08;
-    }
-
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += this.gravity;
-        this.vx *= .98;
         this.life--;
-        this.size *= .96;
+
+        this.size*=.985;
     }
 
-    draw() {
+    draw(){
+
+        const alpha=
+            Math.max(0,this.life/this.maxLife);
+
         ctx.save();
 
-        ctx.globalAlpha = this.life / this.maxLife;
-        ctx.fillStyle = this.color;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 15;
+        ctx.globalAlpha=alpha;
+
+        ctx.fillStyle=this.color;
+
+        ctx.shadowColor=this.color;
+        ctx.shadowBlur=15;
 
         ctx.beginPath();
-        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.arc(
+            this.x,
+            this.y,
+            Math.max(.1,this.size),
+            0,
+            Math.PI*2
+        );
+
         ctx.fill();
 
         ctx.restore();
     }
 }
 
-function explosion(x,y,color1,color2,count=35) {
-    for(let i=0;i<count;i++) {
+/* -----------------------------
+   إنشاء الانفجار
+----------------------------- */
+
+function explosion(
+    x,
+    y,
+    color1,
+    color2,
+    amount=80,
+    power=10
+){
+
+    for(let i=0;i<amount;i++){
+
         particles.push(
             new Particle(
                 x,
                 y,
-                Math.random() > .5 ? color1 : color2
+                Math.random()>.5?
+                color1:
+                color2,
+                {
+                    speed:
+                        Math.random()*power+2,
+
+                    size:
+                        Math.random()*6+1,
+
+                    life:
+                        Math.random()*40+30
+                }
             )
         );
     }
-
-    shake = Math.max(shake,8);
 }
 
-function energyTrail(char,color) {
-    for(let i=0;i<3;i++) {
-        particles.push(new Particle(char.x, char.y-35, color));
+/* -----------------------------
+   شظايا طاقة
+----------------------------- */
+
+function energyParticles(char,color){
+
+    for(let i=0;i<4;i++){
+
+        particles.push(
+            new Particle(
+                char.x+
+                (Math.random()-.5)*35,
+
+                char.y-
+                50+
+                (Math.random()-.5)*50,
+
+                color,
+                {
+                    speed:Math.random()*2+1,
+                    size:Math.random()*3+1,
+                    life:30
+                }
+            )
+        );
     }
 }
 
-/* ================= TEXT EFFECT ================= */
+/* -----------------------------
+   حجم الشاشة
+----------------------------- */
 
-function floatingText(x,y,text,color) {
-    texts.push({
-        x,y,text,color,
-        life:50,
-        vy:-1
-    });
+function resize(){
+
+    dpr=
+        Math.min(window.devicePixelRatio||1,2);
+
+    W=window.innerWidth;
+    H=window.innerHeight;
+
+    canvas.width=W*dpr;
+    canvas.height=H*dpr;
+
+    canvas.style.width=W+"px";
+    canvas.style.height=H+"px";
+
+    ctx.setTransform(
+        dpr,0,0,dpr,0,0
+    );
 }
 
-/* ================= SLASH ================= */
+window.addEventListener(
+    "resize",
+    resize
+);
 
-function createSlash(x,y,color,direction) {
-    slashes.push({
-        x,
-        y,
-        color,
-        direction,
-        life:15,
-        maxLife:15
-    });
-}
+resize();
 
-function drawSlashes() {
-    for(let i=slashes.length-1;i>=0;i--) {
-        const s = slashes[i];
+/* =========================================================
+   الخلفية
+========================================================= */
 
-        s.life--;
+function background(){
 
-        ctx.save();
+    const gradient=
+        ctx.createLinearGradient(
+            0,0,
+            0,H
+        );
 
-        ctx.globalAlpha = s.life/s.maxLife;
-        ctx.strokeStyle = s.color;
-        ctx.shadowColor = s.color;
-        ctx.shadowBlur = 20;
-        ctx.lineWidth = 8;
-        ctx.lineCap = "round";
-
-        ctx.beginPath();
-
-        if(s.direction === 1) {
-            ctx.moveTo(s.x-60,s.y+25);
-            ctx.quadraticCurveTo(
-                s.x,
-                s.y-45,
-                s.x+65,
-                s.y-10
-            );
-        } else {
-            ctx.moveTo(s.x+60,s.y+25);
-            ctx.quadraticCurveTo(
-                s.x,
-                s.y-45,
-                s.x-65,
-                s.y-10
-            );
-        }
-
-        ctx.stroke();
-        ctx.restore();
-
-        if(s.life<=0) slashes.splice(i,1);
-    }
-}
-
-/* ================= CHARACTER DRAWING ================= */
-
-function drawCharacter(char,isDemon=false) {
-
-    ctx.save();
-
-    ctx.translate(char.x,char.y);
-
-    const pulse = Math.sin(frame*.12)*5;
-
-    /* aura */
-
-    const gradient = ctx.createRadialGradient(
-        0,-50,5,
-        0,-50,100+pulse
+    gradient.addColorStop(
+        0,
+        "#02020b"
     );
 
-    gradient.addColorStop(0,char.aura);
-    gradient.addColorStop(.35,char.aura+"88");
-    gradient.addColorStop(1,"transparent");
-
-    ctx.fillStyle = gradient;
-
-    ctx.beginPath();
-    ctx.arc(0,-50,100+pulse,0,Math.PI*2);
-    ctx.fill();
-
-    /* shadow */
-
-    ctx.fillStyle = "rgba(0,0,0,.5)";
-    ctx.beginPath();
-    ctx.ellipse(0,12,42,10,0,0,Math.PI*2);
-    ctx.fill();
-
-    /* body */
-
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 5;
-    ctx.lineCap = "round";
-    ctx.shadowColor = char.aura;
-    ctx.shadowBlur = 15;
-
-    /* head */
-
-    ctx.fillStyle = "#f4f4f4";
-
-    ctx.beginPath();
-    ctx.arc(0,-78,17,0,Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
-
-    /* eyes */
-
-    ctx.fillStyle = isDemon ? "#ff0055" : "#00e5ff";
-
-    ctx.beginPath();
-    ctx.arc(-6,-80,3,0,Math.PI*2);
-    ctx.arc(6,-80,3,0,Math.PI*2);
-    ctx.fill();
-
-    /* horns */
-
-    if(isDemon) {
-
-        ctx.strokeStyle = "#ff0055";
-        ctx.lineWidth = 6;
-
-        ctx.beginPath();
-
-        ctx.moveTo(-9,-91);
-        ctx.lineTo(-22,-113);
-
-        ctx.moveTo(9,-91);
-        ctx.lineTo(22,-113);
-
-        ctx.stroke();
-
-        ctx.strokeStyle = "#fff";
-    }
-
-    /* torso */
-
-    ctx.beginPath();
-
-    ctx.moveTo(0,-61);
-    ctx.lineTo(0,-22);
-
-    ctx.stroke();
-
-    const cycle = Math.sin(frame*.18);
-
-    /* animation */
-
-    if(char.state === "attack") {
-
-        ctx.beginPath();
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(-17,10);
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(18,8);
-
-        ctx.moveTo(0,-48);
-        ctx.lineTo(char.facing*35,-57);
-
-        ctx.stroke();
-
-        /* sword */
-
-        ctx.strokeStyle = char.weapon;
-        ctx.lineWidth = 8;
-        ctx.shadowColor = char.weapon;
-        ctx.shadowBlur = 25;
-
-        ctx.beginPath();
-
-        ctx.moveTo(char.facing*35,-57);
-        ctx.lineTo(char.facing*95,-78);
-
-        ctx.stroke();
-
-        ctx.strokeStyle = "#fff";
-
-    } else if(char.state === "special") {
-
-        ctx.beginPath();
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(-25,8);
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(25,8);
-
-        ctx.moveTo(0,-48);
-        ctx.lineTo(char.facing*55,-70);
-
-        ctx.stroke();
-
-        ctx.strokeStyle = char.weapon;
-        ctx.lineWidth = 11;
-        ctx.shadowBlur = 35;
-
-        ctx.beginPath();
-
-        ctx.moveTo(char.facing*45,-70);
-        ctx.lineTo(char.facing*130,-100);
-
-        ctx.stroke();
-
-        ctx.strokeStyle = "#fff";
-
-    } else if(char.state === "defend") {
-
-        ctx.strokeStyle = char.aura;
-
-        ctx.lineWidth = 8;
-
-        ctx.beginPath();
-
-        ctx.arc(0,-48,45,0,Math.PI*2);
-
-        ctx.stroke();
-
-        ctx.strokeStyle = "#fff";
-
-        ctx.beginPath();
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(-18,10);
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(18,10);
-
-        ctx.moveTo(0,-48);
-        ctx.lineTo(char.facing*20,-25);
-
-        ctx.stroke();
-
-    } else {
-
-        ctx.beginPath();
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(-10+cycle*5,10);
-
-        ctx.moveTo(0,-22);
-        ctx.lineTo(10-cycle*5,10);
-
-        ctx.moveTo(0,-48);
-        ctx.lineTo(-18,-25);
-
-        ctx.moveTo(0,-48);
-        ctx.lineTo(18,-25);
-
-        ctx.stroke();
-    }
-
-    ctx.restore();
-}
-
-/* ================= BACKGROUND ================= */
-
-function drawBackground() {
-
-    const bg = ctx.createLinearGradient(0,0,0,H);
-
-    bg.addColorStop(0,"#010107");
-    bg.addColorStop(.5,"#080718");
-    bg.addColorStop(1,"#12030d");
-
-    ctx.fillStyle = bg;
-    ctx.fillRect(0,0,W,H);
-
-    /* moon */
+    gradient.addColorStop(
+        .45,
+        "#090719"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#020107"
+    );
+
+    ctx.fillStyle=gradient;
+
+    ctx.fillRect(
+        0,0,W,H
+    );
+
+    /* القمر */
 
     ctx.save();
 
-    ctx.globalAlpha=.15;
-    ctx.fillStyle="#ffffff";
+    ctx.globalAlpha=.22;
+
     ctx.shadowColor="#ffffff";
-    ctx.shadowBlur=40;
+    ctx.shadowBlur=70;
+
+    ctx.fillStyle="#dcecff";
 
     ctx.beginPath();
-    ctx.arc(W*.5,H*.25,70,0,Math.PI*2);
+
+    ctx.arc(
+        W*.5,
+        H*.23,
+        Math.min(W,H)*.09,
+        0,
+        Math.PI*2
+    );
+
     ctx.fill();
 
     ctx.restore();
 
-    /* stars */
+    /* النجوم */
 
-    for(let i=0;i<70;i++) {
+    for(let i=0;i<100;i++){
 
-        const x=(i*137)%W;
-        const y=(i*71)%(H*.65);
+        const x=
+            (i*173)%W;
 
-        ctx.fillStyle=`rgba(255,255,255,${.15+Math.sin(frame*.02+i)*.1})`;
+        const y=
+            (i*83)%(H*.62);
 
-        ctx.fillRect(x,y,2,2);
+        const a=
+            .25+
+            Math.sin(
+                frame*.025+i
+            )*.15;
+
+        ctx.fillStyle=
+            `rgba(255,255,255,${a})`;
+
+        ctx.fillRect(
+            x,
+            y,
+            1.5,
+            1.5
+        );
     }
 
-    /* ground */
+    /* مدينة مدمرة */
 
-    const ground=H*.74;
+    drawRuins();
 
-    ctx.strokeStyle="rgba(255,255,255,.18)";
+    /* الأرض */
+
+    const ground=H*.78;
+
+    const floor=
+        ctx.createLinearGradient(
+            0,ground,
+            0,H
+        );
+
+    floor.addColorStop(
+        0,
+        "#151020"
+    );
+
+    floor.addColorStop(
+        1,
+        "#030305"
+    );
+
+    ctx.fillStyle=floor;
+
+    ctx.fillRect(
+        0,
+        ground,
+        W,
+        H-ground
+    );
+
+    ctx.strokeStyle=
+        "rgba(255,255,255,.12)";
+
     ctx.lineWidth=2;
 
     ctx.beginPath();
-    ctx.moveTo(0,ground+15);
-    ctx.lineTo(W,ground+15);
-    ctx.stroke();
 
-    /* energy crack */
+    ctx.moveTo(
+        0,
+        ground
+    );
 
-    ctx.strokeStyle="rgba(0,229,255,.15)";
-
-    ctx.beginPath();
-
-    ctx.moveTo(W*.1,ground+15);
-    ctx.lineTo(W*.25,ground+20);
-    ctx.lineTo(W*.35,ground+12);
-
-    ctx.moveTo(W*.65,ground+12);
-    ctx.lineTo(W*.75,ground+20);
-    ctx.lineTo(W*.9,ground+15);
+    ctx.lineTo(
+        W,
+        ground
+    );
 
     ctx.stroke();
 }
 
-/* ================= INPUT ================= */
+/* -----------------------------
+   المباني
+----------------------------- */
 
-function setKey(key,value) {
-    keys[key]=value;
-}
+function drawRuins(){
 
-window.addEventListener("keydown",e => {
+    const base=H*.78;
 
-    if(e.repeat) return;
+    for(let i=0;i<18;i++){
 
-    if(e.key==="ArrowLeft" || e.key.toLowerCase()==="a")
-        setKey("left",true);
+        const x=i*W/17;
 
-    if(e.key==="ArrowRight" || e.key.toLowerCase()==="d")
-        setKey("right",true);
+        const height=
+            50+
+            ((i*37)%130);
 
-    if(e.key===" " || e.key.toLowerCase()==="j")
-        setKey("attack",true);
+        const width=
+            30+
+            ((i*13)%45);
 
-    if(e.key.toLowerCase()==="k")
-        setKey("special",true);
+        ctx.fillStyle=
+            i%2===0?
+            "#080812":
+            "#0b0915";
 
-    if(e.key.toLowerCase()==="l")
-        setKey("defend",true);
-});
-
-window.addEventListener("keyup",e => {
-
-    if(e.key==="ArrowLeft" || e.key.toLowerCase()==="a")
-        setKey("left",false);
-
-    if(e.key==="ArrowRight" || e.key.toLowerCase()==="d")
-        setKey("right",false);
-
-    if(e.key===" " || e.key.toLowerCase()==="j")
-        setKey("attack",false);
-
-    if(e.key.toLowerCase()==="k")
-        setKey("special",false);
-
-    if(e.key.toLowerCase()==="l")
-        setKey("defend",false);
-});
-
-document.querySelectorAll(".btn").forEach(btn => {
-
-    const key=btn.dataset.key;
-
-    btn.addEventListener("pointerdown",e => {
-        e.preventDefault();
-        setKey(key,true);
-    });
-
-    btn.addEventListener("pointerup",e => {
-        e.preventDefault();
-        setKey(key,false);
-    });
-
-    btn.addEventListener("pointercancel",()=>{
-        setKey(key,false);
-    });
-
-    btn.addEventListener("pointerleave",()=>{
-        setKey(key,false);
-    });
-});
-
-/* ================= COMBAT ================= */
-
-function playerAttack() {
-
-    if(player.cooldown>0) return;
-
-    player.state="attack";
-    player.attackTimer=14;
-    player.cooldown=22;
-
-    createSlash(
-        player.x + player.facing*55,
-        player.y-55,
-        player.weapon,
-        player.facing
-    );
-
-    const distance=Math.abs(player.x-enemy.x);
-
-    if(distance<150) {
-
-        let damage=8;
-
-        if(enemy.state==="defend")
-            damage=2;
-
-        enemy.hp=Math.max(0,enemy.hp-damage);
-
-        explosion(
-            enemy.x,
-            enemy.y-50,
-            player.aura,
-            player.weapon,
-            15
+        ctx.fillRect(
+            x,
+            base-height,
+            width,
+            height
         );
 
-        floatingText(
-            enemy.x,
-            enemy.y-100,
-            "-"+damage,
-            "#ffe600"
-        );
-    }
-}
+        /* النوافذ */
 
-function playerSpecial() {
+        for(
+            let y=base-height+15;
+            y<base-10;
+            y+=20
+        ){
 
-    if(player.energy<35 || player.specialTimer>0)
-        return;
+            if(
+                (i+y)%3===0
+            ){
 
-    player.energy-=35;
-    player.state="special";
-    player.specialTimer=55;
-    shake=15;
+                ctx.fillStyle=
+                    "rgba(120,100,255,.25)";
 
-    createSlash(
-        player.x + player.facing*100,
-        player.y-70,
-        "#ffe600",
-        player.facing
-    );
-
-    explosion(
-        enemy.x,
-        enemy.y-50,
-        "#ffe600",
-        "#00e5ff",
-        60
-    );
-
-    const distance=Math.abs(player.x-enemy.x);
-
-    if(distance<300) {
-
-        const damage=22;
-
-        enemy.hp=Math.max(0,enemy.hp-damage);
-
-        floatingText(
-            enemy.x,
-            enemy.y-110,
-            "-"+damage,
-            "#ffe600"
-        );
-    }
-}
-
-function enemyAI() {
-
-    if(enemy.cooldown>0) return;
-
-    const distance=Math.abs(enemy.x-player.x);
-
-    if(distance>170) {
-
-        enemy.state="dash";
-
-        const direction=player.x>enemy.x ? 1 : -1;
-
-        enemy.x+=direction*2.8;
-        enemy.facing=direction;
-
-        energyTrail(enemy,enemy.aura);
-
-    } else {
-
-        if(Math.random()<.025) {
-
-            enemy.state="attack";
-            enemy.attackTimer=15;
-            enemy.cooldown=35;
-
-            createSlash(
-                enemy.x+enemy.facing*50,
-                enemy.y-55,
-                enemy.weapon,
-                enemy.facing
-            );
-
-            let damage=7;
-
-            if(player.defend)
-                damage=1;
-
-            player.hp=Math.max(0,player.hp-damage);
-
-            explosion(
-                player.x,
-                player.y-50,
-                enemy.aura,
-                enemy.weapon,
-                15
-            );
-
-            floatingText(
-                player.x,
-                player.y-105,
-                "-"+damage,
-                "#ff0055"
-            );
-
-        } else {
-
-            enemy.state="idle";
+                ctx.fillRect(
+                    x+8,
+                    y,
+                    5,
+                    8
+                );
+            }
         }
     }
 }
 
-/* ================= PLAYER ================= */
+/* =========================================================
+   هالة الشخصية
+========================================================= */
 
-function updatePlayer() {
+function aura(char){
 
-    player.defend=keys.defend;
+    const radius=
+        70+
+        Math.sin(frame*.12)*10;
 
-    if(player.specialTimer>0)
-        player.specialTimer--;
+    const g=
+        ctx.createRadialGradient(
+            char.x,
+            char.y-60,
+            5,
+            char.x,
+            char.y-60,
+            radius
+        );
 
-    if(player.cooldown>0)
-        player.cooldown--;
-
-    if(player.attackTimer>0) {
-        player.attackTimer--;
-        return;
-    }
-
-    player.state=player.defend ? "defend" : "idle";
-
-    if(keys.left) {
-
-        player.x-=4;
-        player.facing=-1;
-        energyTrail(player,player.aura);
-    }
-
-    if(keys.right) {
-
-        player.x+=4;
-        player.facing=1;
-        energyTrail(player,player.aura);
-    }
-
-    if(keys.attack)
-        playerAttack();
-
-    if(keys.special)
-        playerSpecial();
-
-    player.x=Math.max(60,Math.min(W-60,player.x));
-
-    player.energy=Math.min(
-        100,
-        player.energy+.12
+    g.addColorStop(
+        0,
+        char.aura+"cc"
     );
+
+    g.addColorStop(
+        .35,
+        char.aura+"55"
+    );
+
+    g.addColorStop(
+        1,
+        "transparent"
+    );
+
+    ctx.fillStyle=g;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        char.x,
+        char.y-60,
+        radius,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
 }
 
-/* ================= EFFECT TEXT ================= */
+/* =========================================================
+   رسم أيومي
+========================================================= */
 
-function updateTexts() {
-
-    for(let i=texts.length-1;i>=0;i--) {
-
-        const t=texts[i];
-
-        t.y+=t.vy;
-        t.life--;
-
-        ctx.save();
-
-        ctx.globalAlpha=t.life/50;
-        ctx.fillStyle=t.color;
-        ctx.font="bold 22px Arial";
-        ctx.textAlign="center";
-
-        ctx.shadowColor=t.color;
-        ctx.shadowBlur=12;
-
-        ctx.fillText(t.text,t.x,t.y);
-
-        ctx.restore();
-
-        if(t.life<=0)
-            texts.splice(i,1);
-    }
-}
-
-/* ================= HUD ================= */
-
-function updateHUD() {
-
-    document.getElementById("playerHealth").style.width =
-        player.hp+"%";
-
-    document.getElementById("enemyHealth").style.width =
-        enemy.hp+"%";
-
-    document.getElementById("energy").style.width =
-        player.energy+"%";
-}
-
-/* ================= GAME OVER ================= */
-
-function endGame() {
-
-    if(gameEnded) return;
-
-    gameEnded=true;
-
-    const screen=document.getElementById("gameOver");
-    const result=document.getElementById("result");
-    const text=document.getElementById("resultText");
-
-    screen.style.display="flex";
-
-    if(player.hp<=0) {
-
-        result.textContent="انتصار الظلام";
-        result.style.textShadow="0 0 30px #ff0055";
-        text.textContent="قائد الشياطين حسم المعركة.";
-    } else {
-
-        result.textContent="انتصار النور";
-        result.style.textShadow="0 0 30px #00e5ff";
-        text.textContent="أيومي أشيا أطلق الضربة الأخيرة.";
-    }
-}
-
-function resetGame() {
-
-    player.x=W*.28;
-    enemy.x=W*.72;
-
-    player.hp=100;
-    enemy.hp=100;
-
-    player.energy=100;
-
-    player.cooldown=0;
-    player.specialTimer=0;
-    enemy.cooldown=0;
-
-    player.state="idle";
-    enemy.state="idle";
-
-    particles.length=0;
-    slashes.length=0;
-    texts.length=0;
-
-    gameEnded=false;
-
-    document.getElementById("gameOver").style.display="none";
-}
-
-document.getElementById("restart")
-    .addEventListener("click",resetGame);
-
-/* ================= MAIN LOOP ================= */
-
-function animate() {
-
-    frame++;
-
-    if(!gameEnded) {
-
-        updatePlayer();
-        enemyAI();
-
-        if(enemy.attackTimer>0)
-            enemy.attackTimer--;
-        else if(enemy.state==="attack")
-            enemy.state="idle";
-
-        if(player.hp<=0 || enemy.hp<=0)
-            endGame();
-    }
-
-    player.y=H*.74;
-    enemy.y=H*.74;
+function drawAyumi(){
 
     ctx.save();
 
-    if(shake>0) {
+    ctx.translate(
+        ayumi.x,
+        ayumi.y
+    );
 
-        ctx.translate(
-            (Math.random()-.5)*shake,
-            (Math.random()-.5)*shake
+    ctx.scale(
+        ayumi.scale,
+        ayumi.scale
+    );
+
+    ctx.rotate(
+        ayumi.angle
+    );
+
+    aura({
+        ...ayumi,
+        x:0,
+        y:0
+    });
+
+    /* الشعر */
+
+    ctx.fillStyle=
+        ayumi.hair;
+
+    ctx.shadowColor=
+        "#00e5ff";
+
+    ctx.shadowBlur=15;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -18,-80
+    );
+
+    ctx.quadraticCurveTo(
+        -45,-75,
+        -55,-40
+    );
+
+    ctx.lineTo(
+        -35,-50
+    );
+
+    ctx.lineTo(
+        -48,-10
+    );
+
+    ctx.lineTo(
+        -20,-35
+    );
+
+    ctx.lineTo(
+        0,-20
+    );
+
+    ctx.lineTo(
+        25,-45
+    );
+
+    ctx.lineTo(
+        18,-80
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    /* الرأس */
+
+    ctx.shadowBlur=10;
+
+    ctx.fillStyle="#f2f2f2";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -70,
+        17,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* العين */
+
+    ctx.fillStyle=
+        "#00e5ff";
+
+    ctx.shadowColor=
+        "#00e5ff";
+
+    ctx.shadowBlur=15;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        6,
+        -72,
+        3.5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* الجسم */
+
+    ctx.strokeStyle="#fff";
+
+    ctx.lineWidth=6;
+
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,-52
+    );
+
+    ctx.lineTo(
+        0,-18
+    );
+
+    ctx.stroke();
+
+    /* الأرجل */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,-18
+    );
+
+    ctx.lineTo(
+        -17,10
+    );
+
+    ctx.moveTo(
+        0,-18
+    );
+
+    ctx.lineTo(
+        18,8
+    );
+
+    ctx.stroke();
+
+    /* الذراع */
+
+    ctx.beginPath();
+
+    if(ayumi.attacking){
+
+        ctx.moveTo(
+            0,-43
         );
 
-        shake*=.88;
+        ctx.lineTo(
+            45,-65
+        );
 
-        if(shake<.2)
-            shake=0;
+    }else{
+
+        ctx.moveTo(
+            0,-43
+        );
+
+        ctx.lineTo(
+            20,-20
+        );
     }
 
-    drawBackground();
+    ctx.stroke();
 
-    drawCharacter(player,false);
-    drawCharacter(enemy,true);
+    /* السيف */
 
-    drawSlashes();
+    if(ayumi.attacking){
 
-    for(let i=particles.length-1;i>=0;i--) {
+        ctx.strokeStyle=
+            ayumi.light;
+
+        ctx.lineWidth=8;
+
+        ctx.shadowColor=
+            ayumi.light;
+
+        ctx.shadowBlur=25;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            40,-65
+        );
+
+        ctx.lineTo(
+            115,-90
+        );
+
+        ctx.stroke();
+
+        /* نصل ثانوي */
+
+        ctx.strokeStyle="#fff";
+
+        ctx.lineWidth=2;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            43,-67
+        );
+
+        ctx.lineTo(
+            115,-91
+        );
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/* =========================================================
+   رسم قائد الشياطين
+========================================================= */
+
+function drawDemon(){
+
+    ctx.save();
+
+    ctx.translate(
+        demon.x,
+        demon.y
+    );
+
+    ctx.scale(
+        demon.scale,
+        demon.scale
+    );
+
+    ctx.rotate(
+        demon.angle
+    );
+
+    aura({
+        ...demon,
+        x:0,
+        y:0
+    });
+
+    /* عباءة */
+
+    ctx.fillStyle=
+        "#12000a";
+
+    ctx.shadowColor=
+        "#ff0055";
+
+    ctx.shadowBlur=20;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -15,-50
+    );
+
+    ctx.lineTo(
+        -50,5
+    );
+
+    ctx.lineTo(
+        0,-10
+    );
+
+    ctx.lineTo(
+        50,5
+    );
+
+    ctx.lineTo(
+        15,-50
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    /* شعر */
+
+    ctx.fillStyle=
+        demon.hair;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -18,-82
+    );
+
+    ctx.lineTo(
+        -45,-65
+    );
+
+    ctx.lineTo(
+        -30,-75
+    );
+
+    ctx.lineTo(
+        -45,-90
+    );
+
+    ctx.lineTo(
+        -20,-87
+    );
+
+    ctx.lineTo(
+        0,-105
+    );
+
+    ctx.lineTo(
+        20,-87
+    );
+
+    ctx.lineTo(
+        45,-90
+    );
+
+    ctx.lineTo(
+        30,-75
+    );
+
+    ctx.lineTo(
+        45,-65
+    );
+
+    ctx.lineTo(
+        18,-82
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    /* الرأس */
+
+    ctx.fillStyle=
+        "#ddd";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -70,
+        17,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* القرون */
+
+    ctx.strokeStyle=
+        "#ff0055";
+
+    ctx.lineWidth=7;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -10,-84
+    );
+
+    ctx.lineTo(
+        -28,-112
+    );
+
+    ctx.moveTo(
+        10,-84
+    );
+
+    ctx.lineTo(
+        28,-112
+    );
+
+    ctx.stroke();
+
+    /* العينان */
+
+    ctx.fillStyle=
+        "#ff0055";
+
+    ctx.shadowColor=
+        "#ff0055";
+
+    ctx.shadowBlur=20;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -7,-72,
+        3.5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        7,-72,
+        3.5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* الجسم */
+
+    ctx.strokeStyle="#fff";
+
+    ctx.lineWidth=6;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,-52
+    );
+
+    ctx.lineTo(
+        0,-15
+    );
+
+    ctx.stroke();
+
+    /* الأرجل */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,-15
+    );
+
+    ctx.lineTo(
+        -22,10
+    );
+
+    ctx.moveTo(
+        0,-15
+    );
+
+    ctx.lineTo(
+        22,10
+    );
+
+    ctx.stroke();
+
+    /* الذراع والسيف */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,-43
+    );
+
+    ctx.lineTo(
+        -45,-65
+    );
+
+    ctx.stroke();
+
+    if(demon.attacking){
+
+        ctx.strokeStyle=
+            demon.light;
+
+        ctx.lineWidth=9;
+
+        ctx.shadowColor=
+            demon.light;
+
+        ctx.shadowBlur=30;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -40,-65
+        );
+
+        ctx.lineTo(
+            -115,-90
+        );
+
+        ctx.stroke();
+
+        ctx.strokeStyle="#fff";
+
+        ctx.lineWidth=2;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -43,-67
+        );
+
+        ctx.lineTo(
+            -115,-91
+        );
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/* =========================================================
+   خطوط سرعة
+========================================================= */
+
+function speedLines(color,direction){
+
+    ctx.save();
+
+    ctx.strokeStyle=color;
+    ctx.globalAlpha=.3;
+    ctx.lineWidth=2;
+
+    for(let i=0;i<18;i++){
+
+        const y=
+            Math.random()*H;
+
+        const length=
+            Math.random()*150+50;
+
+        const start=
+            direction>0?
+            0:
+            W;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            start,
+            y
+        );
+
+        ctx.lineTo(
+            start-direction*length,
+            y
+        );
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/* =========================================================
+   صدمة الطاقة
+========================================================= */
+
+function energyClash(){
+
+    const x=W*.5;
+    const y=H*.62;
+
+    const radius=
+        35+
+        Math.sin(frame*.5)*10;
+
+    const g=
+        ctx.createRadialGradient(
+            x,y,5,
+            x,y,radius
+        );
+
+    g.addColorStop(
+        0,
+        "#ffffff"
+    );
+
+    g.addColorStop(
+        .2,
+        "#ffe600"
+    );
+
+    g.addColorStop(
+        .45,
+        "#00e5ff"
+    );
+
+    g.addColorStop(
+        .7,
+        "#ff0055"
+    );
+
+    g.addColorStop(
+        1,
+        "transparent"
+    );
+
+    ctx.fillStyle=g;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,y,
+        radius,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+}
+
+/* =========================================================
+   الضوء النهائي
+========================================================= */
+
+function finalLight(){
+
+    const x=W*.5;
+    const y=H*.3;
+
+    const radius=
+        Math.min(W,H)*.55;
+
+    const g=
+        ctx.createRadialGradient(
+            x,y,10,
+            x,y,radius
+        );
+
+    g.addColorStop(
+        0,
+        "rgba(255,255,255,.95)"
+    );
+
+    g.addColorStop(
+        .15,
+        "rgba(255,230,0,.7)"
+    );
+
+    g.addColorStop(
+        .45,
+        "rgba(0,229,255,.25)"
+    );
+
+    g.addColorStop(
+        1,
+        "transparent"
+    );
+
+    ctx.fillStyle=g;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+}
+
+/* =========================================================
+   سيناريو الفيلم
+========================================================= */
+
+function cinematic(){
+
+    /*
+       0 - 4    مقدمة
+       4 - 8    ظهور أيومي
+       8 - 12   ظهور الشيطان
+       12 - 17  التقارب
+       17 - 21  الاندفاع
+       21 - 27  الاشتباك
+       27 - 32  الانفجار
+       32 - 38  الضربة النهائية
+       38 - 44  النهاية
+    */
+
+    const seconds=
+        (frame%2640)/60;
+
+    /* الوضع الأساسي */
+
+    ayumi.y=H*.78;
+    demon.y=H*.78;
+
+    ayumi.scale=
+        Math.min(W,H)/700;
+
+    demon.scale=
+        Math.min(W,H)/700;
+
+    /* ----------------
+       المشهد 1
+    ---------------- */
+
+    if(seconds<4){
+
+        ayumi.x=W*.28;
+        demon.x=W*.72;
+
+        ayumi.attacking=false;
+        demon.attacking=false;
+
+        if(seconds>.5){
+
+            document.getElementById(
+                "title"
+            ).style.opacity=1;
+
+            document.getElementById(
+                "title"
+            ).style.transform=
+                "scale(1)";
+        }
+    }
+
+    /* ----------------
+       المشهد 2
+    ---------------- */
+
+    else if(seconds<8){
+
+        document.getElementById(
+            "title"
+        ).style.opacity=.25;
+
+        ayumi.x=
+            W*.28+
+            (seconds-4)*8;
+
+        demon.x=W*.72;
+
+        ayumi.attacking=false;
+        demon.attacking=false;
+
+        if(
+            frame%3===0
+        ){
+            energyParticles(
+                ayumi,
+                ayumi.aura
+            );
+        }
+    }
+
+    /* ----------------
+       المشهد 3
+    ---------------- */
+
+    else if(seconds<12){
+
+        ayumi.x=W*.36;
+        demon.x=W*.64;
+
+        ayumi.attacking=false;
+        demon.attacking=false;
+
+        if(frame%3===0){
+
+            energyParticles(
+                demon,
+                demon.aura
+            );
+        }
+    }
+
+    /* ----------------
+       المشهد 4
+    ---------------- */
+
+    else if(seconds<17){
+
+        ayumi.x=
+            W*.36+
+            (seconds-12)*20;
+
+        demon.x=
+            W*.64-
+            (seconds-12)*20;
+
+        ayumi.attacking=false;
+        demon.attacking=false;
+
+        speedLines(
+            "#00e5ff",
+            1
+        );
+
+        speedLines(
+            "#ff0055",
+            -1
+        );
+    }
+
+    /* ----------------
+       المشهد 5
+    ---------------- */
+
+    else if(seconds<21){
+
+        ayumi.x=
+            W*.46;
+
+        demon.x=
+            W*.54;
+
+        ayumi.attacking=true;
+        demon.attacking=true;
+
+        energyClash();
+
+        if(frame%2===0){
+
+            explosion(
+                W*.5,
+                H*.64,
+                "#00e5ff",
+                "#ff0055",
+                8,
+                7
+            );
+        }
+    }
+
+    /* ----------------
+       المشهد 6
+    ---------------- */
+
+    else if(seconds<27){
+
+        ayumi.x=W*.45;
+        demon.x=W*.55;
+
+        ayumi.attacking=true;
+        demon.attacking=true;
+
+        energyClash();
+
+        if(frame%4===0){
+
+            explosion(
+                W*.5,
+                H*.63,
+                "#ffe600",
+                "#ff0055",
+                18,
+                10
+            );
+        }
+
+        if(
+            seconds>24
+        ){
+
+            ayumi.x+=
+                Math.sin(frame*.4)*5;
+
+            demon.x+=
+                Math.sin(frame*.4)*5;
+        }
+    }
+
+    /* ----------------
+       المشهد 7
+    ---------------- */
+
+    else if(seconds<32){
+
+        ayumi.attacking=false;
+        demon.attacking=false;
+
+        ayumi.x=
+            W*.30-
+            (seconds-27)*4;
+
+        demon.x=
+            W*.70+
+            (seconds-27)*4;
+
+        explosion(
+            W*.5,
+            H*.62,
+            "#ffffff",
+            "#ffe600",
+            5,
+            5
+        );
+
+        finalLight();
+
+        if(seconds>29){
+
+            document.getElementById(
+                "subtitle"
+            ).textContent=
+                "لن ينتهي النور...";
+
+            document.getElementById(
+                "subtitle"
+            ).style.opacity=1;
+        }
+    }
+
+    /* ----------------
+       المشهد 8
+    ---------------- */
+
+    else if(seconds<38){
+
+        ayumi.x=W*.35;
+        demon.x=W*.65;
+
+        ayumi.attacking=true;
+        demon.attacking=false;
+
+        if(
+            seconds>34
+        ){
+
+            ayumi.x+=
+                (W*.5-ayumi.x)*.15;
+
+            speedLines(
+                "#ffe600",
+                1
+            );
+
+            if(frame%3===0){
+
+                explosion(
+                    ayumi.x+80,
+                    H*.65,
+                    "#ffe600",
+                    "#00e5ff",
+                    12,
+                    8
+                );
+            }
+        }
+
+        if(
+            seconds>36
+        ){
+
+            finalLight();
+
+            if(frame%5===0){
+
+                explosion(
+                    W*.5,
+                    H*.55,
+                    "#ffffff",
+                    "#ffe600",
+                    20,
+                    12
+                );
+            }
+        }
+    }
+
+    /* ----------------
+       المشهد 9
+    ---------------- */
+
+    else if(seconds<44){
+
+        ayumi.x=W*.5;
+        demon.x=W*.75;
+
+        ayumi.attacking=false;
+        demon.attacking=false;
+
+        ayumi.angle=
+            Math.sin(frame*.03)*.02;
+
+        demon.angle=
+            Math.sin(frame*.02)*.01;
+
+        document.getElementById(
+            "subtitle"
+        ).textContent=
+            "إمبراطور الظلام والنور";
+
+        document.getElementById(
+            "subtitle"
+        ).style.opacity=1;
+
+        if(seconds>41){
+
+            document.getElementById(
+                "title"
+            ).style.opacity=1;
+
+            document.getElementById(
+                "title"
+            ).style.transform=
+                "scale(1)";
+        }
+    }
+
+    /* ----------------
+       إعادة المشهد
+    ---------------- */
+
+    else{
+
+        document.getElementById(
+            "subtitle"
+        ).style.opacity=0;
+
+        document.getElementById(
+            "title"
+        ).style.opacity=0;
+
+        document.getElementById(
+            "title"
+        ).style.transform=
+            "scale(.8)";
+    }
+}
+
+/* =========================================================
+   رسم الجزيئات
+========================================================= */
+
+function drawParticles(){
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ){
 
         particles[i].update();
         particles[i].draw();
 
-        if(particles[i].life<=0)
+        if(
+            particles[i].life<=0
+        ){
+
             particles.splice(i,1);
+        }
+    }
+}
+
+/* =========================================================
+   الكاميرا السينمائية
+========================================================= */
+
+function cameraShake(){
+
+    const seconds=
+        (frame%2640)/60;
+
+    if(
+        seconds>17 &&
+        seconds<32
+    ){
+
+        const power=
+            4+
+            Math.sin(frame*.5)*3;
+
+        ctx.translate(
+            (Math.random()-.5)*power,
+            (Math.random()-.5)*power
+        );
     }
 
-    updateTexts();
+    if(
+        seconds>36 &&
+        seconds<38
+    ){
+
+        const power=8;
+
+        ctx.translate(
+            (Math.random()-.5)*power,
+            (Math.random()-.5)*power
+        );
+    }
+}
+
+/* =========================================================
+   الحلقة الرئيسية
+========================================================= */
+
+function animate(){
+
+    frame++;
+
+    time=frame/FPS;
+
+    background();
+
+    ctx.save();
+
+    cameraShake();
+
+    cinematic();
+
+    drawAyumi();
+
+    drawDemon();
+
+    drawParticles();
 
     ctx.restore();
 
-    updateHUD();
-
-    requestAnimationFrame(animate);
+    requestAnimationFrame(
+        animate
+    );
 }
 
 animate();
+
+/* =========================================================
+   منع إيقاف الحركة عند تغيير التركيز
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    ()=>{
+        if(
+            !document.hidden
+        ){
+            requestAnimationFrame(
+                animate
+            );
+        }
+    }
+);
 </script>
 
 </body>
