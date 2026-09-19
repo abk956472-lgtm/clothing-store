@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#030508">
+<meta name="description" content="HUMAN OS v7.0 — Life Operating System"><meta name="application-name" content="HUMAN OS"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>HUMAN OS v8.0 // LIFE OPERATING SYSTEM // HUMAN AI CORE</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="./human-ai.config.js"></script>
+
+<style>
+:root{
+  --bg:#030508;--panel:rgba(8,14,26,.88);--panel-border:rgba(0,240,255,.22);
+  --sidebar-bg:#050810;--cyan:#00f0ff;--cyan-glow:rgba(0,240,255,.35);
+  --pink:#ff0055;--pink-glow:rgba(255,0,85,.4);--green:#00ff9d;
+  --yellow:#ffd000;--text:#e1eaf2;--muted:#62758a;--dark-accent:rgba(0,0,0,.6);
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;--font-mono:'Consolas','Courier New',monospace;
+  --radius:7px;--sidebar-width:270px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--font)}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:var(--bg);color:var(--text);display:flex;overflow:hidden;
+  background-image:radial-gradient(circle at 10% 20%,rgba(0,240,255,.06),transparent 45%),
+  radial-gradient(circle at 90% 80%,rgba(255,0,85,.05),transparent 45%),
+  linear-gradient(rgba(0,240,255,.02) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,240,255,.02) 1px,transparent 1px);
+  background-size:100% 100%,100% 100%,30px 30px,30px 30px;
+}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.2) 50%);
+  background-size:100% 4px;z-index:999;pointer-events:none;opacity:.45}
+body.reduced-motion *{animation:none!important;transition:none!important}
+body.no-scanlines::before{display:none}
+button,input,select,textarea{font:inherit}
+button{background:rgba(0,240,255,.1);border:1px solid var(--cyan);color:var(--cyan);padding:9px 16px;
+  border-radius:4px;cursor:pointer;font-weight:700;font-size:.85rem;transition:.2s;display:inline-flex;
+  align-items:center;justify-content:center;gap:6px;user-select:none}
+button:hover{background:var(--cyan);color:#000;box-shadow:0 0 15px var(--cyan)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.nav-item:focus-visible{
+  outline:2px solid var(--cyan);outline-offset:2px}
+button.btn-pink{border-color:var(--pink);color:var(--pink);background:rgba(255,0,85,.1)}
+button.btn-pink:hover{background:var(--pink);color:#fff;box-shadow:0 0 15px var(--pink)}
+button.btn-green{border-color:var(--green);color:var(--green);background:rgba(0,255,157,.08)}
+button.btn-green:hover{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
+button.small{padding:5px 9px;font-size:.75rem}
+button.icon-btn{width:36px;height:36px;padding:0}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none!important;background:transparent!important;color:var(--muted)!important}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:rgba(0,0,0,.5)}
+::-webkit-scrollbar-thumb{background:var(--panel-border);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--cyan)}
+
+aside{width:var(--sidebar-width);height:100vh;background:var(--sidebar-bg);border-left:1px solid var(--panel-border);
+  display:flex;flex-direction:column;padding:20px 12px;gap:15px;z-index:200;box-shadow:5px 0 30px rgba(0,0,0,.9);
+  transition:transform .3s ease;flex-shrink:0}
+.brand{color:var(--cyan);font-weight:900;font-size:1.15rem;letter-spacing:2px;padding:0 10px 15px;
+  border-bottom:1px solid var(--panel-border);text-shadow:0 0 12px var(--cyan);display:flex;align-items:center;justify-content:space-between}
+.brand span.ver{font-size:.7rem;color:var(--pink);border:1px solid var(--pink);padding:2px 6px;border-radius:3px;text-shadow:none}
+.nav-menu{display:flex;flex-direction:column;gap:5px;list-style:none;flex:1;overflow-y:auto}
+.nav-item{padding:10px 14px;border-radius:4px;color:var(--muted);cursor:pointer;font-size:.88rem;transition:.2s;
+  display:flex;align-items:center;gap:10px;border:1px solid transparent;user-select:none}
+.nav-item:hover,.nav-item.active{color:var(--cyan);background:rgba(0,240,255,.08);border-color:var(--panel-border);box-shadow:inset 0 0 10px var(--cyan-glow)}
+.nav-item.pink-item:hover,.nav-item.pink-item.active{color:var(--pink);background:rgba(255,0,85,.08);border-color:rgba(255,0,85,.3);box-shadow:inset 0 0 10px var(--pink-glow)}
+.mobile-nav-toggle{display:none;background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:5px 10px;font-size:1.2rem;cursor:pointer}
+
+main{flex:1;display:flex;flex-direction:column;height:100vh;overflow-y:auto;position:relative;min-width:0}
+header{min-height:65px;padding:10px 25px;border-bottom:1px solid var(--panel-border);display:flex;justify-content:space-between;
+  align-items:center;background:rgba(5,8,16,.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:90;flex-wrap:wrap;gap:10px}
+.page-title{color:var(--cyan);font-size:1.1rem;letter-spacing:2px;font-weight:700;text-shadow:0 0 8px var(--cyan-glow)}
+.system-status{display:flex;align-items:center;gap:16px;font-size:.82rem}.clock{font-family:var(--font-mono);color:#fff;font-size:.95rem;letter-spacing:1px}
+.online{color:var(--green)}.online.offline{color:var(--pink)}
+.content-area{padding:25px;flex:1}.view-section{display:none;animation:fadeIn .25s ease-in-out}.view-section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.panel{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);padding:20px;margin-bottom:20px;
+  box-shadow:0 4px 25px rgba(0,0,0,.6);position:relative;backdrop-filter:blur(8px)}
+.panel::before{content:"";position:absolute;top:-1px;left:-1px;width:10px;height:10px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+.panel-title{color:var(--cyan);font-size:.92rem;letter-spacing:1.5px;margin-bottom:15px;padding-bottom:8px;
+  border-bottom:1px dashed var(--panel-border);display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.form-grid{display:grid;gap:10px}.form-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.form-grid-4{grid-template-columns:2fr 1fr 1fr auto}.form-grid-goal{grid-template-columns:2fr 2fr 1fr 1fr}
+input,select,textarea{width:100%;background:var(--dark-accent);color:var(--cyan);border:1px solid var(--panel-border);padding:10px 12px;
+  border-radius:4px;outline:none;font-family:inherit;margin-bottom:10px;font-size:.9rem}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 12px var(--cyan-glow)}
+select option{background:#080e1a;color:var(--text)}
+input[type="checkbox"]{accent-color:var(--cyan)}
+.bar-container{height:10px;background:rgba(255,255,255,.06);border:1px solid var(--panel-border);border-radius:5px;overflow:hidden;position:relative}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));box-shadow:0 0 10px var(--cyan-glow);width:0;transition:width .4s ease}
+.stat-card{background:rgba(0,0,0,.45);border:1px solid var(--panel-border);padding:15px;border-radius:5px;text-align:center;position:relative}
+.stat-title{font-size:.75rem;color:var(--muted);letter-spacing:1px}.stat-value{font-size:1.55rem;font-weight:700;color:var(--cyan);margin-top:5px;font-family:var(--font-mono)}
+.badge{padding:2px 8px;border-radius:3px;font-size:.7rem;font-weight:700}.badge-low{background:rgba(0,255,157,.15);color:var(--green);border:1px solid var(--green)}
+.badge-medium{background:rgba(255,208,0,.15);color:var(--yellow);border:1px solid var(--yellow)}
+.badge-high{background:rgba(255,0,85,.15);color:var(--pink);border:1px solid var(--pink)}
+.badge-cyan{background:rgba(0,240,255,.1);color:var(--cyan);border:1px solid var(--cyan)}
+.item-card{padding:11px 13px;border:1px solid var(--panel-border);background:rgba(0,0,0,.35);border-radius:5px}
+.item-card.completed{opacity:.65}.item-card.overdue{border-color:rgba(255,0,85,.5)}
+.muted{color:var(--muted)}.mono{font-family:var(--font-mono)}.text-green{color:var(--green)}.text-pink{color:var(--pink)}.text-yellow{color:var(--yellow)}
+.avatar-box{width:90px;height:90px;border-radius:50%;border:2px solid var(--cyan);box-shadow:0 0 15px var(--cyan-glow);
+  display:flex;align-items:center;justify-content:center;background:rgba(0,240,255,.05);overflow:hidden;margin-bottom:15px;flex-shrink:0}
+.avatar-box img{width:100%;height:100%;object-fit:cover}
+#hologram-viewport{width:100%;height:480px;position:relative;background:radial-gradient(circle at center,rgba(0,240,255,.05),transparent 70%);
+  border-radius:4px;overflow:hidden}
+#hologram-viewport canvas{display:block;width:100%;height:100%}
+.hud-overlay{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;pointer-events:none;font-family:var(--font-mono);font-size:.7rem;color:var(--cyan);z-index:2}
+.hud-scanner{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  box-shadow:0 0 8px var(--cyan);animation:scanAnim 4s linear infinite;pointer-events:none;z-index:3}
+@keyframes scanAnim{0%{top:0;opacity:.8}50%{top:100%;opacity:.8}100%{top:0;opacity:.8}}
+.core-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:15px}
+.notice{background:rgba(255,0,85,.05);border:1px solid rgba(255,0,85,.2);padding:10px;border-radius:4px;font-size:.75rem;color:var(--pink);margin-bottom:15px}
+.toast-stack{position:fixed;bottom:20px;left:20px;z-index:1001;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100vw - 40px))}
+.toast{background:rgba(5,8,16,.97);border:1px solid var(--cyan);color:var(--cyan);padding:11px 15px;border-radius:4px;box-shadow:0 0 20px var(--cyan-glow);font-size:.82rem;animation:slideUp .25s ease}
+.toast.pink{border-color:var(--pink);color:var(--pink);box-shadow:0 0 20px var(--pink-glow)}
+.toast.green{border-color:var(--green);color:var(--green);box-shadow:0 0 20px rgba(0,255,157,.3)}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}.modal{width:min(620px,100%);max-height:90vh;overflow:auto;background:#070c16;border:1px solid var(--cyan);box-shadow:0 0 35px var(--cyan-glow);border-radius:8px;padding:20px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.modal h3{color:var(--cyan)}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.quick-grid button{min-height:48px}
+.search-results{max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:7px}.search-result{padding:10px;border:1px solid var(--panel-border);border-radius:4px;background:rgba(0,0,0,.3);cursor:pointer}
+.search-result:hover{border-color:var(--cyan);background:rgba(0,240,255,.05)}
+.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed var(--panel-border);border-radius:5px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.list{display:flex;flex-direction:column;gap:8px}.actions{display:flex;gap:6px;flex-wrap:wrap}
+.meta{font-size:.72rem;color:var(--muted)}.danger-text{color:var(--pink)}
+.kpi{font-size:1.9rem;font-weight:700;font-family:var(--font-mono)}
+dialog{border:0}
+.footer-note{font-size:.7rem;color:var(--muted);line-height:1.6}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:992px){
+  body{overflow:hidden;display:block}
+  aside{position:fixed;right:0;top:0;width:min(290px,88vw);transform:translateX(105%);border-left:1px solid var(--panel-border);height:100dvh}
+  aside.open{transform:translateX(0)}
+  .mobile-nav-toggle{display:inline-flex}
+  main{height:100dvh}
+  header{padding:10px 15px}
+  .content-area{padding:15px}
+  .grid-2,.grid-3,.grid-4,.form-grid-2,.form-grid-4,.form-grid-goal{grid-template-columns:1fr}
+  .system-status{gap:8px}
+  #hologram-viewport{height:390px}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr}
+  .content-area{padding:10px}.panel{padding:14px;margin-bottom:12px}
+  .system-status #dateDisplay{display:none}.page-title{font-size:.9rem}
+  .stat-value{font-size:1.25rem}.stat-card{padding:11px}
+  #hologram-viewport{height:340px}.core-metrics{grid-template-columns:1fr}
+  .quick-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:380px){.grid-4{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* =========================================================
+   HUMAN OS v7.0 — LIFE OS EXTENSIONS
+========================================================= */
+.life-balance{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));gap:10px}
+.balance-card{padding:12px;border:1px solid var(--panel-border);background:rgba(0,0,0,.35);border-radius:5px;text-align:center}
+.balance-ring{width:58px;height:58px;border-radius:50%;margin:0 auto 8px;display:grid;place-items:center;background:conic-gradient(var(--cyan) calc(var(--value)*1%),rgba(255,255,255,.06) 0);position:relative}
+.balance-ring::after{content:"";position:absolute;inset:6px;border-radius:50%;background:#07101a}
+.balance-ring strong{position:relative;z-index:1;font-family:var(--font-mono);font-size:.8rem}
+.life-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.mini-list{display:flex;flex-direction:column;gap:7px;max-height:320px;overflow:auto}
+.timeline-item{border-right:2px solid var(--cyan);padding:8px 12px;background:rgba(0,240,255,.03)}
+.health-kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.routine-step{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--panel-border);border-radius:4px;margin-bottom:6px}
+.project-card{border:1px solid var(--panel-border);padding:12px;border-radius:5px;background:rgba(0,0,0,.28)}
+.command-input{font-family:var(--font-mono)}
+@media(max-width:1100px){.life-balance{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:992px){.life-grid{grid-template-columns:1fr}.health-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.life-balance{grid-template-columns:repeat(2,minmax(0,1fr))}.health-kpi{grid-template-columns:1fr 1fr}}
+
+/* =========================================================
+   v7.0.1 UX / DATA HARDENING EXTENSIONS
+========================================================= */
+.hud-kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.hud-kpi{padding:12px;border:1px solid var(--panel-border);background:rgba(0,0,0,.38);border-radius:5px;text-align:center}
+.hud-kpi .v{font-family:var(--font-mono);font-size:1.15rem;color:var(--cyan);font-weight:800;margin-top:5px}
+.command-bar{display:flex;gap:8px;margin-bottom:15px}
+.command-bar input{margin:0;flex:1}
+.health-week{display:grid;grid-template-columns:repeat(7,minmax(70px,1fr));gap:7px}
+.health-day{padding:8px;border:1px solid var(--panel-border);border-radius:4px;text-align:center;background:rgba(0,0,0,.25)}
+.health-day .v{font-family:var(--font-mono);color:var(--cyan);font-weight:700}
+.project-task{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px dashed var(--panel-border)}
+.chip{display:inline-flex;align-items:center;padding:3px 7px;border:1px solid var(--panel-border);border-radius:20px;font-size:.7rem;color:var(--muted)}
+.modal-form{display:grid;gap:10px}
+.modal-form label{font-size:.75rem;color:var(--muted)}
+.confirm-text{line-height:1.8;color:var(--text);margin:8px 0 18px}
+@media(max-width:1200px){.hud-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.hud-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.health-week{grid-template-columns:repeat(4,minmax(0,1fr))}.command-bar{flex-direction:column}}
+
+
+/* =========================================================
+   HUMAN OS v8.0 — HUMAN AI CORE UI
+========================================================= */
+.ai-shell{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;min-height:calc(100vh - 130px)}
+.ai-chat{display:flex;flex-direction:column;min-height:620px}
+.ai-messages{flex:1;min-height:430px;max-height:calc(100vh - 300px);overflow:auto;padding:12px;background:rgba(0,0,0,.22);border:1px solid var(--panel-border);border-radius:6px}
+.ai-msg{display:flex;margin:10px 0}.ai-msg.user{justify-content:flex-start}.ai-msg.assistant{justify-content:flex-end}.ai-bubble{max-width:min(82%,760px);padding:11px 13px;border:1px solid var(--panel-border);border-radius:7px;line-height:1.75;white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,.38)}
+.ai-msg.user .ai-bubble{border-color:rgba(0,240,255,.45);box-shadow:inset 0 0 15px rgba(0,240,255,.04)}.ai-msg.assistant .ai-bubble{border-color:rgba(0,255,157,.4);box-shadow:inset 0 0 15px rgba(0,255,157,.04)}
+.ai-meta{font-size:.67rem;color:var(--muted);margin-bottom:4px;font-family:var(--font-mono)}
+.ai-compose{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}.ai-compose textarea{min-height:75px;resize:vertical;margin:0}.ai-side{display:flex;flex-direction:column;gap:14px}.ai-status-card{padding:14px;border:1px solid var(--panel-border);background:rgba(0,0,0,.35);border-radius:6px}.ai-status{font-family:var(--font-mono);font-weight:800;letter-spacing:1px}.ai-status.online{color:var(--green)}.ai-status.offline{color:var(--pink)}
+.ai-chip-row{display:flex;flex-wrap:wrap;gap:6px}.ai-chip{padding:6px 9px;border:1px solid var(--panel-border);background:rgba(0,240,255,.05);color:var(--cyan);border-radius:20px;cursor:pointer;font-size:.72rem}.ai-chip:hover{background:rgba(0,240,255,.15)}
+.ai-tool{padding:8px 10px;margin:7px 0;border-right:2px solid var(--cyan);background:rgba(0,240,255,.04);font-size:.75rem}.ai-source{padding:8px 10px;margin:7px 0;border:1px dashed var(--panel-border);font-size:.74rem}.ai-source a{color:var(--cyan);text-decoration:none}.ai-source a:hover{text-decoration:underline}
+.ai-perm{display:grid;gap:7px}.ai-perm label{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--muted)}
+.ai-empty{text-align:center;color:var(--muted);padding:60px 20px}.ai-thinking{display:inline-flex;gap:5px;align-items:center;color:var(--cyan)}.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:aiPulse 1s infinite}.ai-dot:nth-child(2){animation-delay:.15s}.ai-dot:nth-child(3){animation-delay:.3s}@keyframes aiPulse{50%{opacity:.2;transform:scale(.7)}}
+@media(max-width:980px){.ai-shell{grid-template-columns:1fr}.ai-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.ai-side{grid-template-columns:1fr}.ai-compose{grid-template-columns:1fr}.ai-bubble{max-width:94%}.ai-messages{max-height:none}}
+
+</style>
+</head>
+
+<body>
+<aside id="sidebar" aria-label="التنقل الرئيسي">
+  <div class="brand">
+    <span>HUMAN OS <span class="ver">v8.0</span></span>
+    <button class="mobile-nav-toggle" id="mobileNavButton" type="button" aria-label="فتح قائمة التنقل" aria-expanded="false">☰</button>
+  </div>
+  <ul class="nav-menu" id="navMenu">
+    <li class="nav-item active" tabindex="0" role="button" data-tab="dashboard">📊 Dashboard // الرئيسية</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="profile">👤 Profile // الملف الشخصي</li>
+    <li class="nav-item pink-item" tabindex="0" role="button" data-tab="core">🫀 Human Core // النواة</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="tasks">⚡ Tasks // المهام</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="habits">🔄 Habits // العادات</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="goals">🎯 Goals // الأهداف</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="finance">💳 Finance // المالية</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="calendar">📅 Calendar // التقويم</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="notes">📝 Notes // الملاحظات</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="stats">📈 Statistics // الإحصائيات</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="settings">⚙️ Settings // الإعدادات</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="health">♥ Health // الصحة</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="mind">◈ Mind // العقل</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="growth">◆ Growth // التطور</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="routine">↻ Routine // الروتين</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="time">◷ Time // الوقت</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="shopping">▣ Shopping // المشتريات</li>
+    <li class="nav-item" tabindex="0" role="button" data-tab="projects">◫ Projects // المشاريع</li>
+    <li class="nav-item pink-item" tabindex="0" role="button" data-tab="achievements">★ Achievements // الإنجازات</li>
+    <li class="nav-item pink-item" tabindex="0" role="button" data-tab="ai">🧠 HUMAN AI // المساعد الذكي</li>
+
+  </ul>
+</aside>
+
+<main id="mainApp">
+<header>
+  <div class="row">
+    <button class="mobile-nav-toggle" id="mobileNavHeader" type="button" aria-label="فتح قائمة التنقل" aria-expanded="false">☰</button>
+    <div class="page-title" id="pageTitle">DASHBOARD MODULE</div>
+  </div>
+  <div class="system-status">
+    <span class="clock" id="clock">00:00:00</span>
+    <span id="dateDisplay" class="muted"></span>
+    <span id="onlineStatus" class="online">● ONLINE</span>
+    <button type="button" class="small" id="globalSearchBtn" aria-label="البحث في النظام">⌕ بحث</button>
+    <button type="button" class="small btn-green" id="quickActionsBtn" aria-label="فتح الإجراءات السريعة">＋ Quick</button>
+  </div>
+</header>
+
+<div class="content-area">
+<section id="view-dashboard" class="view-section active">
+
+  <div class="command-bar">
+    <input id="dashboardCommand" class="command-input" type="text" maxlength="200"
+      placeholder="/ task أو /goal أو /habit أو /note أو /expense أو /event">
+    <button type="button" id="dashboardCommandBtn">تشغيل</button>
+  </div>
+  <div class="hud-kpi-grid">
+    <div class="hud-kpi"><div class="stat-title">SLEEP</div><div class="v" id="dashSleep">—</div></div>
+    <div class="hud-kpi"><div class="stat-title">WATER</div><div class="v" id="dashWaterKpi">0%</div></div>
+    <div class="hud-kpi"><div class="stat-title">LEARNING</div><div class="v" id="dashLearning">0m</div></div>
+    <div class="hud-kpi"><div class="stat-title">PROJECTS</div><div class="v" id="dashProjects">0</div></div>
+    <div class="hud-kpi"><div class="stat-title">STREAK</div><div class="v" id="dashBestStreak">0</div></div>
+    <div class="hud-kpi"><div class="stat-title">TODAY SPEND</div><div class="v" id="dashTodaySpend">0 DZD</div></div>
+  </div>
+  <div class="grid-4" style="margin-bottom:20px">
+    <div class="stat-card"><div class="stat-title">USER LEVEL</div><div class="stat-value" id="dashLevel">1</div><div class="meta">XP: <span id="dashXP">0</span>/<span id="dashXPNeeded">100</span></div></div>
+    <div class="stat-card"><div class="stat-title">TASK COMPLETION</div><div class="stat-value text-green" id="dashTaskRate">0%</div><div class="meta"><span id="dashTaskDone">0</span>/<span id="dashTaskTotal">0</span> Done</div></div>
+    <div class="stat-card"><div class="stat-title">FINANCIAL BALANCE</div><div class="stat-value text-yellow" id="dashBalance">0 DZD</div><div class="meta">Net Local Balance</div></div>
+    <div class="stat-card"><div class="stat-title">CORE STATE</div><div class="stat-value text-pink" id="dashCoreState" style="font-size:1.1rem;margin-top:10px">NORMAL</div><div class="meta">Simulation Engine</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">SYSTEM OVERVIEW // نظرة عامة</div>
+      <div style="display:flex;flex-direction:column;gap:13px;font-size:.9rem">
+        <div><div class="between" style="margin-bottom:4px"><span>🎯 Goal Progression Average:</span><span id="dashGoalAvg">0%</span></div><div class="bar-container"><div class="bar-fill" id="dashGoalBar"></div></div></div>
+        <div class="between"><span>🔄 Active Habits Streak Total:</span><strong class="text-green" id="dashHabitStreak">0 Days</strong></div>
+        <div class="between"><span>📅 Upcoming Events Count:</span><strong id="dashEventCount" class="text-green">0</strong></div>
+        <div class="between"><span>📝 Knowledge Base Size:</span><strong id="dashNoteWords" class="text-yellow">0 Words</strong></div>
+        <div class="between"><span>💧 Hydration:</span><strong id="dashHydration" class="text-cyan">0%</strong></div>
+        <div class="between"><span>⚙️ System Health:</span><strong id="dashSystemHealth" class="text-green">100%</strong></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">HYDRATION TRACKER // عداد السوائل</div>
+      <div style="text-align:center">
+        <div style="font-size:2.2rem;font-weight:700;color:var(--cyan);font-family:var(--font-mono);margin:10px 0"><span id="dashWaterVal">0</span> / <span id="waterGoalDisplay">8</span> <span style="font-size:1rem;color:var(--muted)">CUPS</span></div>
+        <div class="bar-container" style="margin-bottom:12px"><div class="bar-fill" id="waterBar"></div></div>
+        <p class="meta" style="margin-bottom:15px">يتم التصفير تلقائياً مع بداية يوم جديد</p>
+        <div class="row" style="justify-content:center"><button type="button" id="addWaterBtn">+ تسجيل كوب ماء</button><button type="button" class="small" id="waterGoalBtn">تغيير الهدف</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">QUICK STATUS // الحالة السريعة</div>
+    <div class="grid-4">
+      <div class="stat-card"><div class="stat-title">ACTIVE TASKS</div><div class="stat-value" id="dashPendingTasks">0</div></div>
+      <div class="stat-card"><div class="stat-title">ACTIVE GOALS</div><div class="stat-value" id="dashActiveGoals">0</div></div>
+      <div class="stat-card"><div class="stat-title">XP EARNED</div><div class="stat-value" id="dashTotalXp">0</div></div>
+      <div class="stat-card"><div class="stat-title">NOTIFICATIONS</div><div class="stat-value" id="dashNotifications">0</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">LIFE BALANCE // توازن الحياة <span class="meta">مؤشرات تنظيمية مبنية على بياناتك داخل HUMAN OS</span></div>
+    <div id="lifeBalanceGrid" class="life-balance"></div>
+    <div class="between" style="margin-top:14px"><span>الحالة العامة</span><strong id="lifeBalanceOverall" class="text-cyan">0%</strong></div>
+    <div class="bar-container" style="margin-top:7px"><div class="bar-fill" id="lifeBalanceBar"></div></div>
+  </div>
+  <div class="grid-3">
+    <div class="panel"><div class="panel-title">TODAY FOCUS // تركيز اليوم</div><div id="todayFocus" class="mini-list"></div></div>
+    <div class="panel"><div class="panel-title">SMART REMINDERS // تذكيرات النظام</div><div id="smartReminders" class="mini-list"></div></div>
+    <div class="panel"><div class="panel-title">RECENT ACTIVITY // النشاط الأخير</div><div id="recentActivity" class="mini-list"></div></div>
+  </div>
+</section>
+
+<section id="view-profile" class="view-section">
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">USER PROFILE IDENTITY // هوية المستخدم</div>
+      <div class="row" style="align-items:center">
+        <div class="avatar-box" id="avatarDisplay" aria-label="الصورة الرمزية">
+          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div><h3 id="profName" style="color:var(--cyan);font-size:1.2rem">المستخدم الرئيسي</h3><p id="profRole" class="muted" style="font-size:.9rem">مطور نظام / مهندس</p><div class="meta" style="margin-top:5px">تاريخ الإنشاء: <span id="profCreated">-</span></div></div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="panel-title">LEVEL & XP STATUS // المستوى والخبرة</div>
+        <div class="between" style="font-size:.9rem;margin-bottom:5px"><span>LEVEL: <strong id="userLevel" class="text-cyan">1</strong></span><span>XP: <strong id="userXP">0</strong> / <span id="userXPNeeded">100</span></span></div>
+        <div class="bar-container"><div class="bar-fill" id="xpBar"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">EDIT PROFILE // تعديل البيانات</div>
+      <label for="inputProfName" class="meta">الاسم الكامل</label><input type="text" id="inputProfName" maxlength="100" placeholder="الاسم الكامل...">
+      <label for="inputProfRole" class="meta">التخصص / المهنة</label><input type="text" id="inputProfRole" maxlength="120" placeholder="التخصص...">
+      <label for="inputAvatar" class="meta">صورة رمزية (رابط HTTPS أو Data Image)</label><input type="text" id="inputAvatar" maxlength="500000" placeholder="اتركه فارغاً لاستخدام الصورة الافتراضية">
+      <button type="button" id="saveProfileBtn">حفظ بيانات الملف الشخصي</button>
+    </div>
+  </div>
+</section>
+
+<section id="view-core" class="view-section">
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title" style="color:var(--pink)">3D HOLOGRAM CORE <span id="coreStatusBadge" class="badge badge-medium">NORMAL</span></div>
+      <div id="hologram-viewport">
+        <div class="hud-overlay"><div>SYS.CORE // v7.0</div><div>SCANNER: ACTIVE</div></div><div class="hud-scanner"></div>
+      </div>
+      <div class="footer-note" style="margin-top:8px">Three.js hologram. المؤشرات الحيوية المعروضة في هذا النظام محاكاة برمجية وليست أجهزة قياس.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title" style="color:var(--pink)">BIOMETRIC SIMULATION // محاكاة العلامات الحيوية</div>
+      <div class="notice">تنبيه: Heart Rate وStamina وCore Health هنا مؤشرات محاكاة برمجية وليست قياسات طبية حقيقية.</div>
+      <div class="core-metrics">
+        <div class="stat-card"><div class="stat-title">SIMULATED HEART RATE</div><div class="stat-value text-pink" id="bpm">72 BPM</div></div>
+        <div class="stat-card"><div class="stat-title">ENERGY / STAMINA</div><div class="stat-value text-green" id="stamina">85%</div></div>
+        <div class="stat-card"><div class="stat-title">CORE STABILITY</div><div class="stat-value" id="coreStability">100%</div></div>
+        <div class="stat-card"><div class="stat-title">SYSTEM RESOURCE</div><div class="stat-value text-yellow" id="coreResource">0%</div></div>
+      </div>
+      <div class="panel-title">CORE PERFORMANCE STATE // تغيير حالة الأداء</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button type="button" data-core="NORMAL">NORMAL</button><button type="button" data-core="ACTIVE">ACTIVE</button>
+        <button type="button" data-core="HIGH PERFORMANCE">HIGH PERF.</button><button type="button" class="btn-pink" data-core="OVERDRIVE">OVERDRIVE</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="view-tasks" class="view-section">
+  <div class="panel">
+    <div class="panel-title">TASK MANAGEMENT ENGINE // إدارة المهام</div>
+    <div class="form-grid form-grid-4">
+      <input type="text" id="taskInput" maxlength="180" placeholder="وصف المهمة الجديد...">
+      <select id="taskPriority"><option value="Low">منخفضة (+10 XP)</option><option value="Medium">متوسطة (+20 XP)</option><option value="High">عالية (+30 XP)</option></select>
+      <input type="date" id="taskDueDate" title="تاريخ الاستحقاق">
+      <button type="button" id="addTaskBtn">+ إضافة</button>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <input type="time" id="taskDueTime" style="max-width:180px;margin:0" aria-label="وقت الاستحقاق">
+      <input type="text" id="taskTags" maxlength="120" placeholder="Tags: عمل, دراسة, شخصي" style="flex:1;margin:0">
+       <input type="text" id="taskCategory" maxlength="60" placeholder="التصنيف" style="flex:1;margin:0">
+    </div>
+    <div class="row" style="margin-bottom:15px">
+      <input type="search" id="taskSearch" placeholder="بحث في المهام..." style="margin:0;flex:2">
+      <select id="taskFilter" style="margin:0;flex:1"><option value="all">جميع المهام</option><option value="pending">قيد الانتظار</option><option value="completed">المكتملة</option><option value="overdue">متأخرة</option></select>
+      <select id="taskSort" style="margin:0;flex:1"><option value="created">الأحدث</option><option value="priority">الأولوية</option><option value="due">الاستحقاق</option><option value="alpha">الاسم</option></select>
+    </div>
+    <div id="taskList" class="list"></div>
+  </div>
+</section>
+
+<section id="view-habits" class="view-section">
+  <div class="panel">
+    <div class="panel-title">HABIT TRACKER // متابع العادات</div>
+    <div class="row" style="margin-bottom:15px"><input type="text" id="habitInput" maxlength="150" placeholder="اسم العادة الجديدة..." style="margin:0;flex:1"><button type="button" id="addHabitBtn">+ إضافة عادة</button></div>
+    <div id="habitList" class="grid-3"></div>
+  </div>
+</section>
+
+<section id="view-goals" class="view-section">
+  <div class="panel">
+    <div class="panel-title">STRATEGIC GOALS // الأهداف الاستراتيجية</div>
+    <div class="form-grid form-grid-goal">
+      <input type="text" id="goalTitle" maxlength="150" placeholder="عنوان الهدف...">
+      <input type="text" id="goalDesc" maxlength="250" placeholder="وصف مختصر...">
+      <input type="date" id="goalStartDate"><input type="date" id="goalDeadline">
+    </div>
+    <button type="button" id="addGoalBtn" style="margin-bottom:15px">+ إنشاء هدف</button>
+    <div id="goalList" class="list"></div>
+  </div>
+</section>
+
+<section id="view-finance" class="view-section">
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">ADD TRANSACTION // تسجيل معاملة</div>
+      <input type="text" id="finTitle" maxlength="180" placeholder="وصف المعاملة...">
+      <input type="number" id="finAmount" min="0.01" max="100000000000" step="0.01" placeholder="المبلغ بـ DZD...">
+      <input type="text" id="finCategory" maxlength="80" placeholder="التصنيف (عمل، معدات، طعام...)">
+      <select id="finType"><option value="income">دخل (+ DZD)</option><option value="expense">مصروف (- DZD)</option></select>
+      <button type="button" id="addFinanceBtn">تسجيل في السجل</button>
+    </div>
+    <div class="panel">
+      <div class="panel-title">FINANCIAL SUMMARY // الملخص المالي</div>
+      <div class="grid-3" style="margin-bottom:15px">
+        <div class="stat-card"><div class="stat-title">INCOME</div><div class="stat-value text-green" id="finTotalIncome" style="font-size:1.05rem">0</div></div>
+        <div class="stat-card"><div class="stat-title">EXPENSES</div><div class="stat-value text-pink" id="finTotalExpenses" style="font-size:1.05rem">0</div></div>
+        <div class="stat-card"><div class="stat-title">BALANCE</div><div class="stat-value" id="finNetBalance" style="font-size:1.05rem">0</div></div>
+      </div>
+      <div class="row" style="margin-bottom:10px"><input type="search" id="financeSearch" placeholder="بحث مالي..." style="margin:0;flex:1"><select id="financeFilter" style="margin:0;max-width:180px"><option value="all">الكل</option><option value="income">الدخل</option><option value="expense">المصروفات</option></select></div>
+      <div id="finList" class="list" style="max-height:300px;overflow:auto"></div>
+    </div>
+  </div>
+</section>
+
+<section id="view-calendar" class="view-section">
+  <div class="panel">
+    <div class="panel-title">CALENDAR & EVENTS // التقويم والمواعيد</div>
+    <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr 2fr auto">
+      <input type="text" id="eventTitle" maxlength="150" placeholder="عنوان الموعد..."><input type="date" id="eventDate"><input type="time" id="eventTime"><input type="text" id="eventDesc" maxlength="250" placeholder="تفاصيل الموعد..."><button type="button" id="addEventBtn">+ إضافة</button>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+       <input type="search" id="eventSearch" placeholder="بحث في المواعيد..." style="margin:0;flex:1">
+       <select id="eventPriority" style="max-width:180px"><option value="Medium">أولوية متوسطة</option><option value="Low">منخفضة</option><option value="High">عالية</option></select>
+       <select id="eventFilter" style="max-width:160px"><option value="upcoming">القادمة</option><option value="all">الكل</option><option value="past">المنتهية</option></select>
+       <select id="eventSort" style="max-width:160px"><option value="time">حسب الوقت</option><option value="priority">حسب الأولوية</option><option value="created">الأحدث</option></select>
+     </div>
+    <div id="eventList" class="list"></div>
+  </div>
+</section>
+
+<section id="view-notes" class="view-section">
+  <div class="panel">
+    <div class="panel-title">KNOWLEDGE BASE // قاعدة الملاحظات <span id="noteMeta" class="meta">0 كلمات | 0 أحرف | آخر تعديل: -</span></div>
+    <input type="search" id="noteSearch" placeholder="بحث في الملاحظات دون تغيير النص الأصلي...">
+    <div id="noteSearchResults" class="list" style="margin-bottom:10px;display:none"></div>
+    <textarea id="mainNotes" style="min-height:380px;font-family:var(--font-mono);line-height:1.6;margin-bottom:0" placeholder="اكتب أفكارك وملاحظاتك هنا... يتم الحفظ التلقائي"></textarea>
+  </div>
+</section>
+
+
+<section id="view-health" class="view-section">
+  <div class="panel"><div class="panel-title">HEALTH SYSTEM // نظام الصحة</div>
+    <div class="health-kpi" style="margin-bottom:15px">
+      <div class="stat-card"><div class="stat-title">SLEEP</div><div class="stat-value" id="healthSleepKpi">0h</div></div>
+      <div class="stat-card"><div class="stat-title">ACTIVITY</div><div class="stat-value" id="healthActivityKpi">0</div></div>
+      <div class="stat-card"><div class="stat-title">WATER</div><div class="stat-value" id="healthWaterKpi">0%</div></div>
+      <div class="stat-card"><div class="stat-title">WEIGHT</div><div class="stat-value" id="healthWeightKpi">—</div></div>
+    </div>
+    <div class="form-grid form-grid-4">
+      <input type="number" id="sleepHours" min="0" max="24" step="0.25" placeholder="ساعات النوم">
+      <input type="time" id="wakeTime" aria-label="وقت الاستيقاظ">
+      <input type="number" id="activityMinutes" min="0" max="1440" step="1" placeholder="دقائق النشاط">
+      <input type="number" id="healthWeight" min="0" max="500" step="0.1" placeholder="الوزن (kg)">
+      <button type="button" id="saveHealthBtn">حفظ اليوم</button>
+    </div>
+    <input type="text" id="exerciseNote" maxlength="180" placeholder="نوع النشاط أو الرياضة (اختياري)">
+    <div class="panel" style="margin-top:15px">
+       <div class="panel-title">WEEKLY HEALTH SUMMARY // الملخص الأسبوعي</div>
+       <div id="healthWeekly" class="health-week"></div>
+     </div>
+     <div id="healthLogList" class="mini-list"></div>
+  </div>
+</section>
+
+<section id="view-mind" class="view-section">
+  <div class="life-grid">
+    <div class="panel"><div class="panel-title">MIND CHECK-IN // تسجيل الحالة</div>
+      <select id="mindMood"><option value="5">هادئ / ممتاز</option><option value="4">جيد</option><option value="3">متوسط</option><option value="2">متعب</option><option value="1">سيئ</option></select>
+      <input type="number" id="mindFocus" min="1" max="10" placeholder="التركيز 1-10">
+      <input type="number" id="mindEnergy" min="1" max="10" placeholder="الطاقة 1-10">
+      <textarea id="mindJournal" maxlength="5000" placeholder="ماذا حدث اليوم؟ ماذا تفكر؟"></textarea>
+       <textarea id="mindIdeas" maxlength="3000" placeholder="أفكار اليوم / أشياء تريد تذكرها..."></textarea>
+      <button type="button" id="saveMindBtn">حفظ تسجيل اليوم</button>
+    </div>
+    <div class="panel"><div class="panel-title">MIND HISTORY // سجل العقل</div><div id="mindHistory" class="mini-list"></div></div>
+  </div>
+</section>
+
+<section id="view-growth" class="view-section">
+  <div class="life-grid">
+    <div class="panel"><div class="panel-title">SKILLS & LEARNING // المهارات والتعلم</div>
+      <div class="form-grid form-grid-2"><input id="skillTitle" maxlength="120" placeholder="اسم المهارة"><input id="skillCategory" maxlength="60" placeholder="التصنيف"></div>
+      <div class="row"><input type="number" id="skillProgress" min="0" max="100" placeholder="التقدم %" style="margin:0;flex:1"><button id="addSkillBtn" type="button">+ مهارة</button></div>
+      <hr style="border-color:var(--panel-border);margin:15px 0">
+      <div class="form-grid form-grid-2"><input id="learningTitle" maxlength="150" placeholder="جلسة تعلم / كتاب / دورة"><input id="learningMinutes" type="number" min="1" max="1440" placeholder="الدقائق"></div>
+      <button id="addLearningBtn" type="button">+ تسجيل تعلم</button>
+      <div id="growthList" class="mini-list" style="margin-top:12px"></div>
+    </div>
+    <div class="panel"><div class="panel-title">LEARNING LOG // سجل التعلم</div><div id="learningLog" class="mini-list"></div></div>
+  </div>
+</section>
+
+<section id="view-routine" class="view-section">
+  <div class="panel"><div class="panel-title">ROUTINE ENGINE // محرك الروتين</div>
+    <div class="form-grid form-grid-2"><input id="routineTitle" maxlength="120" placeholder="اسم الروتين"><select id="routinePeriod"><option value="morning">الصباح</option><option value="evening">المساء</option><option value="custom">مخصص</option></select></div>
+    <div class="row"><input id="routineStep" maxlength="120" placeholder="خطوة الروتين" style="margin:0;flex:1"><input id="routineMinutes" type="number" min="1" max="600" placeholder="الدقائق" style="max-width:140px;margin:0"><button id="addRoutineBtn" type="button">+ إضافة روتين</button></div>
+    <div id="routineList" class="grid-2" style="margin-top:15px"></div>
+  </div>
+</section>
+
+<section id="view-time" class="view-section">
+  <div class="panel"><div class="panel-title">TIME PLANNER // تخطيط الوقت</div>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr 2fr auto"><input type="date" id="blockDate"><input type="time" id="blockStart"><input type="time" id="blockEnd"><input id="blockTitle" maxlength="150" placeholder="ماذا ستفعل؟"><button id="addBlockBtn" type="button">+ Block</button></div>
+    <div id="timeBlockList" class="mini-list" style="margin-top:15px"></div>
+  </div>
+</section>
+
+<section id="view-shopping" class="view-section">
+  <div class="panel"><div class="panel-title">SHOPPING SYSTEM // المشتريات</div>
+    <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr auto"><input id="shopTitle" maxlength="150" placeholder="المنتج"><input id="shopQty" type="number" min="1" max="10000" value="1" placeholder="الكمية"><input id="shopPrice" type="number" min="0" step="0.01" placeholder="السعر المتوقع">
+       <input id="shopActual" type="number" min="0" step="0.01" placeholder="السعر الفعلي (اختياري)">
+       <button id="addShopBtn" type="button">+ إضافة</button></div>
+    <div class="between" style="margin:12px 0"><span>الإجمالي المتوقع</span><strong id="shopTotal" class="text-yellow">0 DZD</strong></div>
+    <div id="shoppingList" class="mini-list"></div>
+  </div>
+</section>
+
+<section id="view-projects" class="view-section">
+  <div class="panel"><div class="panel-title">PROJECT SYSTEM // المشاريع</div>
+    <div class="form-grid" style="grid-template-columns:1.5fr 2fr 1fr 1fr auto"><input id="projectTitle" maxlength="150" placeholder="اسم المشروع"><input id="projectDesc" maxlength="250" placeholder="وصف"><input type="date" id="projectStart"><input type="date" id="projectDeadline"><button id="addProjectBtn" type="button">+ مشروع</button></div>
+    <div id="projectList" class="grid-2" style="margin-top:15px"></div>
+  </div>
+</section>
+
+<section id="view-achievements" class="view-section">
+  <div class="panel"><div class="panel-title">ACHIEVEMENT SYSTEM // الإنجازات <span class="meta">تُفتح تلقائياً عند تحقيق شروطها</span></div>
+    <div id="achievementList" class="grid-3"></div>
+  </div>
+</section>
+
+<section id="view-stats" class="view-section">
+  <div class="panel">
+    <div class="panel-title">SYSTEM ANALYTICS // إحصائيات النظام</div>
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-title">TOTAL TASKS</div><div class="stat-value" id="stTasksTotal">0</div></div>
+      <div class="stat-card"><div class="stat-title">COMPLETED TASKS</div><div class="stat-value text-green" id="stTasksDone">0</div></div>
+      <div class="stat-card"><div class="stat-title">BEST HABIT STREAK</div><div class="stat-value text-yellow" id="stBestStreak">0</div></div>
+      <div class="stat-card"><div class="stat-title">TOTAL EVENTS</div><div class="stat-value" id="stEventsTotal">0</div></div>
+    </div>
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-title">GOAL AVERAGE</div><div class="stat-value" id="stGoalAvg">0%</div></div>
+      <div class="stat-card"><div class="stat-title">TOTAL XP EARNED</div><div class="stat-value" id="stTotalXp">0</div></div>
+      <div class="stat-card"><div class="stat-title">FINANCE VOLUME</div><div class="stat-value" id="stFinanceVolume">0</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel" style="margin:0"><div class="panel-title">TASK COMPLETION</div><div class="bar-container" style="height:20px;margin-top:15px"><div class="bar-fill" id="stTaskChartBar"></div></div><div style="text-align:center;margin-top:8px" id="stTaskChartText">0%</div></div>
+      <div class="panel" style="margin:0"><div class="panel-title">XP SYSTEM LEVEL</div><div style="font-size:.9rem;margin-top:10px">LEVEL: <strong id="stLevel" class="text-cyan">1</strong><br>XP: <strong id="stXP">0</strong> / <span id="stXPNeeded">100</span></div><div class="bar-container" style="margin-top:10px"><div class="bar-fill" id="stXpBar"></div></div></div>
+    </div>
+    <div class="panel" style="margin-top:20px"><div class="panel-title">XP ACTIVITY LOG</div><div id="xpLogList" class="list"></div></div>
+  </div>
+</section>
+
+
+<section id="view-ai" class="view-section">
+  <div class="panel">
+    <div class="panel-title"><span>HUMAN AI CORE // المساعد الذكي</span><span id="aiHeaderStatus" class="ai-status offline">OFFLINE</span></div>
+    <div class="ai-shell">
+      <div class="panel ai-chat" style="margin:0">
+        <div id="aiMessages" class="ai-messages" aria-live="polite"><div class="ai-empty">HUMAN AI CORE جاهز. اربط مزود الذكاء الاصطناعي من إعدادات AI ثم ابدأ المحادثة.</div></div>
+        <div id="aiActivity" class="ai-tool" hidden></div>
+        <div class="ai-compose">
+          <textarea id="aiInput" aria-label="رسالة HUMAN AI" placeholder="اكتب سؤالك أو أمرًا مثل: /task دراسة الإنجليزية غدًا الساعة 18:00"></textarea>
+          <div class="actions" style="align-items:stretch;flex-direction:column">
+            <button type="button" id="aiSendBtn" class="btn-green">إرسال</button>
+            <button type="button" id="aiClearBtn">محادثة جديدة</button>
+          </div>
+        </div>
+        <div class="ai-chip-row" style="margin-top:10px">
+          <button type="button" class="ai-chip" data-ai-prompt="كيف وضعي اليوم؟">حالة اليوم</button>
+          <button type="button" class="ai-chip" data-ai-prompt="رتب لي يومي">خطة اليوم</button>
+          <button type="button" class="ai-chip" data-ai-prompt="ما المهام المتأخرة؟">المهام المتأخرة</button>
+          <button type="button" class="ai-chip" data-ai-prompt="ما أهدافي الحالية؟">الأهداف</button>
+          <button type="button" class="ai-chip" data-ai-prompt="/task دراسة الإنجليزية غدًا الساعة 18:00">أمر Task</button>
+        </div>
+      </div>
+      <aside class="ai-side" style="width:auto;height:auto;background:transparent;border:0;box-shadow:none;padding:0">
+        <div class="ai-status-card"><div class="panel-title">AI STATUS</div><div id="aiStatusText" class="ai-status offline">OFFLINE</div><div class="muted" id="aiProviderText" style="margin-top:6px">Provider: غير مضبوط</div><div class="muted" id="aiModelText" style="margin-top:4px">Model: —</div></div>
+        <div class="ai-status-card"><div class="panel-title">MEMORY</div><div class="between"><span>ذكريات محفوظة</span><strong id="aiMemoryCount">0</strong></div><button type="button" id="aiSaveMemoryBtn" style="margin-top:10px;width:100%">حفظ من الإدخال كذاكرة</button></div>
+        <div class="ai-status-card"><div class="panel-title">PERMISSIONS</div><div class="ai-perm">
+          <label>قراءة Tasks <input type="checkbox" id="permTasks" checked></label>
+          <label>قراءة Goals <input type="checkbox" id="permGoals" checked></label>
+          <label>قراءة Finance <input type="checkbox" id="permFinance"></label>
+          <label>قراءة Health <input type="checkbox" id="permHealth"></label>
+          <label>تنفيذ تغييرات <input type="checkbox" id="permWrite"></label>
+          <label>Web Search <input type="checkbox" id="permWeb" checked></label>
+        </div></div>
+        <div class="ai-status-card"><div class="panel-title">LAST ACTION</div><div id="aiLastAction" class="muted">لا توجد عمليات بعد.</div></div>
+      </aside>
+    </div>
+  </div>
+</section>
+<section id="view-settings" class="view-section">
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">SYSTEM BACKUP & DATA</div>
+      <p class="footer-note" style="margin-bottom:15px">البيانات تعمل محلياً في المتصفح. LocalStorage ليس تشفيراً ولا يحمي البيانات من شخص يملك وصولاً إلى المتصفح أو الجهاز.</p>
+      <div class="actions">
+        <button type="button" id="exportBtn">📥 تصدير JSON</button>
+        <button type="button" id="importBtn">📤 استيراد JSON</button>
+        <input type="file" id="importFile" hidden accept=".json,application/json">
+        <button type="button" id="resetBtn" class="btn-pink">⚠️ إعادة ضبط النظام</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">INTERFACE SETTINGS // إعدادات الواجهة</div>
+      <label class="row" style="justify-content:space-between;margin-bottom:12px"><span>تقليل الحركة</span><input type="checkbox" id="reducedMotion" style="width:auto;margin:0"></label>
+      <label class="row" style="justify-content:space-between;margin-bottom:12px"><span>تأثير Scanlines</span><input type="checkbox" id="scanlines" style="width:auto;margin:0" checked></label>
+      <label for="waterGoalSetting" class="meta">هدف الماء اليومي (أكواب)</label><input type="number" id="waterGoalSetting" min="1" max="50" step="1">
+      <button type="button" id="saveSettingsBtn">حفظ الإعدادات</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">SYSTEM INFORMATION</div>
+    <div class="grid-3">
+      <div><span class="muted">Version:</span> <strong>8.0</strong></div>
+      <div><span class="muted">Storage:</span> <strong>LocalStorage + schema validation</strong></div>
+      <div><span class="muted">Engine:</span> <strong>HTML5 / CSS3 / JavaScript / Three.js</strong></div>
+      <div><span class="muted">Storage Key:</span> <strong id="storageKeyInfo"></strong></div>
+      <div><span class="muted">Last Save:</span> <strong id="lastSaveInfo">-</strong></div>
+      <div><span class="muted">Three.js:</span> <strong id="threeStatus">Checking...</strong></div>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<div id="toastStack" class="toast-stack" aria-live="polite"></div>
+<div class="overlay" id="confirmOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-header"><h3 id="confirmTitle">CONFIRM ACTION</h3><button type="button" class="icon-btn" data-close-overlay="confirmOverlay" aria-label="إغلاق">×</button></div>
+    <div id="confirmText" class="confirm-text"></div>
+    <div class="actions" style="justify-content:flex-start"><button type="button" id="confirmYes" class="btn-pink">تأكيد</button><button type="button" data-close-overlay="confirmOverlay">إلغاء</button></div>
+  </div>
+</div>
+
+
+<div class="overlay" id="quickOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quickTitle">
+    <div class="modal-header"><h3 id="quickTitle">COMMAND CENTER // الإجراءات السريعة</h3><button type="button" class="icon-btn" data-close-overlay="quickOverlay" aria-label="إغلاق">×</button></div>
+    <div class="quick-grid">
+      <button type="button" data-quick="task">⚡ إضافة مهمة</button><button type="button" data-quick="habit">🔄 إضافة عادة</button>
+      <button type="button" data-quick="goal">🎯 إضافة هدف</button><button type="button" data-quick="finance">💳 معاملة مالية</button>
+      <button type="button" data-quick="event">📅 موعد</button><button type="button" data-quick="note">📝 ملاحظة</button><button type="button" data-quick="workout">🏃 نشاط</button><button type="button" data-quick="sleep">🌙 نوم</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="searchOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+    <div class="modal-header"><h3 id="searchTitle">GLOBAL SEARCH // البحث المركزي</h3><button type="button" class="icon-btn" data-close-overlay="searchOverlay" aria-label="إغلاق">×</button></div>
+    <input type="search" id="globalSearchInput" placeholder="ابحث في المهام والعادات والأهداف والمواعيد والملاحظات والمالية..." autocomplete="off">
+    <div id="globalSearchResults" class="search-results"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   HUMAN OS v7.0 — CORE STATE
+========================================================= */
+const STORAGE_KEY = "HUMAN_OS_v7_DATA";
+const LEGACY_KEYS = ["HUMAN_OS_v6_DATA","HUMAN_OS_v5_DATA"];
+const SCHEMA_VERSION = 7;
+
+const DEFAULT_STATE = () => ({
+  schemaVersion: SCHEMA_VERSION,
+  profile:{name:"المستخدم الرئيسي",role:"مطور نظام / مهندس",avatar:"",createdDate:new Date().toLocaleDateString("ar-DZ")},
+  xpSystem:{level:1,xp:0,totalEarned:0,log:[]},
+  coreState:"NORMAL",
+  biometrics:{water:0,lastWaterDate:localDateKey(),waterGoal:8},
+  tasks:[],
+  habits:[],
+  goals:[],
+  finance:[],
+  events:[],
+  notes:"",
+  lastNoteEdit:"-",
+  settings:{reducedMotion:window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches||false,scanlines:true},
+  notifications:[],
+  health:{logs:[]},
+  mind:{logs:[]},
+  growth:{skills:[],learning:[]},
+  routines:[],
+  timeBlocks:[],
+  shopping:[],
+  projects:[],
+  achievements:[],
+  ai:{conversations:[],memories:[],preferences:{tasks:true,goals:true,finance:false,health:false,write:false,web:true},lastAction:"-",provider:"openai-compatible",model:"-"}
+});
+
+let state = DEFAULT_STATE();
+let threeScene=null,threeCamera=null,threeRenderer=null,humanGroup=null,heartMesh=null,coreParticles=null,threeAnimationId=null;
+let noteSaveTimer=null;
+let lastSavedAt="-";
+
+/* =========================================================
+   UTILITIES / VALIDATION
+========================================================= */
+function localDateKey(d=new Date()){
+  const x=new Date(d);
+  const y=x.getFullYear(),m=String(x.getMonth()+1).padStart(2,"0"),day=String(x.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function parseDateKey(v){const [y,m,d]=String(v||"").split("-").map(Number);return y&&m&&d?new Date(y,m-1,d):null}
+function dayDiff(a,b){
+  const da=parseDateKey(a),db=parseDateKey(b); if(!da||!db)return null;
+  da.setHours(0,0,0,0);db.setHours(0,0,0,0);return Math.round((db-da)/86400000);
+}
+function uid(prefix="id"){return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`}
+function num(v,min=0,max=1e12){const n=Number(v);return Number.isFinite(n)?Math.min(max,Math.max(min,n)):min}
+function clamp(v,min,max){return Math.min(max,Math.max(min,v))}
+function esc(v){const s=String(v??"");return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function validUrl(v){
+  if(!v)return "";
+  if(v.startsWith("data:image/"))return v;
+  try{const u=new URL(v);return ["https:","http:"].includes(u.protocol)?v:""}catch{return ""}
+}
+function dateTimeValue(date,time=""){return date?`${date}T${time||"23:59"}`:""}
+function formatDZD(v){return `${new Intl.NumberFormat("ar-DZ",{maximumFractionDigits:2}).format(v)} DZD`}
+function formatDate(v){const d=parseDateKey(v);return d?d.toLocaleDateString("ar-DZ",{year:"numeric",month:"short",day:"numeric"}):"غير محدد"}
+function nowTime(){return new Date().toLocaleTimeString("en-US",{hour12:false})}
+function safeArray(v){return Array.isArray(v)?v:[]}
+function safeString(v,max=10000){return typeof v==="string"?v.slice(0,max):String(v??"").slice(0,max)}
+function priorityValue(p){return p==="High"?3:p==="Medium"?2:1}
+function xpNeeded(level){return 100+Math.max(0,level-1)*25}
+function totalXpFromSystem(){return Number(state.xpSystem.totalEarned)||0}
+function taskIsOverdue(t){
+  if(t.completed||!t.dueDate)return false;
+  const target=dateTimeValue(t.dueDate,t.dueTime);
+  return target && new Date(target)<new Date();
+}
+function normalizeState(raw){
+  const base=DEFAULT_STATE();
+  const s=raw&&typeof raw==="object"?raw:{};
+  const out={
+    ...base,...s,
+    schemaVersion:SCHEMA_VERSION,
+    profile:{...base.profile,...(s.profile&&typeof s.profile==="object"?s.profile:{})},
+    xpSystem:{...base.xpSystem,...(s.xpSystem&&typeof s.xpSystem==="object"?s.xpSystem:{})},
+    biometrics:{...base.biometrics,...(s.biometrics&&typeof s.biometrics==="object"?s.biometrics:{})},
+    settings:{...base.settings,...(s.settings&&typeof s.settings==="object"?s.settings:{})},
+    tasks:safeArray(s.tasks),habits:safeArray(s.habits),goals:safeArray(s.goals),finance:safeArray(s.finance),
+    events:safeArray(s.events),notifications:safeArray(s.notifications)
+  };
+  out.profile.name=safeString(out.profile.name,100)||base.profile.name;
+  out.profile.role=safeString(out.profile.role,120)||base.profile.role;
+  out.profile.avatar=validUrl(safeString(out.profile.avatar,500000));
+  out.profile.createdDate=safeString(out.profile.createdDate,60)||base.profile.createdDate;
+  out.xpSystem.level=Math.max(1,Math.floor(num(out.xpSystem.level,1,99999)));
+  out.xpSystem.xp=Math.max(0,num(out.xpSystem.xp,0,1e9));
+  out.xpSystem.totalEarned=Math.max(out.xpSystem.xp,num(out.xpSystem.totalEarned,0,1e12));
+  out.xpSystem.log=safeArray(out.xpSystem.log).slice(-300).map(x=>({amount:num(x?.amount,0,1e9),source:safeString(x?.source,250),date:safeString(x?.date,80)}));
+  out.coreState=["NORMAL","ACTIVE","HIGH PERFORMANCE","OVERDRIVE"].includes(out.coreState)?out.coreState:"NORMAL";
+  out.biometrics.water=Math.floor(num(out.biometrics.water,0,100));
+  out.biometrics.waterGoal=Math.floor(num(out.biometrics.waterGoal,1,50))||8;
+  out.biometrics.lastWaterDate=safeString(out.biometrics.lastWaterDate,30)||localDateKey();
+
+  out.tasks=out.tasks.map(t=>({
+    id:t?.id??uid("task"),text:safeString(t?.text,180),priority:["Low","Medium","High"].includes(t?.priority)?t.priority:"Low",
+    completed:!!t?.completed,xpClaimed:!!t?.xpClaimed,dueDate:safeString(t?.dueDate,20),dueTime:safeString(t?.dueTime,10),
+    tags:safeArray(t?.tags).map(x=>safeString(x,40)).filter(Boolean).slice(0,10),createdAt:Number(t?.createdAt)||Date.now()
+  })).filter(t=>t.text);
+  out.habits=out.habits.map(h=>({
+    id:h?.id??uid("habit"),title:safeString(h?.title,150),streak:Math.max(0,Math.floor(num(h?.streak,0,100000))),
+    bestStreak:Math.max(0,Math.floor(num(h?.bestStreak,h?.streak||0,100000))),lastCompletedDate:h?.lastCompletedDate?safeString(h.lastCompletedDate,30):null,
+    history:safeArray(h?.history).map(x=>safeString(x,30)).filter(Boolean).slice(-365)
+  })).filter(h=>h.title);
+  out.goals=out.goals.map(g=>({
+    id:g?.id??uid("goal"),title:safeString(g?.title,150),desc:safeString(g?.desc,250),
+    startDate:safeString(g?.startDate,20),deadline:safeString(g?.deadline,20),progress:clamp(num(g?.progress,0,100),0,100),
+    xpClaimed:!!g?.xpClaimed,createdAt:Number(g?.createdAt)||Date.now()
+  })).filter(g=>g.title);
+  out.finance=out.finance.map(f=>({
+    id:f?.id??uid("fin"),title:safeString(f?.title,180),category:safeString(f?.category,80)||"عام",
+    amount:Number(f?.amount)||0,date:safeString(f?.date,30)||localDateKey(),createdAt:Number(f?.createdAt)||Date.now()
+  })).filter(f=>Number.isFinite(f.amount));
+  out.events=out.events.map(e=>({
+    id:e?.id??uid("event"),title:safeString(e?.title,150),date:safeString(e?.date,20),time:safeString(e?.time,10),
+    desc:safeString(e?.desc,250),createdAt:Number(e?.createdAt)||Date.now()
+  })).filter(e=>e.title&&e.date);
+  out.notes=safeString(s.notes,1000000);
+  out.lastNoteEdit=safeString(s.lastNoteEdit,80)||"-";
+  out.settings.reducedMotion=!!out.settings.reducedMotion;out.settings.scanlines=out.settings.scanlines!==false;
+  out.notifications=safeArray(out.notifications).map(n=>({id:n?.id??uid("notif"),text:safeString(n?.text,250),type:["normal","pink","green"].includes(n?.type)?n.type:"normal",time:safeString(n?.time,80)})).slice(-100);
+  out.health=out.health&&typeof out.health==="object"?out.health:{logs:[]};
+  out.health.logs=safeArray(out.health.logs).map(x=>({id:x?.id??uid("health"),date:safeString(x?.date,20)||localDateKey(),sleep:num(x?.sleep,0,24),wake:safeString(x?.wake,10),activity:Math.floor(num(x?.activity,0,1440)),weight:num(x?.weight,0,500),exercise:safeString(x?.exercise,180)})).slice(-365);
+  out.mind=out.mind&&typeof out.mind==="object"?out.mind:{logs:[]};
+  out.mind.logs=safeArray(out.mind.logs).map(x=>({id:x?.id??uid("mind"),date:safeString(x?.date,20)||localDateKey(),mood:clamp(num(x?.mood,1,5),1,5),focus:clamp(num(x?.focus,1,10),1,10),energy:clamp(num(x?.energy,1,10),1,10),journal:safeString(x?.journal,5000)})).slice(-365);
+  out.growth=out.growth&&typeof out.growth==="object"?out.growth:{skills:[],learning:[]};
+  out.growth.skills=safeArray(out.growth.skills).map(x=>({id:x?.id??uid("skill"),title:safeString(x?.title,120),category:safeString(x?.category,60),progress:clamp(num(x?.progress,0,100),0,100)})).filter(x=>x.title);
+  out.growth.learning=safeArray(out.growth.learning).map(x=>({id:x?.id??uid("learn"),title:safeString(x?.title,150),minutes:Math.floor(num(x?.minutes,1,1440)),date:safeString(x?.date,20)||localDateKey()})).slice(-500);
+  out.routines=safeArray(out.routines).map(x=>({id:x?.id??uid("routine"),title:safeString(x?.title,120),period:["morning","evening","custom"].includes(x?.period)?x.period:"custom",steps:safeArray(x?.steps).map(s=>({id:s?.id??uid("step"),title:safeString(s?.title,120),minutes:Math.floor(num(s?.minutes,1,600)),doneToday:!!s?.doneToday})).filter(s=>s.title),lastDate:safeString(x?.lastDate,20)})).filter(x=>x.title);
+  out.timeBlocks=safeArray(out.timeBlocks).map(x=>({id:x?.id??uid("block"),date:safeString(x?.date,20)||localDateKey(),start:safeString(x?.start,10),end:safeString(x?.end,10),title:safeString(x?.title,150)})).filter(x=>x.title).slice(-500);
+  out.shopping=safeArray(out.shopping).map(x=>({id:x?.id??uid("shop"),title:safeString(x?.title,150),qty:Math.floor(num(x?.qty,1,10000)),expected:num(x?.expected,0,1e9),actual:num(x?.actual,0,1e9),purchased:!!x?.purchased})).filter(x=>x.title);
+  out.projects=safeArray(out.projects).map(x=>({id:x?.id??uid("project"),title:safeString(x?.title,150),desc:safeString(x?.desc,250),start:safeString(x?.start,20),deadline:safeString(x?.deadline,20),progress:clamp(num(x?.progress,0,100),0,100),status:safeString(x?.status,30)||"active"})).filter(x=>x.title);
+  out.achievements=safeArray(out.achievements).map(x=>({id:safeString(x?.id,80),claimed:!!x?.claimed,date:safeString(x?.date,80)}));
+  return out;
+}
+
+/* =========================================================
+   STORAGE + MIGRATION
+========================================================= */
+function migrate(raw){
+  let s=raw;
+  if(!s||typeof s!=="object")return DEFAULT_STATE();
+  if(!s.schemaVersion){
+    // v5 -> v6 migration
+    s={...s,schemaVersion:6};
+    if(s.biometrics&&!s.biometrics.waterGoal)s.biometrics.waterGoal=8;
+    if(s.tasks)s.tasks=s.tasks.map(t=>({...t,id:t.id??uid("task"),dueDate:t.dueDate||"",dueTime:t.dueTime||"",tags:t.tags||[],createdAt:t.createdAt||Date.now()}));
+    if(s.habits)s.habits=s.habits.map(h=>({...h,history:h.history||[],bestStreak:h.bestStreak||h.streak||0}));
+    if(s.goals)s.goals=s.goals.map(g=>({...g,xpClaimed:!!g.xpClaimed,createdAt:g.createdAt||Date.now()}));
+  }
+  if(Number(s.schemaVersion)===6){
+    s={...s,schemaVersion:7,health:s.health||{logs:[]},mind:s.mind||{logs:[]},growth:s.growth||{skills:[],learning:[]},routines:s.routines||[],timeBlocks:s.timeBlocks||[],shopping:s.shopping||[],projects:s.projects||[],achievements:s.achievements||[]};
+  }
+  return s;
+}
+function loadState(){
+  let raw=null,source=STORAGE_KEY;
+  try{
+    raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw){
+      for(const key of LEGACY_KEYS){const legacy=localStorage.getItem(key);if(legacy){raw=legacy;source=key;break}}
+    }
+    if(raw){
+      const parsed=JSON.parse(raw);
+      state=normalizeState(migrate(parsed));
+      if(source!==STORAGE_KEY)notify("تم ترحيل بيانات HUMAN OS السابقة إلى v7","green");
+    }else state=DEFAULT_STATE();
+  }catch(err){
+    console.error("HUMAN OS storage recovery:",err);
+    state=DEFAULT_STATE();notify("تعذر قراءة التخزين السابق؛ تم تشغيل نسخة آمنة جديدة","pink");
+  }
+  resetDailyWaterIfNeeded(false);
+  saveState(false);
+  renderAll();
+}
+function saveState(render=true){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    lastSavedAt=new Date().toLocaleTimeString("ar-DZ");
+    const el=document.getElementById("lastSaveInfo");if(el)el.textContent=lastSavedAt;
+  }catch(err){console.error(err);notify("فشل حفظ البيانات محلياً","pink")}
+  if(render)renderAll();
+}
+function resetDailyWaterIfNeeded(announce=true){
+  const today=localDateKey();
+  if(state.biometrics.lastWaterDate!==today){
+    state.biometrics.water=0;state.biometrics.lastWaterDate=today;
+    if(announce)notify("بدأ يوم جديد: تم تصفير عداد الماء","green");
+  }
+}
+function notify(text,type="normal"){
+  state.notifications=Array.isArray(state.notifications)?state.notifications:[];
+  state.notifications.push({id:uid("notif"),text,time:new Date().toLocaleTimeString("ar-DZ"),type});
+  state.notifications=state.notifications.slice(-100);
+  const stack=document.getElementById("toastStack");if(!stack)return;
+  const el=document.createElement("div");el.className=`toast ${type==="pink"?"pink":type==="green"?"green":""}`;el.textContent=text;
+  stack.appendChild(el);setTimeout(()=>el.remove(),3500);
+}
+function addXp(amount,source){
+  const n=Math.floor(num(amount,0,1000000));if(!n)return;
+  state.xpSystem.xp+=n;state.xpSystem.totalEarned+=n;
+  state.xpSystem.log.push({amount:n,source:safeString(source,250),date:new Date().toLocaleString("ar-DZ")});
+  state.xpSystem.log=state.xpSystem.log.slice(-300);
+  let leveled=false;
+  while(state.xpSystem.xp>=xpNeeded(state.xpSystem.level)){
+    state.xpSystem.xp-=xpNeeded(state.xpSystem.level);state.xpSystem.level++;leveled=true;
+  }
+  if(leveled)notify(`LEVEL UP! المستوى الجديد: ${state.xpSystem.level}`,"green");
+}
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+const tabNames={dashboard:"DASHBOARD",profile:"PROFILE",core:"HUMAN CORE",tasks:"TASKS",habits:"HABITS",goals:"GOALS",finance:"FINANCE",calendar:"CALENDAR",notes:"NOTES",health:"HEALTH",mind:"MIND",growth:"GROWTH",routine:"ROUTINE",time:"TIME",shopping:"SHOPPING",projects:"PROJECTS",achievements:"ACHIEVEMENTS",stats:"STATISTICS",settings:"SETTINGS"};
+function switchTab(tab){
+  document.querySelectorAll(".view-section").forEach(s=>s.classList.toggle("active",s.id===`view-${tab}`));
+  document.querySelectorAll(".nav-item").forEach(i=>i.classList.toggle("active",i.dataset.tab===tab));
+  document.getElementById("pageTitle").textContent=`${tabNames[tab]||tab.toUpperCase()} MODULE`;
+  if(tab==="core")setTimeout(()=>{init3DCore();resize3D()},40);
+  closeSidebar();
+}
+function toggleSidebar(){
+  const aside=document.getElementById("sidebar"),open=aside.classList.toggle("open");
+  [document.getElementById("mobileNavButton"),document.getElementById("mobileNavHeader")].forEach(b=>{if(b)b.setAttribute("aria-expanded",String(open))});
+}
+function closeSidebar(){
+  const aside=document.getElementById("sidebar");if(aside.classList.contains("open"))aside.classList.remove("open");
+  [document.getElementById("mobileNavButton"),document.getElementById("mobileNavHeader")].forEach(b=>{if(b)b.setAttribute("aria-expanded","false")});
+}
+
+/* =========================================================
+   TASKS
+========================================================= */
+function clearInputs(ids){ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value=""})}
+function addTask(){
+  const text=document.getElementById("taskInput").value.trim();if(!text)return notify("اكتب وصف المهمة أولاً","pink");
+  const tags=document.getElementById("taskTags").value.split(",").map(x=>x.trim()).filter(Boolean).slice(0,10);
+  state.tasks.push({id:uid("task"),text,priority:document.getElementById("taskPriority").value,completed:false,xpClaimed:false,
+    dueDate:document.getElementById("taskDueDate").value,dueTime:document.getElementById("taskDueTime").value,tags,createdAt:Date.now()});
+  clearInputs(["taskInput","taskDueDate","taskDueTime","taskTags"]);saveState();notify("تمت إضافة المهمة","green");
+}
+function toggleTask(id){
+  const t=state.tasks.find(x=>String(x.id)===String(id));if(!t)return;
+  if(!t.completed){
+    t.completed=true;
+    if(!t.xpClaimed){const map={Low:10,Medium:20,High:30};t.xpClaimed=true;addXp(map[t.priority]||10,`إنجاز مهمة: ${t.text}`)}
+    notify(`Task Completed +${({Low:10,Medium:20,High:30})[t.priority]||10} XP`,"green");
+  }else t.completed=false;
+  saveState();
+}
+function deleteTask(id){state.tasks=state.tasks.filter(t=>String(t.id)!==String(id));saveState();notify("تم حذف المهمة")}
+function editTask(id){
+  const t=state.tasks.find(x=>String(x.id)===String(id));if(!t)return;
+  const text=prompt("تعديل وصف المهمة:",t.text);if(text===null)return;
+  const clean=text.trim();if(!clean)return;
+  t.text=clean;saveState();notify("تم تعديل المهمة","green");
+}
+function renderTasks(){
+  const q=document.getElementById("taskSearch").value.trim().toLowerCase(),filter=document.getElementById("taskFilter").value,sort=document.getElementById("taskSort").value;
+  let arr=state.tasks.filter(t=>t.text.toLowerCase().includes(q)||t.tags.some(x=>x.toLowerCase().includes(q)));
+  if(filter==="pending")arr=arr.filter(t=>!t.completed);if(filter==="completed")arr=arr.filter(t=>t.completed);if(filter==="overdue")arr=arr.filter(taskIsOverdue);
+  arr.sort((a,b)=>{
+    if(sort==="priority")return priorityValue(b.priority)-priorityValue(a.priority);
+    if(sort==="due")return (dateTimeValue(a.dueDate,a.dueTime)||"9999").localeCompare(dateTimeValue(b.dueDate,b.dueTime)||"9999");
+    if(sort==="alpha")return a.text.localeCompare(b.text,"ar");
+    return b.createdAt-a.createdAt;
+  });
+  const box=document.getElementById("taskList");
+  if(!arr.length){box.innerHTML='<div class="empty">لا توجد مهام مطابقة.</div>';return}
+  box.innerHTML=arr.map(t=>{
+    const overdue=taskIsOverdue(t),tags=t.tags.map(x=>`<span class="badge badge-cyan">${esc(x)}</span>`).join(" ");
+    return `<div class="item-card ${t.completed?"completed":""} ${overdue?"overdue":""}">
+      <div class="between">
+        <div class="row">
+          <input type="checkbox" ${t.completed?"checked":""} data-action="toggle-task" data-id="${esc(t.id)}" aria-label="إكمال المهمة">
+          <span style="${t.completed?"text-decoration:line-through;color:var(--muted)":""}">${esc(t.text)}</span>
+          <span class="badge badge-${t.priority.toLowerCase()}">${esc(t.priority)}</span>${tags}
+        </div>
+        <div class="actions"><button class="small" data-action="edit-task" data-id="${esc(t.id)}">تعديل</button><button class="small btn-pink" data-action="delete-task" data-id="${esc(t.id)}">حذف</button></div>
+      </div>
+      <div class="meta" style="margin-top:7px">${t.dueDate?`الاستحقاق: ${formatDate(t.dueDate)} ${t.dueTime||""}`:"بدون موعد"}${overdue?' — <span class="danger-text">متأخرة</span>':""} ${t.xpClaimed?"— XP مكتسب":""}</div>
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   HABITS — REAL STREAK
+========================================================= */
+function computeHabit(h){
+  const hist=[...new Set(safeArray(h.history).filter(Boolean))].sort();
+  const today=localDateKey(),yesterday=localDateKey(new Date(Date.now()-86400000));
+  let streak=0, cursor=today;
+  if(!hist.includes(today) && !hist.includes(yesterday))streak=0;
+  else{
+    cursor=hist.includes(today)?today:yesterday;
+    while(hist.includes(cursor)){streak++;const d=parseDateKey(cursor);d.setDate(d.getDate()-1);cursor=localDateKey(d)}
+  }
+  h.streak=streak;h.bestStreak=Math.max(h.bestStreak||0,streak);h.history=hist.slice(-365);return streak;
+}
+function addHabit(){
+  const title=document.getElementById("habitInput").value.trim();if(!title)return notify("اكتب اسم العادة أولاً","pink");
+  state.habits.push({id:uid("habit"),title,streak:0,bestStreak:0,lastCompletedDate:null,history:[]});
+  clearInputs(["habitInput"]);saveState();notify("تمت إضافة العادة","green");
+}
+function logHabitToday(id){
+  const h=state.habits.find(x=>String(x.id)===String(id));if(!h)return;
+  computeHabit(h);const today=localDateKey();
+  if(h.history.includes(today))return notify("تم تسجيل هذه العادة اليوم بالفعل","pink");
+  h.history.push(today);h.lastCompletedDate=today;computeHabit(h);addXp(10,`عادة: ${h.title}`);saveState();notify(`Habit Streak +10 XP — ${h.streak} يوم`,"green");
+}
+function deleteHabit(id){state.habits=state.habits.filter(h=>String(h.id)!==String(id));saveState();notify("تم حذف العادة")}
+function renderHabits(){
+  const box=document.getElementById("habitList");
+  if(!state.habits.length){box.innerHTML='<div class="empty">لم تتم إضافة عادات بعد.</div>';return}
+  box.innerHTML=state.habits.map(h=>{
+    computeHabit(h);const today=localDateKey(),done=h.history.includes(today),rate=Math.round((h.history.length/Math.max(1,Math.min(30,daysSinceCreation(h))))*100);
+    return `<div class="panel" style="margin:0;text-align:center">
+      <div style="font-weight:700;margin-bottom:5px">${esc(h.title)}</div>
+      <div style="font-size:1.35rem;color:var(--green);margin:8px 0;font-family:var(--font-mono)">🔥 ${h.streak} DAYS</div>
+      <div class="meta">Best: ${h.bestStreak||0} | سجل: ${h.history.length} أيام</div>
+      <div class="bar-container" style="margin:10px 0"><div class="bar-fill" style="width:${clamp(rate,0,100)}%"></div></div>
+      <div class="actions" style="justify-content:center"><button class="small ${done?"btn-green":""}" data-action="log-habit" data-id="${esc(h.id)}" ${done?"disabled":""}>${done?"✓ تم اليوم":"+ إنجاز اليوم"}</button><button class="small btn-pink" data-action="delete-habit" data-id="${esc(h.id)}">حذف</button></div>
+    </div>`;
+  }).join("");
+}
+function daysSinceCreation(h){return Math.max(1,h.history.length?Math.min(30,h.history.length):1)}
+
+/* =========================================================
+   GOALS
+========================================================= */
+function addGoal(){
+  const title=document.getElementById("goalTitle").value.trim();if(!title)return notify("اكتب عنوان الهدف أولاً","pink");
+  const start=document.getElementById("goalStartDate").value,deadline=document.getElementById("goalDeadline").value;
+  if(start&&deadline&&start>deadline)return notify("تاريخ البداية لا يمكن أن يكون بعد الموعد النهائي","pink");
+  state.goals.push({id:uid("goal"),title,desc:document.getElementById("goalDesc").value.trim(),startDate:start,deadline,progress:0,xpClaimed:false,createdAt:Date.now()});
+  clearInputs(["goalTitle","goalDesc","goalStartDate","goalDeadline"]);saveState();notify("تم إنشاء الهدف","green");
+}
+function updateGoalProgress(id,delta){
+  const g=state.goals.find(x=>String(x.id)===String(id));if(!g)return;
+  const before=g.progress;g.progress=clamp(g.progress+delta,0,100);
+  if(before<100&&g.progress===100&&!g.xpClaimed){g.xpClaimed=true;addXp(50,`إكمال هدف: ${g.title}`);notify("Goal Completed +50 XP","green")}
+  saveState();
+}
+function deleteGoal(id){state.goals=state.goals.filter(g=>String(g.id)!==String(id));saveState();notify("تم حذف الهدف")}
+function editGoal(id){
+  const g=state.goals.find(x=>String(x.id)===String(id));if(!g)return;
+  const title=prompt("عنوان الهدف:",g.title);if(title===null)return;
+  const desc=prompt("الوصف:",g.desc);if(desc===null)return;
+  g.title=title.trim()||g.title;g.desc=desc.trim();saveState();notify("تم تعديل الهدف","green");
+}
+function goalStatus(g){
+  if(g.progress>=100)return ["مكتمل","green"];
+  if(g.deadline&&g.deadline<localDateKey())return ["متأخر","pink"];
+  return ["نشط","cyan"];
+}
+function countdown(g){
+  if(!g.deadline)return "بدون موعد نهائي";const d=dayDiff(localDateKey(),g.deadline);
+  if(d<0)return `متأخر ${Math.abs(d)} يوم`;if(d===0)return "اليوم";return `${d} يوم متبقٍ`;
+}
+function renderGoals(){
+  const box=document.getElementById("goalList");if(!state.goals.length){box.innerHTML='<div class="empty">لم تتم إضافة أهداف بعد.</div>';return}
+  box.innerHTML=state.goals.slice().sort((a,b)=>b.createdAt-a.createdAt).map(g=>{
+    const [status,type]=goalStatus(g);
+    return `<div class="panel" style="margin:0">
+      <div class="between"><strong style="color:var(--cyan)">${esc(g.title)}</strong><span class="badge badge-${type==="pink"?"high":type==="green"?"low":"cyan"}">${status}</span></div>
+      <div class="meta" style="margin:7px 0">${esc(g.desc)} ${g.startDate?`| البداية: ${formatDate(g.startDate)}`:""} | الموعد: ${g.deadline?formatDate(g.deadline):"غير محدد"} | ${countdown(g)}</div>
+      <div class="between" style="margin-bottom:5px"><span>التقدم</span><strong class="text-yellow">${g.progress}%</strong></div>
+      <div class="bar-container" style="margin-bottom:10px"><div class="bar-fill" style="width:${g.progress}%"></div></div>
+      <div class="actions"><button class="small" data-action="goal-progress" data-id="${esc(g.id)}" data-delta="5">+5%</button><button class="small" data-action="goal-progress" data-id="${esc(g.id)}" data-delta="10">+10%</button><button class="small" data-action="goal-progress" data-id="${esc(g.id)}" data-delta="-5">-5%</button><button class="small" data-action="edit-goal" data-id="${esc(g.id)}">تعديل</button><button class="small btn-pink" data-action="delete-goal" data-id="${esc(g.id)}">حذف</button></div>
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   FINANCE
+========================================================= */
+function financeTotals(){
+  const income=state.finance.filter(f=>f.amount>0).reduce((a,f)=>a+f.amount,0),expense=state.finance.filter(f=>f.amount<0).reduce((a,f)=>a+Math.abs(f.amount),0);
+  return {income,expense,balance:income-expense,volume:income+expense};
+}
+function addFinance(){
+  const title=document.getElementById("finTitle").value.trim(),amount=Number(document.getElementById("finAmount").value);
+  if(!title||!Number.isFinite(amount)||amount<=0)return notify("تحقق من وصف المعاملة والمبلغ","pink");
+  const type=document.getElementById("finType").value;state.finance.push({id:uid("fin"),title,category:document.getElementById("finCategory").value.trim()||"عام",
+    amount:type==="expense"?-Math.abs(amount):Math.abs(amount),date:localDateKey(),createdAt:Date.now()});
+  clearInputs(["finTitle","finAmount","finCategory"]);saveState();notify("تم تسجيل المعاملة","green");
+}
+function deleteFinance(id){state.finance=state.finance.filter(f=>String(f.id)!==String(id));saveState();notify("تم حذف المعاملة")}
+function renderFinance(){
+  const t=financeTotals();document.getElementById("finTotalIncome").textContent=formatDZD(t.income);document.getElementById("finTotalExpenses").textContent=formatDZD(t.expense);document.getElementById("finNetBalance").textContent=formatDZD(t.balance);
+  const q=document.getElementById("financeSearch").value.trim().toLowerCase(),filter=document.getElementById("financeFilter").value;
+  let arr=state.finance.filter(f=>f.title.toLowerCase().includes(q)||f.category.toLowerCase().includes(q));
+  if(filter==="income")arr=arr.filter(f=>f.amount>0);if(filter==="expense")arr=arr.filter(f=>f.amount<0);arr.sort((a,b)=>b.createdAt-a.createdAt);
+  const box=document.getElementById("finList");if(!arr.length){box.innerHTML='<div class="empty">لا توجد معاملات مطابقة.</div>';return}
+  box.innerHTML=arr.map(f=>`<div class="item-card"><div class="between"><div><strong>${esc(f.title)}</strong><span class="meta"> [${esc(f.category)}] ${formatDate(f.date)}</span></div><div class="row"><strong style="color:${f.amount>=0?"var(--green)":"var(--pink)"}">${f.amount>=0?"+":"-"}${formatDZD(Math.abs(f.amount))}</strong><button class="small btn-pink" data-action="delete-finance" data-id="${esc(f.id)}">×</button></div></div></div>`).join("");
+}
+
+/* =========================================================
+   CALENDAR
+========================================================= */
+function eventTimestamp(e){return new Date(`${e.date}T${e.time||"23:59"}`).getTime()}
+function addEvent(){
+  const title=document.getElementById("eventTitle").value.trim(),date=document.getElementById("eventDate").value;
+  if(!title||!date)return notify("عنوان الموعد والتاريخ مطلوبان","pink");
+  state.events.push({id:uid("event"),title,date,time:document.getElementById("eventTime").value,desc:document.getElementById("eventDesc").value.trim(),createdAt:Date.now()});
+  clearInputs(["eventTitle","eventDate","eventTime","eventDesc"]);saveState();notify("تم تسجيل الموعد","green");
+}
+function deleteEvent(id){state.events=state.events.filter(e=>String(e.id)!==String(id));saveState();notify("تم حذف الموعد")}
+function editEvent(id){
+  const e=state.events.find(x=>String(x.id)===String(id));if(!e)return;
+  const title=prompt("عنوان الموعد:",e.title);if(title===null)return;e.title=title.trim()||e.title;
+  const desc=prompt("التفاصيل:",e.desc);if(desc!==null)e.desc=desc.trim();saveState();notify("تم تعديل الموعد","green");
+}
+function renderEvents(){
+  const filter=document.getElementById("eventFilter").value,now=Date.now();
+  let arr=state.events.slice().sort((a,b)=>eventTimestamp(a)-eventTimestamp(b));
+  if(filter==="upcoming")arr=arr.filter(e=>eventTimestamp(e)>=now);if(filter==="past")arr=arr.filter(e=>eventTimestamp(e)<now);
+  const box=document.getElementById("eventList");if(!arr.length){box.innerHTML='<div class="empty">لا توجد مواعيد في هذا التصنيف.</div>';return}
+  box.innerHTML=arr.map(e=>{const past=eventTimestamp(e)<now;return `<div class="item-card ${past?"completed":""}"><div class="between"><div><strong class="text-cyan">📅 ${formatDate(e.date)} ${e.time?`(${esc(e.time)})`:""}</strong> — ${esc(e.title)}<div class="meta">${esc(e.desc)}</div></div><div class="actions"><button class="small" data-action="edit-event" data-id="${esc(e.id)}">تعديل</button><button class="small btn-pink" data-action="delete-event" data-id="${esc(e.id)}">حذف</button></div></div></div>`}).join("");
+}
+
+/* =========================================================
+   NOTES — SEARCH WITHOUT MUTATING SOURCE
+========================================================= */
+function updateNoteMeta(){
+  const text=state.notes.trim(),words=text?text.split(/\s+/).length:0,chars=state.notes.length;
+  document.getElementById("noteMeta").textContent=`${words} كلمات | ${chars} أحرف | آخر تعديل: ${state.lastNoteEdit||"-"}`;
+}
+function renderNoteSearch(){
+  const q=document.getElementById("noteSearch").value.trim().toLowerCase(),box=document.getElementById("noteSearchResults");
+  if(!q){box.style.display="none";box.innerHTML="";return}
+  const lines=state.notes.split("\n").map((line,i)=>({line,i})).filter(x=>x.line.toLowerCase().includes(q)).slice(0,50);
+  box.style.display="flex";box.innerHTML=lines.length?lines.map(x=>`<div class="search-result" data-note-line="${x.i}"><span class="meta">السطر ${x.i+1}</span><br>${esc(x.line)}</div>`).join(""):'<div class="empty">لا توجد نتائج.</div>';
+}
+function focusNoteLine(i){
+  const ta=document.getElementById("mainNotes"),lines=state.notes.split("\n");let pos=0;for(let x=0;x<i;x++)pos+=lines[x].length+1;
+  ta.focus();ta.setSelectionRange(pos,pos+lines[i].length);
+}
+function saveNotes(){
+  state.notes=document.getElementById("mainNotes").value;state.lastNoteEdit=new Date().toLocaleString("ar-DZ");saveState(false);updateNoteMeta();
+}
+function onNotesInput(){clearTimeout(noteSaveTimer);noteSaveTimer=setTimeout(()=>{saveNotes();renderNoteSearch()},350);updateNoteMeta()}
+
+/* =========================================================
+   WATER
+========================================================= */
+function addWater(){
+  resetDailyWaterIfNeeded(false);
+  if(state.biometrics.water>=state.biometrics.waterGoal)return notify(`تم الوصول إلى الهدف اليومي ${state.biometrics.waterGoal}/${state.biometrics.waterGoal}`,"green");
+  state.biometrics.water++;saveState();notify(`تم تسجيل كوب ماء — ${state.biometrics.water}/${state.biometrics.waterGoal}`,"green");
+}
+function setWaterGoal(){
+  const value=prompt("هدف الماء اليومي بالأكواب:",String(state.biometrics.waterGoal));if(value===null)return;
+  const n=Math.floor(Number(value));if(!Number.isFinite(n)||n<1||n>50)return notify("أدخل رقماً بين 1 و50","pink");
+  state.biometrics.waterGoal=n;saveState();notify("تم تحديث هدف الماء","green");
+}
+
+
+/* =========================================================
+   HUMAN OS v7.0 — LIFE SYSTEMS
+========================================================= */
+function todayHealth(){return state.health.logs.find(x=>x.date===localDateKey())||null}
+function saveHealth(){
+  const log={id:todayHealth()?.id||uid("health"),date:localDateKey(),sleep:num(document.getElementById("sleepHours").value,0,24),wake:document.getElementById("wakeTime").value,activity:Math.floor(num(document.getElementById("activityMinutes").value,0,1440)),weight:num(document.getElementById("healthWeight").value,0,500),exercise:safeString(document.getElementById("exerciseNote").value,180)};
+  state.health.logs=state.health.logs.filter(x=>x.date!==log.date);state.health.logs.push(log);state.health.logs=state.health.logs.slice(-365);saveState();notify("تم حفظ سجل الصحة لليوم","green");
+}
+function renderHealth(){
+  const today=todayHealth()||{}, waterPct=Math.round(clamp(state.biometrics.water/state.biometrics.waterGoal,0,1)*100);
+  document.getElementById("healthSleepKpi").textContent=`${Number(today.sleep||0).toFixed(1)}h`;
+  document.getElementById("healthActivityKpi").textContent=`${today.activity||0} min`;
+  document.getElementById("healthWaterKpi").textContent=`${waterPct}%`;
+  document.getElementById("healthWeightKpi").textContent=today.weight?`${today.weight} kg`:"—";
+  ["sleepHours","wakeTime","activityMinutes","healthWeight","exerciseNote"].forEach(id=>document.getElementById(id).value=today[{sleepHours:"sleep",wakeTime:"wake",activityMinutes:"activity",healthWeight:"weight",exerciseNote:"exercise"}[id]]??"");
+  const logs=state.health.logs.slice().reverse().slice(0,14),box=document.getElementById("healthLogList");
+  box.innerHTML=logs.length?logs.map(x=>`<div class="timeline-item"><strong>${esc(formatDate(x.date))}</strong> — نوم ${Number(x.sleep||0).toFixed(1)}h | نشاط ${x.activity||0} min | وزن ${x.weight||"—"} kg ${x.exercise?`| ${esc(x.exercise)}`:""}</div>`).join(""):"<div class='empty'>لا يوجد سجل صحي بعد.</div>";
+}
+function saveMind(){
+  const log={id:state.mind.logs.find(x=>x.date===localDateKey())?.id||uid("mind"),date:localDateKey(),mood:clamp(Number(document.getElementById("mindMood").value),1,5),focus:clamp(Number(document.getElementById("mindFocus").value)||5,1,10),energy:clamp(Number(document.getElementById("mindEnergy").value)||5,1,10),journal:safeString(document.getElementById("mindJournal").value,5000)};
+  state.mind.logs=state.mind.logs.filter(x=>x.date!==log.date);state.mind.logs.push(log);state.mind.logs=state.mind.logs.slice(-365);saveState();notify("تم حفظ تسجيل اليوم الذهني","green");
+}
+function renderMind(){
+  const box=document.getElementById("mindHistory"),logs=state.mind.logs.slice().reverse().slice(0,14);
+  const today=state.mind.logs.find(x=>x.date===localDateKey());if(today){document.getElementById("mindMood").value=today.mood;document.getElementById("mindFocus").value=today.focus;document.getElementById("mindEnergy").value=today.energy;document.getElementById("mindJournal").value=today.journal}
+  box.innerHTML=logs.length?logs.map(x=>`<div class="item-card"><div class="between"><strong>${esc(formatDate(x.date))}</strong><span class="badge badge-cyan">Mood ${x.mood}/5</span></div><div class="meta">Focus ${x.focus}/10 | Energy ${x.energy}/10</div><div style="margin-top:6px">${esc(x.journal||"بدون يوميات")}</div></div>`).join(""):"<div class='empty'>لا يوجد سجل ذهني بعد.</div>";
+}
+function addSkill(){const title=document.getElementById("skillTitle").value.trim();if(!title)return notify("اكتب اسم المهارة","pink");state.growth.skills.push({id:uid("skill"),title,category:document.getElementById("skillCategory").value.trim()||"عام",progress:clamp(Number(document.getElementById("skillProgress").value)||0,0,100)});clearInputs(["skillTitle","skillCategory","skillProgress"]);saveState();notify("تمت إضافة المهارة","green")}
+function addLearning(){const title=document.getElementById("learningTitle").value.trim(),minutes=Math.floor(Number(document.getElementById("learningMinutes").value));if(!title||!Number.isFinite(minutes)||minutes<1)return notify("أدخل جلسة تعلم ومدة صحيحة","pink");state.growth.learning.push({id:uid("learn"),title,minutes,date:localDateKey()});clearInputs(["learningTitle","learningMinutes"]);addXp(5,`تعلم: ${title}`);saveState();notify("تم تسجيل جلسة التعلم +5 XP","green")}
+function renderGrowth(){
+  document.getElementById("growthList").innerHTML=state.growth.skills.length?state.growth.skills.map(s=>`<div class="item-card"><div class="between"><strong>${esc(s.title)}</strong><span class="badge badge-cyan">${esc(s.category)}</span></div><div class="bar-container" style="margin:8px 0"><div class="bar-fill" style="width:${s.progress}%"></div></div><div class="between"><span class="meta">التقدم</span><strong>${s.progress}%</strong></div><div class="actions" style="margin-top:6px"><button class="small" data-action="skill-progress" data-id="${esc(s.id)}" data-delta="5">+5%</button><button class="small btn-pink" data-action="delete-skill" data-id="${esc(s.id)}">حذف</button></div></div>`).join(""):"<div class='empty'>لا توجد مهارات بعد.</div>";
+  document.getElementById("learningLog").innerHTML=state.growth.learning.slice().reverse().slice(0,30).map(x=>`<div class="item-card"><div class="between"><strong>${esc(x.title)}</strong><span class="text-green">${x.minutes} min</span></div><div class="meta">${esc(formatDate(x.date))}</div></div>`).join("")||"<div class='empty'>لا يوجد تعلم مسجل.</div>";
+}
+function addRoutine(){const title=document.getElementById("routineTitle").value.trim();if(!title)return notify("اكتب اسم الروتين","pink");const step=document.getElementById("routineStep").value.trim();const minutes=Math.floor(Number(document.getElementById("routineMinutes").value)||5);const period=document.getElementById("routinePeriod").value;let r=state.routines.find(x=>x.title===title&&x.period===period);if(!r){r={id:uid("routine"),title,period,steps:[],lastDate:""};state.routines.push(r)}if(step)r.steps.push({id:uid("step"),title:step,minutes,doneToday:false});clearInputs(["routineTitle","routineStep","routineMinutes"]);saveState();notify("تم تحديث الروتين","green")}
+function toggleRoutineStep(rid,sid){const r=state.routines.find(x=>x.id===rid),s=r?.steps.find(x=>x.id===sid);if(!s)return;if(r.lastDate!==localDateKey()){r.steps.forEach(x=>x.doneToday=false);r.lastDate=localDateKey()}s.doneToday=!s.doneToday;saveState()}
+function renderRoutines(){const box=document.getElementById("routineList");box.innerHTML=state.routines.length?state.routines.map(r=>`<div class="panel" style="margin:0"><div class="between"><strong>${esc(r.title)}</strong><span class="badge badge-cyan">${r.period}</span></div><div style="margin-top:10px">${r.steps.map(s=>`<label class="routine-step"><input type="checkbox" ${s.doneToday?"checked":""} data-action="routine-step" data-rid="${esc(r.id)}" data-sid="${esc(s.id)}"><span>${esc(s.title)}</span><span class="meta">${s.minutes} min</span></label>`).join("")||'<div class="empty">أضف خطوة للروتين.</div>'}</div></div>`).join(""):"<div class='empty'>لا توجد روتينات بعد.</div>"}
+function addTimeBlock(){const title=document.getElementById("blockTitle").value.trim();if(!title)return notify("اكتب عنوان الوقت","pink");const b={id:uid("block"),date:document.getElementById("blockDate").value||localDateKey(),start:document.getElementById("blockStart").value,end:document.getElementById("blockEnd").value,title};state.timeBlocks.push(b);state.timeBlocks.sort((a,b)=>`${a.date}T${a.start}`.localeCompare(`${b.date}T${b.start}`));clearInputs(["blockDate","blockStart","blockEnd","blockTitle"]);saveState();notify("تمت إضافة Time Block","green")}
+function renderTimeBlocks(){const box=document.getElementById("timeBlockList"),today=localDateKey();const arr=state.timeBlocks.filter(x=>x.date>=today).slice(0,100);box.innerHTML=arr.length?arr.map(x=>`<div class="timeline-item"><div class="between"><strong>${esc(formatDate(x.date))} ${esc(x.start||"")} ${x.end?`→ ${esc(x.end)}`:""}</strong><button class="small btn-pink" data-action="delete-block" data-id="${esc(x.id)}">حذف</button></div><div>${esc(x.title)}</div></div>`).join(""):"<div class='empty'>لا توجد فترات زمنية مخططة.</div>"}
+function addShopping(){const title=document.getElementById("shopTitle").value.trim(),qty=Math.floor(Number(document.getElementById("shopQty").value)||1),expected=Number(document.getElementById("shopPrice").value)||0;if(!title)return notify("اكتب اسم المنتج","pink");state.shopping.push({id:uid("shop"),title,qty,expected,actual:0,purchased:false});clearInputs(["shopTitle","shopPrice"]);document.getElementById("shopQty").value=1;saveState();notify("تمت إضافة المشتريات","green")}
+function renderShopping(){const total=state.shopping.filter(x=>!x.purchased).reduce((a,x)=>a+x.expected*x.qty,0);document.getElementById("shopTotal").textContent=formatDZD(total);const box=document.getElementById("shoppingList");box.innerHTML=state.shopping.length?state.shopping.map(x=>`<div class="item-card ${x.purchased?"completed":""}"><div class="between"><label class="row"><input type="checkbox" ${x.purchased?"checked":""} data-action="shop-toggle" data-id="${esc(x.id)}"><strong>${esc(x.title)}</strong></label><button class="small btn-pink" data-action="delete-shop" data-id="${esc(x.id)}">حذف</button></div><div class="meta">الكمية: ${x.qty} | المتوقع: ${formatDZD(x.expected*x.qty)}${x.purchased?` | الفعلي: ${formatDZD(x.actual||0)}`:""}</div></div>`).join(""):"<div class='empty'>قائمة المشتريات فارغة.</div>"}
+function addProject(){const title=document.getElementById("projectTitle").value.trim();if(!title)return notify("اكتب اسم المشروع","pink");state.projects.push({id:uid("project"),title,desc:document.getElementById("projectDesc").value.trim(),start:document.getElementById("projectStart").value,deadline:document.getElementById("projectDeadline").value,progress:0,status:"active"});clearInputs(["projectTitle","projectDesc","projectStart","projectDeadline"]);saveState();notify("تم إنشاء المشروع","green")}
+function renderProjects(){const box=document.getElementById("projectList");box.innerHTML=state.projects.length?state.projects.map(p=>`<div class="project-card"><div class="between"><strong>${esc(p.title)}</strong><button class="small btn-pink" data-action="delete-project" data-id="${esc(p.id)}">حذف</button></div><div class="meta" style="margin:7px 0">${esc(p.desc)} | ${p.deadline?`الموعد: ${formatDate(p.deadline)}`:"بدون موعد"}</div><div class="bar-container"><div class="bar-fill" style="width:${p.progress}%"></div></div><div class="between" style="margin-top:7px"><span>${p.progress}%</span><div class="actions"><button class="small" data-action="project-progress" data-id="${esc(p.id)}" data-delta="5">+5%</button><button class="small" data-action="project-progress" data-id="${esc(p.id)}" data-delta="-5">-5%</button></div></div></div>`).join(""):"<div class='empty'>لا توجد مشاريع بعد.</div>"}
+function achievementDefs(){return[
+  {id:"first_task",title:"FIRST ACTION",desc:"أكمل أول مهمة",check:()=>state.tasks.some(x=>x.completed)},
+  {id:"ten_tasks",title:"TASK RUNNER",desc:"أكمل 10 مهام",check:()=>state.tasks.filter(x=>x.completed).length>=10},
+  {id:"habit_7",title:"SEVEN DAY STREAK",desc:"حقق عادة لمدة 7 أيام",check:()=>state.habits.some(x=>computeHabit(x)>=7)},
+  {id:"goal_complete",title:"GOAL LOCK",desc:"أكمل هدفاً",check:()=>state.goals.some(x=>x.progress>=100)},
+  {id:"learning_60",title:"LEARNER",desc:"سجل 60 دقيقة تعلم",check:()=>state.growth.learning.reduce((a,x)=>a+x.minutes,0)>=60},
+  {id:"project_complete",title:"BUILDER",desc:"أكمل مشروعاً",check:()=>state.projects.some(x=>x.progress>=100)},
+  {id:"xp_500",title:"XP 500",desc:"اكسب 500 XP",check:()=>state.xpSystem.totalEarned>=500}
+]}
+function renderAchievements(){const defs=achievementDefs();const claimed=new Map(state.achievements.map(x=>[x.id,x]));let changed=false;defs.forEach(d=>{if(d.check()&&!claimed.has(d.id)){state.achievements.push({id:d.id,claimed:true,date:new Date().toLocaleString("ar-DZ")});addXp(25,`Achievement: ${d.title}`);changed=true}});if(changed)state.achievements=state.achievements.slice(-100);const box=document.getElementById("achievementList");box.innerHTML=defs.map(d=>{const c=state.achievements.find(x=>x.id===d.id);return `<div class="stat-card"><div style="font-size:1.5rem;color:${c?'var(--yellow)':'var(--muted)'}">${c?'★':'☆'}</div><strong>${esc(d.title)}</strong><div class="meta" style="margin-top:5px">${esc(d.desc)}</div><div style="margin-top:8px" class="badge ${c?'badge-medium':'badge-cyan'}">${c?'مفتوح':'مقفل'}</div></div>`}).join("");if(changed)saveState(false)}
+function lifeBalance(){
+  const task=state.tasks.length?state.tasks.filter(x=>x.completed).length/state.tasks.length:0;
+  const habit=state.habits.length?state.habits.reduce((a,x)=>a+clamp(computeHabit(x)/7,0,1),0)/state.habits.length:0;
+  const goal=state.goals.length?state.goals.reduce((a,x)=>a+x.progress,0)/state.goals.length/100:0;
+  const healthLog=todayHealth()||{};const health=(clamp((Number(healthLog.sleep||0)/8),0,1)*.4+clamp((Number(healthLog.activity||0)/30),0,1)*.3+clamp(state.biometrics.water/state.biometrics.waterGoal,0,1)*.3);
+  const mindLog=state.mind.logs.find(x=>x.date===localDateKey());const mind=mindLog?((mindLog.mood/5)*.4+(mindLog.focus/10)*.3+(mindLog.energy/10)*.3):0;
+  const learning=clamp(state.growth.learning.reduce((a,x)=>a+x.minutes,0)/300,0,1);
+  const finance=financeTotals().income?clamp((financeTotals().balance/Math.max(1,financeTotals().income)+1)/2,0,1):.5;
+  return {Health:health,Mind:mind,Productivity:task,Finance:finance,Learning:learning,Goals:goal,Habits:habit}
+}
+function renderLifeBalance(){const scores=lifeBalance(),box=document.getElementById("lifeBalanceGrid");box.innerHTML=Object.entries(scores).map(([k,v])=>`<div class="balance-card"><div class="balance-ring" style="--value:${Math.round(v*100)}"><strong>${Math.round(v*100)}%</strong></div><div class="meta">${esc(k)}</div></div>`).join("");const overall=Math.round(Object.values(scores).reduce((a,b)=>a+b,0)/Object.keys(scores).length*100);document.getElementById("lifeBalanceOverall").textContent=`${overall}%`;document.getElementById("lifeBalanceBar").style.width=`${overall}%`}
+function renderSmartDashboard(){
+  const focus=[];state.tasks.filter(x=>!x.completed).sort((a,b)=>priorityValue(b.priority)-priorityValue(a.priority)).slice(0,5).forEach(x=>focus.push(`<div class="timeline-item"><strong>مهمة:</strong> ${esc(x.text)}</div>`));state.goals.filter(x=>x.progress<100).sort((a,b)=>a.progress-b.progress).slice(0,3).forEach(x=>focus.push(`<div class="timeline-item"><strong>هدف:</strong> ${esc(x.title)} — ${x.progress}%</div>`));document.getElementById("todayFocus").innerHTML=focus.join("")||'<div class="empty">لا توجد أولويات عاجلة.</div>';
+  const rem=[];if(!todayHealth()?.sleep)rem.push("سجّل نوم اليوم");if(!state.mind.logs.some(x=>x.date===localDateKey()))rem.push("سجّل حالة اليوم الذهنية");if(state.biometrics.water<state.biometrics.waterGoal)rem.push(`الماء: ${state.biometrics.water}/${state.biometrics.waterGoal}`);if(state.tasks.some(taskIsOverdue))rem.push("لديك مهام متأخرة");document.getElementById("smartReminders").innerHTML=rem.length?rem.map(x=>`<div class="timeline-item">${esc(x)}</div>`).join(""):'<div class="empty">لا توجد تذكيرات داخلية.</div>';
+  const acts=[];state.xpSystem.log.slice().reverse().slice(0,5).forEach(x=>acts.push(`<div class="timeline-item">+${x.amount} XP — ${esc(x.source)}</div>`));document.getElementById("recentActivity").innerHTML=acts.join("")||'<div class="empty">لا يوجد نشاط حديث.</div>';
+}
+function deleteBy(arrName,id){state[arrName]=state[arrName].filter(x=>String(x.id)!==String(id));saveState();notify("تم الحذف")}
+
+/* =========================================================
+   CORE SIMULATION / THREE.JS
+========================================================= */
+function coreMetrics(){
+  const tasks=state.tasks.length?state.tasks.filter(t=>t.completed).length/state.tasks.length:0;
+  const goals=state.goals.length?state.goals.reduce((a,g)=>a+g.progress,0)/state.goals.length/100:0;
+  const habits=state.habits.length?state.habits.reduce((a,h)=>a+Math.min(computeHabit(h),30),0)/(state.habits.length*30):0;
+  const water=clamp(state.biometrics.water/state.biometrics.waterGoal,0,1);
+  const xp=clamp(state.xpSystem.xp/xpNeeded(state.xpSystem.level),0,1);
+  const energy=clamp(25+tasks*20+goals*20+habits*15+water*10+xp*10,10,100);
+  const stability=clamp(45+tasks*20+habits*20+goals*15,20,100);
+  const resource=clamp(20+(financeTotals().balance>0?30:10)+xp*20+water*10,0,100);
+  const modeBoost={NORMAL:0,ACTIVE:6,"HIGH PERFORMANCE":14,OVERDRIVE:25}[state.coreState]||0;
+  return {energy:clamp(energy+modeBoost,0,100),stability,resource};
+}
+function init3DCore(){
+  if(threeScene||!window.THREE)return;
+  const container=document.getElementById("hologram-viewport");if(!container)return;
+  try{
+    threeScene=new THREE.Scene();
+    threeCamera=new THREE.PerspectiveCamera(45,Math.max(1,container.clientWidth)/Math.max(1,container.clientHeight),.1,1000);
+    threeCamera.position.set(0,0,18);
+    threeRenderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:"high-performance"});
+    threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    threeRenderer.setSize(container.clientWidth,container.clientHeight,false);
+    container.insertBefore(threeRenderer.domElement,container.firstChild);
+    humanGroup=new THREE.Group();
+    const wireMat=new THREE.MeshBasicMaterial({color:0x00f0ff,wireframe:true,transparent:true,opacity:.55});
+    const pinkMat=new THREE.MeshBasicMaterial({color:0xff0055});
+    const parts=[
+      [new THREE.IcosahedronGeometry(1.1,2),[0,4.2,0]],
+      [new THREE.CylinderGeometry(.4,.5,.8,8),[0,3.1,0]],
+      [new THREE.CylinderGeometry(1.6,1,3.8,8),[0,1,0]],
+      [new THREE.CylinderGeometry(.3,.25,3.5,8),[-2,1,0],[0,0,.2]],
+      [new THREE.CylinderGeometry(.3,.25,3.5,8),[2,1,0],[0,0,-.2]],
+      [new THREE.CylinderGeometry(.4,.3,4.2,8),[-.7,-2.8,0]],
+      [new THREE.CylinderGeometry(.4,.3,4.2,8),[.7,-2.8,0]]
+    ];
+    parts.forEach(([geo,pos,rot])=>{const m=new THREE.Mesh(geo,wireMat);m.position.set(...pos);if(rot)m.rotation.set(...rot);humanGroup.add(m)});
+    heartMesh=new THREE.Mesh(new THREE.SphereGeometry(.4,12,12),pinkMat);heartMesh.position.set(.2,1.8,.3);humanGroup.add(heartMesh);
+    const ringMat=new THREE.MeshBasicMaterial({color:0x00f0ff,side:THREE.DoubleSide,transparent:true,opacity:.35});
+    for(let i=0;i<3;i++){const r=new THREE.Mesh(new THREE.RingGeometry(3.3+i*.55,3.34+i*.55,48),ringMat);r.rotation.x=Math.PI/2;r.position.y=-4.8;humanGroup.add(r)}
+    const pGeo=new THREE.BufferGeometry(),count=180,positions=new Float32Array(count*3);
+    for(let i=0;i<count;i++){positions[i*3]=(Math.random()-.5)*9;positions[i*3+1]=(Math.random()-.5)*11;positions[i*3+2]=(Math.random()-.5)*5}
+    pGeo.setAttribute("position",new THREE.BufferAttribute(positions,3));coreParticles=new THREE.Points(pGeo,new THREE.PointsMaterial({color:0x00f0ff,size:.025,transparent:true,opacity:.55}));
+    threeScene.add(coreParticles);threeScene.add(humanGroup);
+    document.getElementById("threeStatus").textContent="ONLINE";
+    let t=0;
+    const animate=()=>{
+      threeAnimationId=requestAnimationFrame(animate);t+=.016;
+      const speed={NORMAL:.008,ACTIVE:.015,"HIGH PERFORMANCE":.025,OVERDRIVE:.04}[state.coreState]||.008;
+      humanGroup.rotation.y+=speed;
+      const pulse=1+Math.sin(t*({NORMAL:2,ACTIVE:2.5,"HIGH PERFORMANCE":3,OVERDRIVE:4}[state.coreState]||2))*.12;
+      if(heartMesh)heartMesh.scale.setScalar(pulse);
+      if(coreParticles){coreParticles.rotation.y+=.0008;coreParticles.rotation.x=Math.sin(t*.2)*.05}
+      threeRenderer.render(threeScene,threeCamera);
+    };animate();
+  }catch(err){console.error(err);document.getElementById("threeStatus").textContent="UNAVAILABLE";notify("تعذر تشغيل محرك 3D؛ بقية النظام تعمل بشكل طبيعي","pink")}
+}
+function resize3D(){
+  const c=document.getElementById("hologram-viewport");if(!c||!threeRenderer||!threeCamera)return;
+  threeCamera.aspect=Math.max(1,c.clientWidth)/Math.max(1,c.clientHeight);threeCamera.updateProjectionMatrix();threeRenderer.setSize(c.clientWidth,c.clientHeight,false);
+}
+function setCoreMode(mode){if(!["NORMAL","ACTIVE","HIGH PERFORMANCE","OVERDRIVE"].includes(mode))return;state.coreState=mode;saveState();notify(`Core Mode: ${mode}`,"green")}
+
+/* =========================================================
+   GLOBAL SEARCH
+========================================================= */
+function openOverlay(id){const o=document.getElementById(id);o.classList.add("open");o.setAttribute("aria-hidden","false");}
+function closeOverlay(id){const o=document.getElementById(id);o.classList.remove("open");o.setAttribute("aria-hidden","true");}
+function globalSearch(){
+  const q=document.getElementById("globalSearchInput").value.trim().toLowerCase(),box=document.getElementById("globalSearchResults");
+  if(!q){box.innerHTML='<div class="empty">ابدأ بالكتابة للبحث...</div>';return}
+  const results=[];
+  state.tasks.forEach(x=>{if(x.text.toLowerCase().includes(q))results.push({type:"TASK",title:x.text,tab:"tasks",meta:x.completed?"مكتملة":"قيد الانتظار"})});
+  state.habits.forEach(x=>{if(x.title.toLowerCase().includes(q))results.push({type:"HABIT",title:x.title,tab:"habits",meta:`Streak ${computeHabit(x)}`})});
+  state.goals.forEach(x=>{if(x.title.toLowerCase().includes(q)||x.desc.toLowerCase().includes(q))results.push({type:"GOAL",title:x.title,tab:"goals",meta:`${x.progress}%`})});
+  state.events.forEach(x=>{if(x.title.toLowerCase().includes(q)||x.desc.toLowerCase().includes(q))results.push({type:"EVENT",title:x.title,tab:"calendar",meta:formatDate(x.date)})});
+  state.finance.forEach(x=>{if(x.title.toLowerCase().includes(q)||x.category.toLowerCase().includes(q))results.push({type:"FINANCE",title:x.title,tab:"finance",meta:formatDZD(x.amount)})});
+  state.notes.split("\n").forEach((line,i)=>{if(line.toLowerCase().includes(q))results.push({type:"NOTE",title:line.slice(0,160),tab:"notes",meta:`السطر ${i+1}`})});
+  state.growth.skills.forEach(x=>{if(x.title.toLowerCase().includes(q))results.push({type:"SKILL",title:x.title,tab:"growth",meta:`${x.progress}%`})});
+  state.growth.learning.forEach(x=>{if(x.title.toLowerCase().includes(q))results.push({type:"LEARNING",title:x.title,tab:"growth",meta:`${x.minutes} min`})});
+  state.projects.forEach(x=>{if(x.title.toLowerCase().includes(q)||x.desc.toLowerCase().includes(q))results.push({type:"PROJECT",title:x.title,tab:"projects",meta:`${x.progress}%`})});
+  state.shopping.forEach(x=>{if(x.title.toLowerCase().includes(q))results.push({type:"SHOPPING",title:x.title,tab:"shopping",meta:`x${x.qty}`})});
+  box.innerHTML=results.length?results.slice(0,80).map(r=>`<div class="search-result" data-search-tab="${r.tab}"><strong>${esc(r.type)}</strong> — ${esc(r.title)}<div class="meta">${esc(r.meta)}</div></div>`).join(""):'<div class="empty">لا توجد نتائج.</div>';
+}
+
+/* =========================================================
+   RENDER / DASHBOARD
+========================================================= */
+function renderAll(){
+  resetDailyWaterIfNeeded(false);
+  const p=state.profile,x=state.xpSystem;
+  document.getElementById("profName").textContent=p.name;document.getElementById("profRole").textContent=p.role;document.getElementById("profCreated").textContent=p.createdDate;
+  document.getElementById("inputProfName").value=p.name;document.getElementById("inputProfRole").value=p.role;document.getElementById("inputAvatar").value=p.avatar;
+  const av=document.getElementById("avatarDisplay");
+  av.innerHTML=p.avatar?`<img src="${esc(p.avatar)}" alt="الصورة الرمزية">`:`<svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  const needed=xpNeeded(x.level);
+  ["dashLevel","userLevel","stLevel"].forEach(id=>document.getElementById(id).textContent=x.level);
+  ["dashXP","userXP","stXP"].forEach(id=>document.getElementById(id).textContent=Math.floor(x.xp));
+  ["dashXPNeeded","userXPNeeded","stXPNeeded"].forEach(id=>document.getElementById(id).textContent=needed);
+  const xpPct=clamp(x.xp/needed*100,0,100);document.getElementById("xpBar").style.width=`${xpPct}%`;document.getElementById("stXpBar").style.width=`${xpPct}%`;
+  const done=state.tasks.filter(t=>t.completed).length,total=state.tasks.length,rate=total?Math.round(done/total*100):0;
+  document.getElementById("dashTaskRate").textContent=`${rate}%`;document.getElementById("dashTaskDone").textContent=done;document.getElementById("dashTaskTotal").textContent=total;
+  document.getElementById("dashPendingTasks").textContent=state.tasks.filter(t=>!t.completed).length;
+  const ft=financeTotals();document.getElementById("dashBalance").textContent=formatDZD(ft.balance);
+  document.getElementById("dashCoreState").textContent=state.coreState;document.getElementById("coreStatusBadge").textContent=state.coreState;
+  const goalAvg=state.goals.length?Math.round(state.goals.reduce((a,g)=>a+g.progress,0)/state.goals.length):0;
+  state.habits.forEach(computeHabit);const streakTotal=state.habits.reduce((a,h)=>a+h.streak,0);
+  document.getElementById("dashGoalAvg").textContent=`${goalAvg}%`;document.getElementById("dashGoalBar").style.width=`${goalAvg}%`;
+  document.getElementById("dashHabitStreak").textContent=`${streakTotal} أيام`;document.getElementById("dashEventCount").textContent=state.events.filter(e=>eventTimestamp(e)>=Date.now()).length;
+  const words=state.notes.trim()?state.notes.trim().split(/\s+/).length:0;document.getElementById("dashNoteWords").textContent=`${words} كلمة`;
+  const waterPct=Math.round(clamp(state.biometrics.water/state.biometrics.waterGoal,0,1)*100);
+  document.getElementById("dashWaterVal").textContent=state.biometrics.water;document.getElementById("waterGoalDisplay").textContent=state.biometrics.waterGoal;document.getElementById("waterBar").style.width=`${waterPct}%`;document.getElementById("dashHydration").textContent=`${waterPct}%`;
+  const metrics=coreMetrics();document.getElementById("stamina").textContent=`${Math.round(metrics.energy)}%`;document.getElementById("coreStability").textContent=`${Math.round(metrics.stability)}%`;document.getElementById("coreResource").textContent=`${Math.round(metrics.resource)}%`;
+  const bpmBase={NORMAL:72,ACTIVE:84,"HIGH PERFORMANCE":98,OVERDRIVE:116}[state.coreState]||72;document.getElementById("bpm").textContent=`${Math.round(bpmBase+Math.sin(Date.now()/700)*2)} BPM`;
+  document.getElementById("dashActiveGoals").textContent=state.goals.filter(g=>g.progress<100).length;document.getElementById("dashTotalXp").textContent=totalXpFromSystem();document.getElementById("dashNotifications").textContent=state.notifications.length;
+  const health=Math.round((metrics.energy+metrics.stability+metrics.resource)/3);document.getElementById("dashSystemHealth").textContent=`${health}%`;
+  renderTasks();renderHabits();renderGoals();renderFinance();renderEvents();updateNoteMeta();
+  document.getElementById("mainNotes").value=state.notes;
+  document.getElementById("stTasksTotal").textContent=total;document.getElementById("stTasksDone").textContent=done;document.getElementById("stBestStreak").textContent=state.habits.length?Math.max(...state.habits.map(h=>h.bestStreak||h.streak)):0;
+  document.getElementById("stEventsTotal").textContent=state.events.length;document.getElementById("stGoalAvg").textContent=`${goalAvg}%`;document.getElementById("stTotalXp").textContent=totalXpFromSystem();document.getElementById("stFinanceVolume").textContent=formatDZD(ft.volume);
+  document.getElementById("stTaskChartBar").style.width=`${rate}%`;document.getElementById("stTaskChartText").textContent=`نسبة إنجاز المهام الكلية: ${rate}%`;
+  document.getElementById("xpLogList").innerHTML=x.log.length?x.log.slice().reverse().slice(0,40).map(i=>`<div class="item-card"><div class="between"><span>${esc(i.source)}</span><strong class="text-green">+${i.amount} XP</strong></div><div class="meta">${esc(i.date)}</div></div>`).join(""):'<div class="empty">لا يوجد سجل XP بعد.</div>';
+  document.getElementById("waterGoalSetting").value=state.biometrics.waterGoal;document.getElementById("reducedMotion").checked=state.settings.reducedMotion;document.getElementById("scanlines").checked=state.settings.scanlines;
+  document.getElementById("storageKeyInfo").textContent=STORAGE_KEY;
+  document.getElementById("threeStatus").textContent=window.THREE?"READY":"UNAVAILABLE";
+  renderHealth();renderMind();renderGrowth();renderRoutines();renderTimeBlocks();renderShopping();renderProjects();renderLifeBalance();renderSmartDashboard();renderAchievements();
+  applySettings();
+}
+
+/* =========================================================
+   BACKUP / IMPORT / SETTINGS
+========================================================= */
+function exportData(){
+  const payload={...state,exportedAt:new Date().toISOString(),appVersion:"7.0",schemaVersion:SCHEMA_VERSION};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`HUMAN_OS_v7_BACKUP_${localDateKey()}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);notify("تم تصدير النسخة الاحتياطية","green");
+}
+function importData(file){
+  if(!file)return;
+  if(file.size>10*1024*1024)return notify("حجم ملف النسخة الاحتياطية كبير جداً","pink");
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const parsed=JSON.parse(e.target.result);if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))throw new Error("invalid");
+      if(parsed.schemaVersion&&Number(parsed.schemaVersion)>SCHEMA_VERSION)throw new Error("future_schema");
+      const imported=normalizeState(migrate(parsed));state=imported;saveState();notify("تم استيراد البيانات بعد التحقق منها","green");
+    }catch(err){console.error(err);notify("ملف JSON غير صالح أو تالف","pink")}
+  };reader.readAsText(file);
+}
+function resetSystem(){
+  if(!confirm("هل أنت متأكد؟ سيتم حذف بيانات HUMAN OS المحلية نهائياً من هذا المتصفح."))return;
+  localStorage.removeItem(STORAGE_KEY);state=DEFAULT_STATE();saveState();switchTab("dashboard");notify("تمت إعادة ضبط النظام","pink");
+}
+function applySettings(){
+  document.body.classList.toggle("reduced-motion",state.settings.reducedMotion);document.body.classList.toggle("no-scanlines",!state.settings.scanlines);
+}
+function saveSettings(){
+  const water=Math.floor(Number(document.getElementById("waterGoalSetting").value));
+  if(!Number.isFinite(water)||water<1||water>50)return notify("هدف الماء يجب أن يكون بين 1 و50","pink");
+  state.biometrics.waterGoal=water;state.settings.reducedMotion=document.getElementById("reducedMotion").checked;state.settings.scanlines=document.getElementById("scanlines").checked;
+  saveState();notify("تم حفظ إعدادات النظام","green");
+}
+
+/* =========================================================
+   EVENT DELEGATION / UI
+========================================================= */
+document.addEventListener("click",e=>{
+  const nav=e.target.closest(".nav-item");if(nav){switchTab(nav.dataset.tab);return}
+  const close=e.target.closest("[data-close-overlay]");if(close){closeOverlay(close.dataset.closeOverlay);return}
+  const action=e.target.closest("[data-action]");
+  if(action){
+    const id=action.dataset.id,act=action.dataset.action;
+    if(act==="toggle-task")toggleTask(id);if(act==="delete-task")deleteTask(id);if(act==="edit-task")editTask(id);
+    if(act==="log-habit")logHabitToday(id);if(act==="delete-habit")deleteHabit(id);
+    if(act==="goal-progress")updateGoalProgress(id,Number(action.dataset.delta));if(act==="delete-goal")deleteGoal(id);if(act==="edit-goal")editGoal(id);
+    if(act==="delete-finance")deleteFinance(id);if(act==="delete-event")deleteEvent(id);if(act==="edit-event")editEvent(id);
+    if(act==="skill-progress"){const s=state.growth.skills.find(x=>x.id===id);if(s){s.progress=clamp(s.progress+Number(action.dataset.delta),0,100);saveState()}}
+    if(act==="delete-skill"){state.growth.skills=state.growth.skills.filter(x=>x.id!==id);saveState();notify("تم حذف المهارة")}
+    if(act==="routine-step")toggleRoutineStep(action.dataset.rid,action.dataset.sid);
+    if(act==="delete-block")deleteBy("timeBlocks",id);
+    if(act==="shop-toggle"){const s=state.shopping.find(x=>x.id===id);if(s){s.purchased=!s.purchased;saveState()}}
+    if(act==="delete-shop")deleteBy("shopping",id);
+    if(act==="project-progress"){const p=state.projects.find(x=>x.id===id);if(p){p.progress=clamp(p.progress+Number(action.dataset.delta),0,100);if(p.progress===100)p.status="complete";saveState()}}
+    if(act==="delete-project")deleteBy("projects",id);
+    return;
+  }
+  const core=e.target.closest("[data-core]");if(core){setCoreMode(core.dataset.core);return}
+  const quick=e.target.closest("[data-quick]");if(quick){
+    closeOverlay("quickOverlay");const map={task:["tasks","taskInput"],habit:["habits","habitInput"],goal:["goals","goalTitle"],finance:["finance","finTitle"],event:["calendar","eventTitle"],note:["notes","mainNotes"],workout:["health","activityMinutes"],sleep:["health","sleepHours"]};
+    const item=map[quick.dataset.quick];if(item){switchTab(item[0]);setTimeout(()=>document.getElementById(item[1])?.focus(),80)}return;
+  }
+  const result=e.target.closest("[data-search-tab]");if(result){closeOverlay("searchOverlay");switchTab(result.dataset.searchTab);return}
+  const line=e.target.closest("[data-note-line]");if(line)focusNoteLine(Number(line.dataset.noteLine));
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){closeOverlay("quickOverlay");closeOverlay("searchOverlay");closeSidebar()}
+  const nav=e.target.closest(".nav-item");if(nav&&(e.key==="Enter"||e.key===" ")){e.preventDefault();switchTab(nav.dataset.tab)}
+});
+document.getElementById("mobileNavButton").addEventListener("click",toggleSidebar);
+document.getElementById("mobileNavHeader").addEventListener("click",toggleSidebar);
+document.getElementById("globalSearchBtn").addEventListener("click",()=>{openOverlay("searchOverlay");setTimeout(()=>document.getElementById("globalSearchInput").focus(),50)});
+document.getElementById("quickActionsBtn").addEventListener("click",()=>openOverlay("quickOverlay"));
+document.getElementById("globalSearchInput").addEventListener("input",globalSearch);
+document.getElementById("taskSearch").addEventListener("input",renderTasks);document.getElementById("taskFilter").addEventListener("change",renderTasks);document.getElementById("taskSort").addEventListener("change",renderTasks);
+document.getElementById("financeSearch").addEventListener("input",renderFinance);document.getElementById("financeFilter").addEventListener("change",renderFinance);document.getElementById("eventFilter").addEventListener("change",renderEvents);
+document.getElementById("noteSearch").addEventListener("input",renderNoteSearch);document.getElementById("mainNotes").addEventListener("input",onNotesInput);
+document.getElementById("addTaskBtn").addEventListener("click",addTask);document.getElementById("addHabitBtn").addEventListener("click",addHabit);document.getElementById("addGoalBtn").addEventListener("click",addGoal);
+document.getElementById("addFinanceBtn").addEventListener("click",addFinance);document.getElementById("addEventBtn").addEventListener("click",addEvent);document.getElementById("addWaterBtn").addEventListener("click",addWater);document.getElementById("waterGoalBtn").addEventListener("click",setWaterGoal);
+document.getElementById("saveProfileBtn").addEventListener("click",()=>{
+  const name=document.getElementById("inputProfName").value.trim(),role=document.getElementById("inputProfRole").value.trim(),avatar=validUrl(document.getElementById("inputAvatar").value.trim());
+  if(!name)return notify("الاسم مطلوب","pink");if(document.getElementById("inputAvatar").value.trim()&&!avatar)return notify("رابط الصورة غير مسموح؛ استخدم HTTPS أو Data Image","pink");
+  state.profile.name=name;state.profile.role=role||state.profile.role;state.profile.avatar=avatar;saveState();notify("تم تحديث الملف الشخصي","green");
+});
+document.getElementById("saveHealthBtn").addEventListener("click",saveHealth);
+document.getElementById("saveMindBtn").addEventListener("click",saveMind);
+document.getElementById("addSkillBtn").addEventListener("click",addSkill);document.getElementById("addLearningBtn").addEventListener("click",addLearning);
+document.getElementById("addRoutineBtn").addEventListener("click",addRoutine);document.getElementById("addBlockBtn").addEventListener("click",addTimeBlock);
+document.getElementById("addShopBtn").addEventListener("click",addShopping);document.getElementById("addProjectBtn").addEventListener("click",addProject);
+document.getElementById("exportBtn").addEventListener("click",exportData);document.getElementById("importBtn").addEventListener("click",()=>document.getElementById("importFile").click());
+document.getElementById("importFile").addEventListener("change",e=>{importData(e.target.files[0]);e.target.value=""});document.getElementById("resetBtn").addEventListener("click",resetSystem);document.getElementById("saveSettingsBtn").addEventListener("click",saveSettings);
+
+/* =========================================================
+   CLOCK / RESIZE / DAILY MAINTENANCE
+========================================================= */
+function updateClock(){
+  const now=new Date();document.getElementById("clock").textContent=nowTime();document.getElementById("dateDisplay").textContent=now.toLocaleDateString("ar-DZ",{weekday:"short",year:"numeric",month:"short",day:"numeric"});
+  const online=document.getElementById("onlineStatus");online.textContent=navigator.onLine?"● ONLINE":"● OFFLINE";online.classList.toggle("offline",!navigator.onLine);
+}
+window.addEventListener("resize",resize3D);
+window.addEventListener("online",updateClock);window.addEventListener("offline",updateClock);
+setInterval(updateClock,1000);
+setInterval(()=>{const before=state.biometrics.lastWaterDate;resetDailyWaterIfNeeded(true);if(before!==state.biometrics.lastWaterDate){saveState()}renderAll()},60000);
+window.addEventListener("beforeunload",()=>{if(noteSaveTimer)saveNotes()});
+
+window.addEventListener("DOMContentLoaded",()=>{
+  loadState();updateClock();
+  if(window.THREE)document.getElementById("threeStatus").textContent="READY";else document.getElementById("threeStatus").textContent="UNAVAILABLE";
+});
+
+/* =========================================================
+   HUMAN OS v7.0 — HARDENED LIFE OS PATCH
+========================================================= */
+(function(){
+"use strict";
+
+const _normalizeState = normalizeState;
+const _migrate = migrate;
+
+function mergeV7(out){
+  out.health=out.health&&typeof out.health==="object"?out.health:{logs:[]};
+  out.mind=out.mind&&typeof out.mind==="object"?out.mind:{logs:[]};
+  out.growth=out.growth&&typeof out.growth==="object"?out.growth:{skills:[],learning:[]};
+  out.routines=safeArray(out.routines); out.timeBlocks=safeArray(out.timeBlocks);
+  out.shopping=safeArray(out.shopping); out.projects=safeArray(out.projects);
+  out.achievements=safeArray(out.achievements);
+  out.tasks=safeArray(out.tasks).map(t=>({...t,category:safeString(t.category,60)||"عام"}));
+  out.goals=safeArray(out.goals).map(g=>({...g,priority:["Low","Medium","High"].includes(g.priority)?g.priority:"Medium",category:safeString(g.category,60)||"عام",status:g.progress>=100?"complete":"active"}));
+  out.events=safeArray(out.events).map(e=>({...e,priority:["Low","Medium","High"].includes(e.priority)?e.priority:"Medium"}));
+  out.finance=safeArray(out.finance).map(f=>({...f,date:safeString(f.date,20)||localDateKey()}));
+  out.shopping=safeArray(out.shopping).map(x=>({...x,actual:num(x.actual,0,1e9),purchased:!!x.purchased}));
+  out.projects=safeArray(out.projects).map(p=>({...p,status:p.progress>=100?"complete":(p.status||"active"),tasks:safeArray(p.tasks).map(t=>({id:t.id??uid("pt"),title:safeString(t.title,150),done:!!t.done,xpClaimed:!!t.xpClaimed})).filter(t=>t.title)}));
+  return out;
+}
+normalizeState=function(raw){return mergeV7(_normalizeState(raw));};
+
+function migrateV7(raw){
+  const s=_migrate(raw);
+  if(Number(s.schemaVersion)<7)s.schemaVersion=7;
+  s.tasks=safeArray(s.tasks).map(t=>({...t,category:t.category||"عام"}));
+  s.goals=safeArray(s.goals).map(g=>({...g,priority:g.priority||"Medium",category:g.category||"عام",status:g.progress>=100?"complete":"active"}));
+  s.events=safeArray(s.events).map(e=>({...e,priority:e.priority||"Medium"}));
+  s.projects=safeArray(s.projects).map(p=>({...p,tasks:safeArray(p.tasks)}));
+  return s;
+}
+migrate=migrateV7;
+
+function persist(render=true){
+  state=normalizeState(state);
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    lastSavedAt=new Date().toLocaleTimeString("ar-DZ");
+    const el=document.getElementById("lastSaveInfo");if(el)el.textContent=lastSavedAt;
+  }catch(err){console.error(err);notify("تعذر حفظ البيانات. قد تكون مساحة التخزين ممتلئة.","pink");return false}
+  if(render)renderAll();
+  return true;
+}
+saveState=persist;
+
+function openConfirm(message,callback){
+  const o=document.getElementById("confirmOverlay");
+  document.getElementById("confirmText").textContent=message;
+  const yes=document.getElementById("confirmYes");
+  yes.onclick=()=>{closeOverlay("confirmOverlay");callback()};
+  openOverlayCompat("confirmOverlay");
+}
+function openOverlayCompat(id){const o=document.getElementById(id);if(o){o.classList.add("open");o.setAttribute("aria-hidden","false")}}
+function closeOverlayCompat(id){const o=document.getElementById(id);if(o){o.classList.remove("open");o.setAttribute("aria-hidden","true")}}
+
+function recomputeBestStreak(h){
+  const hist=[...new Set(safeArray(h.history).filter(Boolean))].sort();
+  let best=0,cur=0,prev=null;
+  for(const d of hist){
+    if(prev&&dayDiff(prev,d)===1)cur++; else cur=1;
+    best=Math.max(best,cur);prev=d;
+  }
+  h.bestStreak=Math.max(Number(h.bestStreak)||0,best);
+  return computeHabit(h);
+}
+computeHabit=function(h){return (function(){
+  const hist=[...new Set(safeArray(h.history).filter(Boolean))].sort();
+  const today=localDateKey(), yesterday=localDateKey(new Date(Date.now()-86400000));
+  let streak=0,cursor=hist.includes(today)?today:(hist.includes(yesterday)?yesterday:null);
+  while(cursor&&hist.includes(cursor)){
+    streak++;const d=parseDateKey(cursor);d.setDate(d.getDate()-1);cursor=localDateKey(d);
+  }
+  h.streak=streak;h.history=hist.slice(-365);recomputeBestStreakRaw(h);h.lastCompletedDate=hist.at(-1)||null;return streak;
+})()};
+function recomputeBestStreakRaw(h){
+  const hist=[...new Set(safeArray(h.history).filter(Boolean))].sort();let best=0,cur=0,prev=null;
+  for(const d of hist){if(prev&&dayDiff(prev,d)===1)cur++;else cur=1;best=Math.max(best,cur);prev=d}
+  h.bestStreak=Math.max(Number(h.bestStreak)||0,best);
+}
+
+function addTaskV7(){
+  const text=document.getElementById("taskInput").value.trim();if(!text)return notify("اكتب وصف المهمة أولاً","pink");
+  const due=document.getElementById("taskDueDate").value, time=document.getElementById("taskDueTime").value;
+  if(due&&time&&new Date(`${due}T${time}`)<new Date()&&confirmLikeDisabled()){}
+  const tags=document.getElementById("taskTags").value.split(",").map(x=>x.trim()).filter(Boolean).slice(0,10);
+  state.tasks.push({id:uid("task"),text,priority:document.getElementById("taskPriority").value,category:document.getElementById("taskCategory").value.trim()||"عام",completed:false,xpClaimed:false,dueDate:due,dueTime:time,tags,createdAt:Date.now()});
+  clearInputs(["taskInput","taskDueDate","taskDueTime","taskTags","taskCategory"]);persist();notify("تمت إضافة المهمة","green");
+}
+function confirmLikeDisabled(){return false}
+addTask=addTaskV7;
+
+function toggleTaskV7(id){
+  const t=state.tasks.find(x=>String(x.id)===String(id));if(!t)return;
+  if(!t.completed){t.completed=true;if(!t.xpClaimed){t.xpClaimed=true;addXp(({Low:10,Medium:20,High:30})[t.priority]||10,`إنجاز مهمة: ${t.text}`)}notify("تم إنجاز المهمة","green")}
+  else t.completed=false;
+  persist();
+}
+toggleTask=toggleTaskV7;
+
+function logHabitTodayV7(id){
+  const h=state.habits.find(x=>String(x.id)===String(id));if(!h)return;
+  computeHabit(h);const today=localDateKey();
+  if(h.history.includes(today))return notify("تم تسجيل هذه العادة اليوم بالفعل","pink");
+  h.history.push(today);h.lastCompletedDate=today;computeHabit(h);addXp(10,`عادة: ${h.title}`);persist();notify(`تم تسجيل العادة — Streak ${h.streak} يوم`,"green");
+}
+logHabitToday=logHabitTodayV7;
+
+function addGoalV7(){
+  const title=document.getElementById("goalTitle").value.trim();if(!title)return notify("اكتب عنوان الهدف أولاً","pink");
+  const start=document.getElementById("goalStartDate").value,deadline=document.getElementById("goalDeadline").value;
+  if(start&&deadline&&start>deadline)return notify("تاريخ البداية لا يمكن أن يكون بعد الموعد النهائي","pink");
+  state.goals.push({id:uid("goal"),title,desc:document.getElementById("goalDesc").value.trim(),startDate:start,deadline,progress:0,priority:document.getElementById("goalPriority").value,category:document.getElementById("goalCategory").value.trim()||"عام",status:"active",xpClaimed:false,createdAt:Date.now()});
+  clearInputs(["goalTitle","goalDesc","goalStartDate","goalDeadline","goalCategory"]);persist();notify("تم إنشاء الهدف","green");
+}
+addGoal=addGoalV7;
+
+function updateGoalProgressV7(id,delta){
+  const g=state.goals.find(x=>String(x.id)===String(id));if(!g)return;
+  const before=g.progress;g.progress=clamp(g.progress+delta,0,100);g.status=g.progress>=100?"complete":"active";
+  if(before<100&&g.progress===100&&!g.xpClaimed){g.xpClaimed=true;addXp(50,`إكمال هدف: ${g.title}`);notify("اكتمل الهدف +50 XP","green")}
+  persist();
+}
+updateGoalProgress=updateGoalProgressV7;
+
+function addFinanceV7(){
+  const title=document.getElementById("finTitle").value.trim(),amount=Number(document.getElementById("finAmount").value);
+  if(!title||!Number.isFinite(amount)||amount<=0)return notify("تحقق من وصف المعاملة والمبلغ","pink");
+  const type=document.getElementById("finType").value;
+  state.finance.push({id:uid("fin"),title,category:document.getElementById("finCategory").value.trim()||"عام",amount:type==="expense"?-Math.abs(amount):Math.abs(amount),date:document.getElementById("finDate").value||localDateKey(),createdAt:Date.now()});
+  clearInputs(["finTitle","finAmount","finCategory","finDate"]);persist();notify("تم تسجيل المعاملة","green");
+}
+addFinance=addFinanceV7;
+
+function addEventV7(){
+  const title=document.getElementById("eventTitle").value.trim(),date=document.getElementById("eventDate").value;
+  if(!title||!date)return notify("عنوان الموعد والتاريخ مطلوبان","pink");
+  state.events.push({id:uid("event"),title,date,time:document.getElementById("eventTime").value,desc:document.getElementById("eventDesc").value.trim(),priority:document.getElementById("eventPriority").value,createdAt:Date.now()});
+  clearInputs(["eventTitle","eventDate","eventTime","eventDesc"]);persist();notify("تم تسجيل الموعد","green");
+}
+addEvent=addEventV7;
+
+function addShoppingV7(){
+  const title=document.getElementById("shopTitle").value.trim(),qty=Math.floor(Number(document.getElementById("shopQty").value)||1),expected=Number(document.getElementById("shopPrice").value)||0,actual=Number(document.getElementById("shopActual").value)||0;
+  if(!title)return notify("اكتب اسم المنتج","pink");
+  state.shopping.push({id:uid("shop"),title,qty,expected,actual,purchased:false});clearInputs(["shopTitle","shopPrice","shopActual"]);document.getElementById("shopQty").value=1;persist();notify("تمت إضافة المشتريات","green");
+}
+addShopping=addShoppingV7;
+
+function addProjectV7(){
+  const title=document.getElementById("projectTitle").value.trim();if(!title)return notify("اكتب اسم المشروع","pink");
+  state.projects.push({id:uid("project"),title,desc:document.getElementById("projectDesc").value.trim(),start:document.getElementById("projectStart").value,deadline:document.getElementById("projectDeadline").value,progress:0,status:"active",tasks:[]});
+  clearInputs(["projectTitle","projectDesc","projectStart","projectDeadline"]);persist();notify("تم إنشاء المشروع","green");
+}
+addProject=addProjectV7;
+
+function renderTasksV7(){
+  const q=document.getElementById("taskSearch").value.trim().toLowerCase(),filter=document.getElementById("taskFilter").value,sort=document.getElementById("taskSort").value;
+  let arr=state.tasks.filter(t=>t.text.toLowerCase().includes(q)||t.category.toLowerCase().includes(q)||safeArray(t.tags).some(x=>x.toLowerCase().includes(q)));
+  if(filter==="pending")arr=arr.filter(t=>!t.completed);if(filter==="completed")arr=arr.filter(t=>t.completed);if(filter==="overdue")arr=arr.filter(taskIsOverdue);
+  arr.sort((a,b)=>sort==="priority"?priorityValue(b.priority)-priorityValue(a.priority):sort==="due"?(dateTimeValue(a.dueDate,a.dueTime)||"9999").localeCompare(dateTimeValue(b.dueDate,b.dueTime)||"9999"):sort==="alpha"?a.text.localeCompare(b.text,"ar"):b.createdAt-a.createdAt);
+  const box=document.getElementById("taskList");
+  if(!arr.length){box.innerHTML='<div class="empty">لا توجد مهام مطابقة.<br><button type="button" data-focus="taskInput" style="margin-top:10px">إضافة مهمة</button></div>';return}
+  box.innerHTML=arr.map(t=>{
+    const overdue=taskIsOverdue(t),tags=safeArray(t.tags).map(x=>`<span class="badge badge-cyan">${esc(x)}</span>`).join(" ");
+    return `<div class="item-card ${t.completed?"completed":""} ${overdue?"overdue":""}">
+      <div class="between"><div class="row"><input type="checkbox" ${t.completed?"checked":""} data-action="toggle-task" data-id="${esc(t.id)}" aria-label="إكمال المهمة"><span style="${t.completed?"text-decoration:line-through;color:var(--muted)":""}">${esc(t.text)}</span><span class="badge badge-${t.priority.toLowerCase()}">${esc(t.priority)}</span><span class="chip">${esc(t.category)}</span>${tags}</div>
+      <div class="actions"><button class="small" data-action="edit-task" data-id="${esc(t.id)}">تعديل</button><button class="small btn-pink" data-action="delete-task" data-id="${esc(t.id)}">حذف</button></div></div>
+      <div class="meta" style="margin-top:7px">${t.dueDate?`الاستحقاق: ${formatDate(t.dueDate)} ${t.dueTime||""}`:"بدون موعد"}${overdue?' — <span class="danger-text">متأخرة</span>':""} — ${esc(t.category)} ${t.xpClaimed?"— XP مكتسب":""}</div>
+    </div>`;
+  }).join("");
+}
+renderTasks=renderTasksV7;
+
+function renderGoalsV7(){
+  const box=document.getElementById("goalList");if(!state.goals.length){box.innerHTML='<div class="empty">لم تتم إضافة أهداف بعد.<br><button type="button" data-focus="goalTitle" style="margin-top:10px">إنشاء هدف</button></div>';return}
+  box.innerHTML=state.goals.slice().sort((a,b)=>priorityValue(b.priority)-priorityValue(a.priority)||b.createdAt-a.createdAt).map(g=>{
+    const [status,type]=goalStatus(g);
+    return `<div class="panel" style="margin:0"><div class="between"><strong style="color:var(--cyan)">${esc(g.title)}</strong><span class="badge badge-${type==="pink"?"high":type==="green"?"low":"cyan"}">${status}</span></div>
+    <div class="meta" style="margin:7px 0">${esc(g.desc)} | الفئة: ${esc(g.category)} | الأولوية: ${esc(g.priority)} | ${g.startDate?`البداية: ${formatDate(g.startDate)} | `:""}الموعد: ${g.deadline?formatDate(g.deadline):"غير محدد"} | ${countdown(g)}</div>
+    <div class="between" style="margin-bottom:5px"><span>التقدم</span><strong class="text-yellow">${g.progress}%</strong></div><div class="bar-container" style="margin-bottom:10px"><div class="bar-fill" style="width:${g.progress}%"></div></div>
+    <div class="actions"><button class="small" data-action="goal-progress" data-id="${esc(g.id)}" data-delta="5">+5%</button><button class="small" data-action="goal-progress" data-id="${esc(g.id)}" data-delta="10">+10%</button><button class="small" data-action="goal-progress" data-id="${esc(g.id)}" data-delta="-5">-5%</button><button class="small" data-action="edit-goal" data-id="${esc(g.id)}">تعديل</button><button class="small btn-pink" data-action="delete-goal" data-id="${esc(g.id)}">حذف</button></div></div>`;
+  }).join("");
+}
+renderGoals=renderGoalsV7;
+
+function renderFinanceV7(){
+  const t=financeTotals();document.getElementById("finTotalIncome").textContent=formatDZD(t.income);document.getElementById("finTotalExpenses").textContent=formatDZD(t.expense);document.getElementById("finNetBalance").textContent=formatDZD(t.balance);
+  const q=document.getElementById("financeSearch").value.trim().toLowerCase(),filter=document.getElementById("financeFilter").value;
+  let arr=state.finance.filter(f=>f.title.toLowerCase().includes(q)||f.category.toLowerCase().includes(q));
+  if(filter==="income")arr=arr.filter(f=>f.amount>0);if(filter==="expense")arr=arr.filter(f=>f.amount<0);arr.sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt);
+  document.getElementById("finList").innerHTML=arr.length?arr.map(f=>`<div class="item-card"><div class="between"><div><strong>${esc(f.title)}</strong><span class="meta"> [${esc(f.category)}] ${formatDate(f.date)}</span></div><div class="row"><strong style="color:${f.amount>=0?"var(--green)":"var(--pink)"}">${f.amount>=0?"+":"-"}${formatDZD(Math.abs(f.amount))}</strong><button class="small btn-pink" data-action="delete-finance" data-id="${esc(f.id)}">×</button></div></div></div>`).join(""):'<div class="empty">لا توجد معاملات مطابقة.</div>';
+  let summary=document.getElementById("financePeriodSummary");
+  if(!summary){summary=document.createElement("div");summary.id="financePeriodSummary";summary.className="meta";document.getElementById("finList").parentElement.appendChild(summary)}
+  const month=localDateKey().slice(0,7),mf=state.finance.filter(f=>f.date.startsWith(month)),today=state.finance.filter(f=>f.date===localDateKey());
+  const mi=mf.filter(f=>f.amount>0).reduce((a,f)=>a+f.amount,0),me=mf.filter(f=>f.amount<0).reduce((a,f)=>a+Math.abs(f.amount),0),td=today.filter(f=>f.amount<0).reduce((a,f)=>a+Math.abs(f.amount),0);
+  summary.textContent=`ملخص الشهر: دخل ${formatDZD(mi)} | مصروف ${formatDZD(me)} | صافي ${formatDZD(mi-me)} — مصروف اليوم: ${formatDZD(td)}`;
+}
+renderFinance=renderFinanceV7;
+
+function renderEventsV7(){
+  const filter=document.getElementById("eventFilter").value,q=document.getElementById("eventSearch").value.trim().toLowerCase(),sort=document.getElementById("eventSort").value,now=Date.now();
+  let arr=state.events.filter(e=>e.title.toLowerCase().includes(q)||e.desc.toLowerCase().includes(q));
+  if(filter==="upcoming")arr=arr.filter(e=>eventTimestamp(e)>=now);if(filter==="past")arr=arr.filter(e=>eventTimestamp(e)<now);
+  arr.sort((a,b)=>sort==="priority"?priorityValue(b.priority)-priorityValue(a.priority):sort==="created"?b.createdAt-a.createdAt:eventTimestamp(a)-eventTimestamp(b));
+  const box=document.getElementById("eventList");box.innerHTML=arr.length?arr.map(e=>{const past=eventTimestamp(e)<now;return `<div class="item-card ${past?"completed":""}"><div class="between"><div><strong class="text-cyan">📅 ${formatDate(e.date)} ${e.time?`(${esc(e.time)})`:""}</strong> — ${esc(e.title)} <span class="badge badge-${e.priority==="High"?"high":e.priority==="Low"?"low":"medium"}">${esc(e.priority)}</span><div class="meta">${esc(e.desc)}</div></div><div class="actions"><button class="small" data-action="edit-event" data-id="${esc(e.id)}">تعديل</button><button class="small btn-pink" data-action="delete-event" data-id="${esc(e.id)}">حذف</button></div></div></div>`}).join(""):'<div class="empty">لا توجد مواعيد في هذا التصنيف.</div>';
+}
+renderEvents=renderEventsV7;
+
+function saveHealthV7(){
+  const existing=todayHealth();
+  const log={id:existing?.id||uid("health"),date:localDateKey(),sleep:num(document.getElementById("sleepHours").value,0,24),wake:document.getElementById("wakeTime").value,activity:Math.floor(num(document.getElementById("activityMinutes").value,0,1440)),weight:num(document.getElementById("healthWeight").value,0,500),exercise:safeString(document.getElementById("exerciseNote").value,180)};
+  state.health.logs=state.health.logs.filter(x=>x.date!==log.date);state.health.logs.push(log);state.health.logs=state.health.logs.slice(-365);persist();notify("تم حفظ سجل الصحة لليوم","green");
+}
+saveHealth=saveHealthV7;
+
+function renderHealthV7(){
+  const today=todayHealth()||{},waterPct=Math.round(clamp(state.biometrics.water/state.biometrics.waterGoal,0,1)*100);
+  document.getElementById("healthSleepKpi").textContent=`${Number(today.sleep||0).toFixed(1)}h`;document.getElementById("healthActivityKpi").textContent=`${today.activity||0} min`;document.getElementById("healthWaterKpi").textContent=`${waterPct}%`;document.getElementById("healthWeightKpi").textContent=today.weight?`${today.weight} kg`:"—";
+  ["sleepHours","wakeTime","activityMinutes","healthWeight","exerciseNote"].forEach(id=>document.getElementById(id).value=today[{sleepHours:"sleep",wakeTime:"wake",activityMinutes:"activity",healthWeight:"weight",exerciseNote:"exercise"}[id]]??"");
+  const logs=state.health.logs.slice().reverse().slice(0,14);document.getElementById("healthLogList").innerHTML=logs.length?logs.map(x=>`<div class="timeline-item"><strong>${esc(formatDate(x.date))}</strong> — نوم ${Number(x.sleep||0).toFixed(1)}h | نشاط ${x.activity||0} min | وزن ${x.weight||"—"} kg ${x.exercise?`| ${esc(x.exercise)}`:""}</div>`).join(""):"<div class='empty'>لا يوجد سجل صحي بعد.</div>";
+  const week=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=localDateKey(d),x=state.health.logs.find(v=>v.date===key);week.push(`<div class="health-day"><div class="meta">${d.toLocaleDateString("ar-DZ",{weekday:"short"})}</div><div class="v">${x?Number(x.sleep||0).toFixed(1)+"h":"—"}</div><div class="meta">${x?x.activity+"m":"لا سجل"}</div></div>`)}
+  document.getElementById("healthWeekly").innerHTML=week.join("");
+}
+renderHealth=renderHealthV7;
+
+function saveMindV7(){
+  const date=localDateKey(),old=state.mind.logs.find(x=>x.date===date);
+  const log={id:old?.id||uid("mind"),date,mood:clamp(Number(document.getElementById("mindMood").value),1,5),focus:clamp(Number(document.getElementById("mindFocus").value)||5,1,10),energy:clamp(Number(document.getElementById("mindEnergy").value)||5,1,10),journal:safeString(document.getElementById("mindJournal").value,5000),ideas:safeString(document.getElementById("mindIdeas").value,3000)};
+  state.mind.logs=state.mind.logs.filter(x=>x.date!==date);state.mind.logs.push(log);state.mind.logs=state.mind.logs.slice(-365);persist();notify("تم حفظ تسجيل اليوم الذهني","green");
+}
+saveMind=saveMindV7;
+
+function renderMindV7(){
+  const box=document.getElementById("mindHistory"),logs=state.mind.logs.slice().reverse().slice(0,14),today=state.mind.logs.find(x=>x.date===localDateKey());
+  if(today){document.getElementById("mindMood").value=today.mood;document.getElementById("mindFocus").value=today.focus;document.getElementById("mindEnergy").value=today.energy;document.getElementById("mindJournal").value=today.journal||"";document.getElementById("mindIdeas").value=today.ideas||""}
+  box.innerHTML=logs.length?logs.map(x=>`<div class="item-card"><div class="between"><strong>${esc(formatDate(x.date))}</strong><span class="badge badge-cyan">Mood ${x.mood}/5</span></div><div class="meta">Focus ${x.focus}/10 | Energy ${x.energy}/10</div><div style="margin-top:6px">${esc(x.journal||"بدون يوميات")}</div>${x.ideas?`<div class="meta" style="margin-top:5px">أفكار: ${esc(x.ideas)}</div>`:""}</div>`).join(""):"<div class='empty'>لا يوجد سجل ذهني بعد.</div>";
+}
+renderMind=renderMindV7;
+
+function addRoutineV7(){
+  const title=document.getElementById("routineTitle").value.trim();if(!title)return notify("اكتب اسم الروتين","pink");
+  const step=document.getElementById("routineStep").value.trim(),minutes=Math.floor(Number(document.getElementById("routineMinutes").value)||5),period=document.getElementById("routinePeriod").value;
+  let r=state.routines.find(x=>x.title===title&&x.period===period);if(!r){r={id:uid("routine"),title,period,steps:[],lastDate:""};state.routines.push(r)}
+  if(step)r.steps.push({id:uid("step"),title:step,minutes,doneToday:false});clearInputs(["routineTitle","routineStep","routineMinutes"]);persist();notify("تم تحديث الروتين","green");
+}
+addRoutine=addRoutineV7;
+
+function renderRoutinesV7(){
+  const box=document.getElementById("routineList");box.innerHTML=state.routines.length?state.routines.map(r=>`<div class="panel" style="margin:0"><div class="between"><strong>${esc(r.title)}</strong><span class="badge badge-cyan">${esc(r.period)}</span></div><div style="margin-top:10px">${r.steps.map((s,i)=>`<div class="routine-step"><input type="checkbox" ${s.doneToday?"checked":""} data-action="routine-step" data-rid="${esc(r.id)}" data-sid="${esc(s.id)}"><span style="flex:1">${esc(s.title)}</span><span class="meta">${s.minutes} min</span><button type="button" class="small" data-action="routine-up" data-rid="${esc(r.id)}" data-index="${i}" ${i===0?"disabled":""}>↑</button><button type="button" class="small" data-action="routine-down" data-rid="${esc(r.id)}" data-index="${i}" ${i===r.steps.length-1?"disabled":""}>↓</button></div>`).join("")||'<div class="empty">أضف خطوة للروتين.</div>'}</div></div>`).join(""):"<div class='empty'>لا توجد روتينات بعد.</div>";
+}
+renderRoutines=renderRoutinesV7;
+
+function moveRoutine(rid,index,delta){
+  const r=state.routines.find(x=>x.id===rid);if(!r)return;const ni=index+delta;if(ni<0||ni>=r.steps.length)return;[r.steps[index],r.steps[ni]]=[r.steps[ni],r.steps[index]];persist();
+}
+
+function renderShoppingV7(){
+  const expected=state.shopping.filter(x=>!x.purchased).reduce((a,x)=>a+x.expected*x.qty,0),actual=state.shopping.filter(x=>x.purchased).reduce((a,x)=>a+x.actual*x.qty,0);
+  document.getElementById("shopTotal").textContent=`${formatDZD(expected)} | فعلي: ${formatDZD(actual)}`;
+  const box=document.getElementById("shoppingList");box.innerHTML=state.shopping.length?state.shopping.map(x=>`<div class="item-card ${x.purchased?"completed":""}"><div class="between"><label class="row"><input type="checkbox" ${x.purchased?"checked":""} data-action="shop-toggle" data-id="${esc(x.id)}"><strong>${esc(x.title)}</strong></label><button class="small btn-pink" data-action="delete-shop" data-id="${esc(x.id)}">حذف</button></div><div class="meta">الكمية: ${x.qty} | المتوقع: ${formatDZD(x.expected*x.qty)} | الفعلي: ${formatDZD(x.actual*x.qty)}</div></div>`).join(""):"<div class='empty'>قائمة المشتريات فارغة.</div>";
+}
+renderShopping=renderShoppingV7;
+
+function renderProjectsV7(){
+  const box=document.getElementById("projectList");box.innerHTML=state.projects.length?state.projects.map(p=>{
+    const done=safeArray(p.tasks).filter(t=>t.done).length,total=safeArray(p.tasks).length;
+    return `<div class="project-card"><div class="between"><strong>${esc(p.title)}</strong><button class="small btn-pink" data-action="delete-project" data-id="${esc(p.id)}">حذف</button></div>
+    <div class="meta" style="margin:7px 0">${esc(p.desc)} | ${p.start?`البداية: ${formatDate(p.start)} | `:""}${p.deadline?`الموعد: ${formatDate(p.deadline)}`:"بدون موعد"} | ${p.status==="complete"?"مكتمل":"نشط"}</div>
+    <div class="bar-container"><div class="bar-fill" style="width:${p.progress}%"></div></div><div class="between" style="margin-top:7px"><span>${p.progress}% ${total?`| ${done}/${total} مهام`:""}</span><div class="actions"><button class="small" data-action="project-progress" data-id="${esc(p.id)}" data-delta="5">+5%</button><button class="small" data-action="project-progress" data-id="${esc(p.id)}" data-delta="-5">-5%</button></div></div>
+    <div style="margin-top:10px">${safeArray(p.tasks).map(t=>`<label class="project-task"><input type="checkbox" ${t.done?"checked":""} data-action="project-task" data-pid="${esc(p.id)}" data-tid="${esc(t.id)}"><span>${esc(t.title)}</span></label>`).join("")}</div>
+    <div class="row" style="margin-top:8px"><input id="projectTask_${esc(p.id)}" maxlength="150" placeholder="مهمة داخل المشروع" style="margin:0;flex:1"><button type="button" class="small" data-action="add-project-task" data-id="${esc(p.id)}">+ مهمة</button></div></div>`;
+  }).join(""):"<div class='empty'>لا توجد مشاريع بعد.</div>";
+}
+renderProjects=renderProjectsV7;
+
+function updateProjectProgressFromTasks(p){
+  if(p.tasks?.length){p.progress=Math.round(p.tasks.filter(t=>t.done).length/p.tasks.length*100);p.status=p.progress>=100?"complete":"active"}
+}
+
+function renderDashboardKPIs(){
+  const h=todayHealth()||{}, waterPct=Math.round(clamp(state.biometrics.water/state.biometrics.waterGoal,0,1)*100);
+  document.getElementById("dashSleep").textContent=h.sleep?`${Number(h.sleep).toFixed(1)}h`:"—";
+  document.getElementById("dashWaterKpi").textContent=`${waterPct}%`;
+  document.getElementById("dashLearning").textContent=`${state.growth.learning.filter(x=>x.date===localDateKey()).reduce((a,x)=>a+x.minutes,0)}m`;
+  document.getElementById("dashProjects").textContent=state.projects.filter(p=>p.progress<100).length;
+  document.getElementById("dashBestStreak").textContent=state.habits.length?Math.max(...state.habits.map(h=>recomputeBestStreak(h)||0)):0;
+  document.getElementById("dashTodaySpend").textContent=formatDZD(state.finance.filter(f=>f.date===localDateKey()&&f.amount<0).reduce((a,f)=>a+Math.abs(f.amount),0));
+}
+
+const _renderAll=renderAll;
+renderAll=function(){
+  state=normalizeState(state);
+  _renderAll();
+  renderDashboardKPIs();
+};
+
+function runCommand(raw){
+  const v=raw.trim();if(!v)return;
+  const parts=v.split(/\s+/),cmd=parts[0].toLowerCase(),payload=parts.slice(1).join(" ").trim();
+  const map={"/task":"tasks","/goal":"goals","/habit":"habits","/note":"notes","/expense":"finance","/event":"calendar","/workout":"health","/sleep":"health"};
+  if(map[cmd]){switchTab(map[cmd]);const fields={tasks:"taskInput",goals:"goalTitle",habits:"habitInput",notes:"mainNotes",finance:"finTitle",calendar:"eventTitle",health:cmd==="/sleep"?"sleepHours":"activityMinutes"};const el=document.getElementById(fields[map[cmd]]);if(el){if(payload)el.value=payload;el.focus()};return}
+  globalSearchInputFallback(v);
+}
+function globalSearchInputFallback(v){openOverlay("searchOverlay");const i=document.getElementById("globalSearchInput");i.value=v;globalSearch();i.focus()}
+
+function resetSystemV7(){
+  openConfirm("سيتم حذف بيانات HUMAN OS المحلية من هذا المتصفح ولا يمكن التراجع عن ذلك. هل تريد المتابعة؟",()=>{
+    localStorage.removeItem(STORAGE_KEY);state=DEFAULT_STATE();persist();switchTab("dashboard");notify("تمت إعادة ضبط النظام","pink");
+  });
+}
+resetSystem=resetSystemV7;
+
+function deleteTaskV7(id){openConfirm("حذف هذه المهمة؟",()=>{state.tasks=state.tasks.filter(t=>String(t.id)!==String(id));persist();notify("تم حذف المهمة")})}
+function deleteHabitV7(id){openConfirm("حذف هذه العادة وسجلها؟",()=>{state.habits=state.habits.filter(h=>String(h.id)!==String(id));persist();notify("تم حذف العادة")})}
+function deleteGoalV7(id){openConfirm("حذف هذا الهدف؟",()=>{state.goals=state.goals.filter(g=>String(g.id)!==String(id));persist();notify("تم حذف الهدف")})}
+function deleteFinanceV7(id){openConfirm("حذف هذه المعاملة المالية؟",()=>{state.finance=state.finance.filter(f=>String(f.id)!==String(id));persist();notify("تم حذف المعاملة")})}
+function deleteEventV7(id){openConfirm("حذف هذا الموعد؟",()=>{state.events=state.events.filter(e=>String(e.id)!==String(id));persist();notify("تم حذف الموعد")})}
+deleteTask=deleteTaskV7;deleteHabit=deleteHabitV7;deleteGoal=deleteGoalV7;deleteFinance=deleteFinanceV7;deleteEvent=deleteEventV7;
+const _deleteBy=deleteBy;
+deleteBy=function(arrName,id){
+  const labels={shopping:"عنصر المشتريات",projects:"المشروع",timeBlocks:"الفترة الزمنية"};
+  openConfirm(`حذف ${labels[arrName]||"هذا العنصر"}؟`,()=>{state[arrName]=safeArray(state[arrName]).filter(x=>String(x.id)!==String(id));persist();notify("تم الحذف")});
+};
+
+function patchActionHandlers(){
+  document.addEventListener("click",e=>{
+    const f=e.target.closest("[data-focus]");if(f){document.getElementById(f.dataset.focus)?.focus();return}
+    const a=e.target.closest("[data-action]");if(!a)return;
+    const id=a.dataset.id;
+    if(a.dataset.action==="routine-up")moveRoutine(a.dataset.rid,Number(a.dataset.index),-1);
+    if(a.dataset.action==="routine-down")moveRoutine(a.dataset.rid,Number(a.dataset.index),1);
+    if(a.dataset.action==="project-task"){const p=state.projects.find(x=>x.id===a.dataset.pid),t=p?.tasks.find(x=>x.id===a.dataset.tid);if(p&&t){t.done=!t.done;updateProjectProgressFromTasks(p);persist()}}
+    if(a.dataset.action==="add-project-task"){const p=state.projects.find(x=>x.id===id),input=document.getElementById(`projectTask_${id}`);if(p&&input?.value.trim()){p.tasks.push({id:uid("pt"),title:input.value.trim(),done:false,xpClaimed:false});input.value="";persist();notify("تمت إضافة مهمة للمشروع","green")}}
+  });
+}
+patchActionHandlers();
+
+document.getElementById("dashboardCommandBtn")?.addEventListener("click",()=>runCommand(document.getElementById("dashboardCommand").value));
+document.getElementById("dashboardCommand")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runCommand(e.currentTarget.value)}});
+document.getElementById("eventSearch")?.addEventListener("input",renderEvents);
+document.getElementById("eventSort")?.addEventListener("change",renderEvents);
+document.getElementById("eventFilter")?.addEventListener("change",renderEvents);
+document.getElementById("finDate")?.setAttribute("value",localDateKey());
+
+/* Visibility-aware Three.js loop: pause rendering while the app is hidden. */
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){if(threeAnimationId)cancelAnimationFrame(threeAnimationId);threeAnimationId=null}
+  else if(threeScene&&threeRenderer&&!threeAnimationId){
+    let t=performance.now()/1000;
+    const loop=()=>{
+      if(document.hidden){threeAnimationId=null;return}
+      threeAnimationId=requestAnimationFrame(loop);t+=.016;
+      const speed={NORMAL:.008,ACTIVE:.015,"HIGH PERFORMANCE":.025,OVERDRIVE:.04}[state.coreState]||.008;
+      if(humanGroup)humanGroup.rotation.y+=speed;
+      const pulse=1+Math.sin(t*({NORMAL:2,ACTIVE:2.5,"HIGH PERFORMANCE":3,OVERDRIVE:4}[state.coreState]||2))*.12;
+      if(heartMesh)heartMesh.scale.setScalar(pulse);
+      if(coreParticles){coreParticles.rotation.y+=.0008;coreParticles.rotation.x=Math.sin(t*.2)*.05}
+      threeRenderer.render(threeScene,threeCamera);
+    };loop();
+  }
+});
+if(window.ResizeObserver){
+  const ro=new ResizeObserver(()=>resize3D());
+  window.addEventListener("DOMContentLoaded",()=>{const c=document.getElementById("hologram-viewport");if(c)ro.observe(c)});
+}
+
+/* Install service worker only on http(s), never from file://. */
+window.addEventListener("DOMContentLoaded",()=>{
+  if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
+    navigator.serviceWorker.register("./sw.js").catch(err=>console.warn("HUMAN OS PWA:",err));
+  }
+  document.getElementById("finDate").value=localDateKey();
+  document.getElementById("eventDate").value ||= localDateKey();
+  document.getElementById("blockDate").value ||= localDateKey();
+  document.getElementById("goalStartDate").value ||= localDateKey();
+});
+
+/* Defensive keyboard handling for overlays. */
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")closeOverlayCompat("confirmOverlay");
+});
+
+/* Upgrade current records once without awarding XP. */
+window.addEventListener("DOMContentLoaded",()=>{
+  state=normalizeState(state);
+  state.habits.forEach(recomputeBestStreak);
+  state.goals.forEach(g=>g.status=g.progress>=100?"complete":"active");
+  state.projects.forEach(updateProjectProgressFromTasks);
+  persist(false);
+  renderAll();
+});
+
+/* =========================================================
+   HUMAN OS v8.0 — HUMAN AI CORE ENGINE
+   Provider-agnostic frontend. Secrets never belong here.
+========================================================= */
+(function initHumanAICore(){
+  const AI_CFG = window.HUMAN_AI_CONFIG || {enabled:false,endpoint:"",provider:"openai-compatible",model:""};
+  const AI_MAX_CONTEXT = 18;
+  const ai = {busy:false};
+  const $ = id => document.getElementById(id);
+  function ensureAI(){
+    state.ai = state.ai || {conversations:[],memories:[],preferences:{tasks:true,goals:true,finance:false,health:false,write:false,web:true},lastAction:"-",provider:AI_CFG.provider||"openai-compatible",model:AI_CFG.model||"-"};
+    state.ai.preferences = Object.assign({tasks:true,goals:true,finance:false,health:false,write:false,web:true},state.ai.preferences||{});
+    state.ai.conversations = safeArray(state.ai.conversations); state.ai.memories=safeArray(state.ai.memories);
+  }
+  function escapeText(v){return String(v??"");}
+  function aiStatus(text,kind="offline"){$("aiStatusText")&&($("aiStatusText").textContent=text,$("aiStatusText").className="ai-status "+kind);$("aiHeaderStatus")&&($('aiHeaderStatus').textContent=text,$('aiHeaderStatus').className="ai-status "+kind)}
+  function activity(text,show=true){const e=$("aiActivity");if(!e)return;e.hidden=!show;e.textContent=text||""}
+  function addMessage(role,content,meta=""){
+    ensureAI(); const box=$("aiMessages"); if(!box)return;
+    if(box.querySelector('.ai-empty'))box.innerHTML="";
+    const row=document.createElement('div');row.className='ai-msg '+(role==='user'?'user':'assistant');
+    const bubble=document.createElement('div');bubble.className='ai-bubble';
+    if(meta){const m=document.createElement('div');m.className='ai-meta';m.textContent=meta;bubble.appendChild(m)}
+    const body=document.createElement('div');body.textContent=escapeText(content);bubble.appendChild(body);row.appendChild(bubble);box.appendChild(row);box.scrollTop=box.scrollHeight;
+  }
+  function contextSnapshot(){
+    ensureAI(); const p=state.ai.preferences||{}; const c={today:localDateKey(),profile:state.profile,coreState:state.coreState,xp:state.xpSystem,settings:state.settings};
+    if(p.tasks)c.tasks=safeArray(state.tasks).slice(0,60).map(x=>({id:x.id,title:x.title,done:!!x.done,dueDate:x.dueDate,dueTime:x.dueTime,priority:x.priority,category:x.category,xp:x.xp}));
+    if(p.goals)c.goals=safeArray(state.goals).slice(0,40).map(x=>({id:x.id,title:x.title,progress:x.progress,deadline:x.deadline,priority:x.priority,category:x.category,status:x.status}));
+    if(p.finance)c.finance=safeArray(state.finance).slice(0,80).map(x=>({id:x.id,type:x.type,title:x.title,amount:x.amount,date:x.date,category:x.category}));
+    if(p.health)c.health=state.health||{};
+    c.habits=safeArray(state.habits).slice(0,40).map(x=>({id:x.id,title:x.title,streak:x.streak,bestStreak:x.bestStreak,lastCompletedDate:x.lastCompletedDate}));
+    c.learning=state.growth||{};c.projects=safeArray(state.projects).slice(0,30).map(x=>({id:x.id,title:x.title,progress:x.progress,status:x.status,startDate:x.startDate,deadline:x.deadline}));
+    c.events=safeArray(state.events).slice(0,40).map(x=>({id:x.id,title:x.title,date:x.date,time:x.time,priority:x.priority}));
+    c.memory=state.ai.memories.slice(0,50).map(m=>({id:m.id,text:m.text,type:m.type,importance:m.importance,createdAt:m.createdAt}));
+    return c;
+  }
+  function tool(name,args){
+    ensureAI(); const p=state.ai.preferences||{};
+    const needWrite=['createTask','updateTask','completeTask','createHabit','logHabit','createGoal','updateGoal','completeGoal','createNote','createEvent','updateEvent','addExpense','addIncome','createProject','updateProject','addShoppingItem','logHealth','logSleep','logWater','logWorkout','addLearning','updateSkill','saveMemory','updateMemory','deleteMemory'];
+    if(needWrite.includes(name)&&!p.write)throw new Error('صلاحية تنفيذ التغييرات غير مفعلة. فعّلها من HUMAN AI.');
+    const a=args||{};
+    if(name==='getDashboard')return contextSnapshot();
+    if(name==='getStatistics')return {xp:state.xpSystem,habits:state.habits.length,goals:state.goals.length,tasks:state.tasks.length,projects:state.projects.length,finance:state.finance.length};
+    if(name==='searchGlobal'){const q=String(a.query||'').toLowerCase();return {tasks:state.tasks.filter(x=>String(x.title||'').toLowerCase().includes(q)).slice(0,20),goals:state.goals.filter(x=>String(x.title||'').toLowerCase().includes(q)).slice(0,20),notes:String(state.notes||'').toLowerCase().includes(q)?state.notes:'',events:state.events.filter(x=>String(x.title||'').toLowerCase().includes(q)).slice(0,20)};}
+    if(name==='getMemory')return state.ai.memories;
+    if(name==='saveMemory'){const m={id:uid('mem'),text:String(a.text||'').trim(),type:a.type||'LONG_TERM',importance:Number(a.importance||3),source:'HUMAN AI',createdAt:new Date().toISOString()};if(!m.text)throw new Error('الذاكرة فارغة.');state.ai.memories.unshift(m);state.ai.memories=state.ai.memories.slice(0,500);persist();return m;}
+    if(name==='deleteMemory'){state.ai.memories=state.ai.memories.filter(m=>String(m.id)!==String(a.id));persist();return {deleted:true};}
+    if(name==='createTask'){const t={id:uid('task'),text:String(a.title||'').trim(),priority:a.priority||'Medium',category:a.category||'AI',completed:false,xpClaimed:false,dueDate:a.dueDate||localDateKey(),dueTime:a.dueTime||'',tags:[],createdAt:Date.now()};if(!t.text)throw new Error('عنوان المهمة مطلوب.');state.tasks.push(t);persist();return t;}
+    if(name==='completeTask'){const t=state.tasks.find(x=>String(x.id)===String(a.id));if(!t)throw new Error('المهمة غير موجودة.');if(!t.completed){t.completed=true;if(!t.xpClaimed){t.xpClaimed=true;addXp(({Low:10,Medium:20,High:30})[t.priority]||10,`إنجاز مهمة: ${t.text}`);}}persist();return t;}
+    if(name==='createGoal'){const g={id:uid('goal'),title:String(a.title||'').trim(),desc:a.description||'',priority:a.priority||'Medium',category:a.category||'AI',startDate:a.startDate||localDateKey(),deadline:a.deadline||'',progress:0,status:'active',xpClaimed:false,createdAt:Date.now()};if(!g.title)throw new Error('عنوان الهدف مطلوب.');state.goals.push(g);persist();return g;}
+    if(name==='updateGoal'){const g=state.goals.find(x=>String(x.id)===String(a.id));if(!g)throw new Error('الهدف غير موجود.');g.progress=Math.max(0,Math.min(100,Number(a.progress??g.progress)));g.status=g.progress>=100?'complete':'active';persist();return g;}
+    if(name==='createNote'){state.notes=(state.notes?state.notes+'\n\n':'')+String(a.text||'');state.lastNoteEdit=new Date().toLocaleString('ar-DZ');persist();return {ok:true};}
+    if(name==='createEvent'){const e={id:uid('event'),title:String(a.title||'').trim(),date:a.date||localDateKey(),time:a.time||'',desc:a.description||'',priority:a.priority||'Medium',createdAt:Date.now()};if(!e.title)throw new Error('عنوان الموعد مطلوب.');state.events.push(e);persist();return e;}
+    if(name==='addExpense'){const amount=Number(a.amount||0);if(!Number.isFinite(amount)||amount<=0)throw new Error('المبلغ غير صالح.');const f={id:uid('fin'),title:String(a.title||'AI expense'),category:a.category||'other',amount:-Math.abs(amount),date:a.date||localDateKey(),createdAt:Date.now()};state.finance.push(f);persist();return f;}
+    throw new Error('الأداة غير مدعومة: '+name);
+  }
+  function renderAI(){ensureAI();if($('aiMemoryCount'))$('aiMemoryCount').textContent=state.ai.memories.length;if($('aiLastAction'))$('aiLastAction').textContent=state.ai.lastAction||'-';if($('aiProviderText'))$('aiProviderText').textContent='Provider: '+(AI_CFG.provider||state.ai.provider||'غير مضبوط');if($('aiModelText'))$('aiModelText').textContent='Model: '+(AI_CFG.model||state.ai.model||'—');
+    ['tasks','goals','finance','health','write','web'].forEach(k=>{const el=$('perm'+k.charAt(0).toUpperCase()+k.slice(1));if(el)el.checked=!!state.ai.preferences[k];});
+    const configured=!!AI_CFG.enabled&&!!AI_CFG.endpoint;aiStatus(navigator.onLine&&configured?'ONLINE':(configured?'OFFLINE':'NOT CONFIGURED'),navigator.onLine&&configured?'online':'offline');
+  }
+  function savePrefs(){ensureAI();['tasks','goals','finance','health','write','web'].forEach(k=>{const el=$('perm'+k.charAt(0).toUpperCase()+k.slice(1));if(el)state.ai.preferences[k]=el.checked});persist();renderAI();}
+  async function callProvider(messages){
+    if(!AI_CFG.enabled||!AI_CFG.endpoint)throw new Error('لم يتم ضبط AI Provider. ضع endpoint ومفتاح المزود في Backend/Edge Function، وليس داخل HTML.');
+    const payload={model:AI_CFG.model||undefined,messages,temperature:Number(AI_CFG.temperature??0.3),human_os:{context:contextSnapshot(),permissions:state.ai.preferences}};
+    const r=await fetch(AI_CFG.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw new Error('AI HTTP '+r.status);const data=await r.json();
+    const content=data.output||data.content||data.message?.content||data.choices?.[0]?.message?.content||data.choices?.[0]?.text;if(!content)throw new Error('استجابة AI غير مفهومة.');return String(content);
+  }
+  function parseLocalCommand(v){
+    const parts=v.trim().split(/\s+/),cmd=(parts[0]||'').toLowerCase(),payload=parts.slice(1).join(' ').trim();
+    if(!/^\/(task|goal|habit|note|expense|event|workout|sleep)$/.test(cmd))return false;
+    if(!state.ai.preferences.write)throw new Error('فعّل صلاحية تنفيذ التغييرات أولًا.');
+    if(cmd==='/task')tool('createTask',{title:payload});
+    else if(cmd==='/goal')tool('createGoal',{title:payload});
+    else if(cmd==='/note')tool('createNote',{text:payload});
+    else if(cmd==='/expense'){const m=payload.match(/(\d+(?:\.\d+)?)\s*(?:دج|DA|DZD)?\s*(.*)/i);tool('addExpense',{amount:Number(m?.[1]||0),title:m?.[2]||payload});}
+    else if(cmd==='/event')tool('createEvent',{title:payload});
+    else return false;
+    state.ai.lastAction='Command '+cmd;persist();renderAI();return true;
+  }
+  async function send(){
+    ensureAI();if(ai.busy)return;const input=$('aiInput');const text=(input?.value||'').trim();if(!text)return;input.value='';addMessage('user',text,'USER');
+    try{ai.busy=true;activity('🧠 HUMAN AI ACTIVE — تحليل الطلب...',true);state.ai.conversations.push({role:'user',content:text,createdAt:new Date().toISOString()});
+      if(text.startsWith('/')){if(parseLocalCommand(text)){addMessage('assistant','تم تنفيذ الأمر داخل HUMAN OS.','SYSTEM ACTION');notify('تم تنفيذ أمر HUMAN AI','green');return;}}
+      const messages=[{role:'system',content:'أنت HUMAN AI CORE داخل HUMAN OS. استخدم العربية عند الإمكان. لا تدّعي استخدام الإنترنت أو أدوات لم تُستخدم. تعامل مع بيانات النظام كمعلومات تنظيمية وليست تشخيصًا طبيًا. إذا احتاجت العملية إلى تعديل، اطلب تأكيدًا عندما يكون التغيير كبيرًا.'},...state.ai.conversations.slice(-AI_MAX_CONTEXT).map(x=>({role:x.role,content:x.content})),{role:'user',content:'SYSTEM_CONTEXT_JSON:\n'+JSON.stringify(contextSnapshot())}];
+      const answer=await callProvider(messages);addMessage('assistant',answer,'HUMAN AI');state.ai.conversations.push({role:'assistant',content:answer,createdAt:new Date().toISOString()});state.ai.lastAction='AI response';persist();
+    }catch(e){addMessage('assistant','تعذر تنفيذ الطلب: '+e.message,'SYSTEM ERROR');notify(e.message,'pink');}finally{ai.busy=false;activity('',false);renderAI();}
+  }
+  function clearChat(){ensureAI();state.ai.conversations=[];persist();const box=$('aiMessages');if(box)box.innerHTML='<div class="ai-empty">محادثة جديدة — HUMAN AI CORE جاهز.</div>';}
+  document.addEventListener('DOMContentLoaded',()=>{ensureAI();renderAI();
+    $('aiSendBtn')?.addEventListener('click',send);$('aiClearBtn')?.addEventListener('click',clearChat);
+    $('aiInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+    document.querySelectorAll('[data-ai-prompt]').forEach(b=>b.addEventListener('click',()=>{$('aiInput').value=b.dataset.aiPrompt;$('aiInput').focus()}));
+    ['permTasks','permGoals','permFinance','permHealth','permWrite','permWeb'].forEach(id=>$(id)?.addEventListener('change',savePrefs));
+    $('aiSaveMemoryBtn')?.addEventListener('click',()=>{const t=($('aiInput')?.value||'').trim();if(!t)return notify('اكتب الذاكرة في مربع الإدخال أولًا','pink');try{state.ai.preferences.write=true;tool('saveMemory',{text:t});$('aiInput').value='';renderAI();notify('تم حفظ الذاكرة','green')}catch(e){notify(e.message,'pink')}});
+    window.addEventListener('online',renderAI);window.addEventListener('offline',renderAI);
+  });
+  window.HUMAN_AI={send,tool,contextSnapshot,render:renderAI,clearChat};
+})();
+
+})();
+
+</script>
+</body>
+</html>
