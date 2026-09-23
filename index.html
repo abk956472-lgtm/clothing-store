@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMA | Boutique Mariage Algérienne</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- مكتبة Supabase للربط بقاعدة البيانات وتخزين الملفات -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        /* الهيدر */
+        header {
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+            position: relative;
+        }
+        header h1 {
+            color: #d4af37;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        header p {
+            font-size: 14px;
+            color: #ccc;
+        }
+        /* زر تسجيل الدخول العلوي */
+        .admin-login-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: transparent;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+        .admin-login-btn:hover {
+            background: #d4af37;
+            color: #1a1a1a;
+        }
+        /* شريط المعلومات */
+        .info-bar {
+            background-color: #333;
+            color: #fff;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 1px solid #444;
+        }
+        .info-bar span {
+            margin: 0 15px;
+            display: inline-block;
+        }
+        /* شريط التوصيل المكتوب */
+        .delivery-banner {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #faebcc;
+        }
+        /* قسم الترحيب (الخلفية تتغير ديناميكياً) */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            text-align: center;
+            padding: 80px 20px;
+            transition: background 0.5s ease;
+        }
+        .hero h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #f3e5ab;
+        }
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #d4af37;
+            color: #1a1a1a;
+            padding: 12px 30px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #b59325;
+            color: #fff;
+        }
+        /* زر الواتساب الأخضر الخاص بالطلب */
+        .whatsapp-btn {
+            display: inline-block;
+            background-color: #25d366;
+            color: #fff;
+            padding: 8px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: 0.3s;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1ebe5d;
+        }
+        /* نافذة تسجيل الدخول المنبثقة */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+        }
+        /* نافذة تكبير الصورة (Lightbox) */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: #fff;
+            font-size: 35px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        /* لوحة التحكم (مخفية) */
+        .admin-box {
+            display: none;
+            max-width: 600px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-top: 4px solid #d4af37;
+        }
+        .admin-box h3 {
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            text-align: center;
+        }
+        .admin-section {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .admin-section h4 {
+            margin-bottom: 10px;
+            color: #d4af37;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        /* زر الحذف الخاص بالمالك داخل البطاقة */
+        .delete-btn {
+            display: none;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        /* المنتجات */
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            color: #1a1a1a;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: #d4af37;
+            margin: 10px auto 0;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        /* حاوية صور المنتج */
+        .product-img-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #000;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        .product-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .img-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 3px;
+        }
+        .prev-img { right: 10px; }
+        .next-img { left: 10px; }
+        .img-counter {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 10px;
+        }
+        .product-card h3 {
+            font-size: 18px;
+            margin: 15px 0 10px;
+        }
+        .product-card p {
+            color: #e67e22;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        /* الفوتر */
+        footer {
+            background-color: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+            border-top: 3px solid #d4af37;
+        }
+        footer p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .social-links a {
+            color: #d4af37;
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .social-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="admin-login-btn" id="headerLoginBtn" onclick="openLoginModal()">دخول المالك</button>
+        <h1>BMA</h1>
+        <p>Boutique Mariage Algérienne</p>
+    </header>
+
+    <div class="info-bar">
+        <span>📍 باب الزوار، الطريق الوطني رقم 05، الجزائر</span>
+        <span>📞 0771 15 44 28 / 0551 49 48 79</span>
+    </div>
+
+    <!-- شريط معلومات التوصيل المكتوب -->
+    <div class="delivery-banner">
+        🚚 خدمة التوصيل السريع متوفرة إلى جميع ولايات الوطن  حتى باب البيت أو المكتب.
+    </div>
+
+    <!-- قسم الترحيب (خلفية ديناميكية) -->
+    <section class="hero" id="heroSection">
+        <h2>أرقى الألبسة التقليدية للعرائس والمناسبات</h2>
+        <p>تصنيع وبيع الأزياء التقليدية الجزائرية</p>
+        <a href="https://wa.me/213551494879?text=السلام%20عليكم،%20أريد%20الاستفسار%20عن%20المنتجات" target="_blank" class="btn">تواصل معنا عبر واتساب</a>
+    </section>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeLoginModal()">&times;</span>
+            <h3 style="margin-bottom: 20px; color: #1a1a1a;">تسجيل دخول المالك</h3>
+            <div class="form-group">
+                <label>البريد الإلكتروني:</label>
+                <input type="email" id="adminEmail" placeholder="bma@gmail.com">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور:</label>
+                <input type="password" id="adminPass" placeholder="********">
+            </div>
+            <button class="btn" style="width: 100%;" onclick="loginAdmin()">دخول</button>
+        </div>
+    </div>
+
+    <!-- نافذة تكبير الصورة (Lightbox) -->
+    <div id="lightboxModal" class="lightbox-modal" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImg">
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div class="admin-box" id="adminDashboard">
+        <h3>✨ لوحة تحكم المالك</h3>
+
+        <!-- قسم تغيير صورة الغلاف -->
+        <div class="admin-section">
+            <h4>🖼️ تغيير صورة الواجهة (الخلفية الكبرى)</h4>
+            <div class="form-group">
+                <label>اختر صورة جديدة لواجهة الموقع من هاتفك:</label>
+                <input type="file" id="heroImageFile" accept="image/*" style="background: #f1f1f1; padding: 8px;">
+            </div>
+            <button class="btn" id="saveHeroBtn" style="width: 100%; background-color: #3498db; color: white; font-size: 14px;" onclick="updateHeroImage()">تحديث صورة الواجهة فوراً</button>
+        </div>
+
+        <!-- قسم إضافة منتج جديد -->
+        <div class="admin-section">
+            <h4>📦 إضافة منتج جديد</h4>
+            <div class="form-group">
+                <label>اسم المنتج:</label>
+                <input type="text" id="pName" placeholder="مثال: قفطان ملكي مطرز">
+            </div>
+            <div class="form-group">
+                <label>وصف السعر أو النوع:</label>
+                <input type="text" id="pDesc" placeholder="مثال: متوفر جملة وتفصيل">
+            </div>
+            <div class="form-group">
+                <label>صور المنتج (اختر من 1 إلى 5 صور من هاتفك):</label>
+                <input type="file" id="pImageFiles" accept="image/*" multiple style="background: #f1f1f1; padding: 8px;">
+            </div>
+            <button class="btn" id="saveProductBtn" style="width: 100%; background-color: #27ae60; color: white;" onclick="addProduct()">حفظ المنتج في قاعدة البيانات</button>
+        </div>
+
+        <button class="btn" style="width: 100%; margin-top: 5px; background-color: #c0392b; color: white;" onclick="logoutAdmin()">تسجيل الخروج</button>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">أحدث التشكيلات</h2>
+        <div class="products-grid" id="productsGrid">
+            <!-- المنتجات -->
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>Boutique Mariage Algérienne (BMA)</strong></p>
+        <p>تصنيع وبيع و توصيل لكل ولايات الوطن )</p>
+        <div class="social-links">
+            <a href="https://wa.me/213551494879" target="_blank">WhatsApp: 0551494879</a> | 
+            <a href="#" target="_blank">Facebook: Boutique Mariage Algérienne</a> | 
+            <a href="#" target="_blank">Instagram: Boutique Mariage Algérienne</a>
+        </div>
+        <p style="margin-top: 15px; color: #777; font-size: 12px;">© 2026 جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = "https://lvthnzfubbrhyfnwqaxs.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_dxFosZXqkQfgc0qexLu0jw_FJ8xLY_G";
+        
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const ADMIN_EMAIL = "bma@gmail.com";
+        const ADMIN_PASS = "123456";
+        
+        // التحقق مما إذا كان المالك مسجل الدخول مسبقاً من ذاكرة الهاتف المحلية
+        let isAdminLoggedIn = localStorage.getItem('bma_admin_logged') === 'true';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLoginStateUI();
+            fetchProducts();
+            loadHeroImage();
+        });
+
+        // ضبط واجهة المستخدم حسب حالة تسجيل الدخول
+        function checkLoginStateUI() {
+            if (isAdminLoggedIn) {
+                document.getElementById('adminDashboard').style.display = 'block';
+                document.getElementById('headerLoginBtn').style.display = 'none';
+            } else {
+                document.getElementById('adminDashboard').style.display = 'none';
+                document.getElementById('headerLoginBtn').style.display = 'block';
+            }
+        }
+
+        // جلب وتطبيق صورة الواجهة المحفوظة
+        async function loadHeroImage() {
+            const { data, error } = await _supabase
+                .from('bma_settings')
+                .select('value')
+                .eq('key', 'hero_bg')
+                .single();
+
+            if (data && data.value) {
+                document.getElementById('heroSection').style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${data.value}')`;
+                document.getElementById('heroSection').style.backgroundSize = 'cover';
+                document.getElementById('heroSection').style.backgroundPosition = 'center';
+            }
+        }
+
+        // تحديث صورة الواجهة من لوحة التحكم
+        async function updateHeroImage() {
+            const fileInput = document.getElementById('heroImageFile');
+            if (fileInput.files.length === 0) {
+                alert('الرجاء اختيار صورة من هاتفك أولاً!');
+                return;
+            }
+
+            const btn = document.getElementById('saveHeroBtn');
+            btn.innerText = "جاري رفع وتحديث الصورة...";
+            btn.disabled = true;
+
+            const file = fileInput.files[0];
+            const fileName = `hero_${Date.now()}_${file.name}`;
+
+            const { error: uploadError } = await _supabase.storage
+                .from('product-images')
+                .upload(fileName, file);
+
+            if (uploadError) {
+                alert('خطأ أثناء رفع الصورة: ' + uploadError.message);
+                btn.innerText = "تحديث صورة الواجهة فوراً";
+                btn.disabled = false;
+                return;
+            }
+
+            const { data: publicUrlData } = _supabase.storage
+                .from('product-images')
+                .getPublicUrl(fileName);
+
+            const imageUrl = publicUrlData.publicUrl;
+
+            const { error: dbError } = await _supabase
+                .from('bma_settings')
+                .upsert({ key: 'hero_bg', value: imageUrl }, { onConflict: 'key' });
+
+            btn.innerText = "تحديث صورة الواجهة فوراً";
+            btn.disabled = false;
+
+            if (dbError) {
+                alert('حدث خطأ أثناء حفظ الرابط في القاعدة: ' + dbError.message);
+                return;
+            }
+
+            alert('تم تغيير صورة واجهة الموقع بنجاح!');
+            fileInput.value = '';
+            loadHeroImage();
+        }
+
+        async function fetchProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">جاري تحميل المنتجات من قاعدة البيانات...</p>';
+
+            const { data, error } = await _supabase
+                .from('bma_products')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error) {
+                grid.innerHTML = '<p style="text-align:center; color: red; grid-column: 1/-1;">خطأ في الاتصال بقاعدة البيانات.</p>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">لا توجد منتجات حالياً. سجل دخولك كمالك لإضافة منتجات جديدة.</p>';
+                return;
+            }
+
+            data.forEach((product, index) => {
+                let images = [];
+                try {
+                    images = typeof product.image_url === 'string' && product.image_url.startsWith('[') ? JSON.parse(product.image_url) : [product.image_url];
+                } catch(e) {
+                    images = [product.image_url];
+                }
+                
+                images = images.filter(img => img && img.trim() !== "");
+                if(images.length === 0) images = ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80'];
+
+                const cardId = `p-card-${index}`;
+                const whatsappMsg = encodeURIComponent(`السلام عليكم، أهلاً BMA، أريد طلب هذا المنتج: ${product.name}`);
+                const whatsappUrl = `https://wa.me/213551494879?text=${whatsappMsg}`;
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.id = cardId;
+                
+                let imgHtml = `
+                    <div class="product-img-container" onclick="openLightbox('${images[0]}')">
+                        <img src="${images[0]}" alt="${product.name}" id="img-display-${index}">
+                        ${images.length > 1 ? `<span class="img-counter" id="counter-${index}">1 / ${images.length}</span>` : ''}
+                        ${images.length > 1 ? `
+                            <button class="img-nav-btn prev-img" onclick="event.stopPropagation(); changeImage(${index}, -1, ${JSON.stringify(images).replace(/"/g, '&quot;')})">‹</button>
+                            <button class="img-nav-btn next-img" onclick="event.stopPropagation(); changeImage(${index}, 1, ${JSON.stringify(images).replace(/"/g, '&quot;')})">›</button>
+                        ` : ''}
+                    </div>
+                `;
+
+                card.innerHTML = `
+                    ${imgHtml}
+                    <h3>${product.name}</h3>
+                    <p>${product.description || 'متوفر جملة وتفصيل'}</p>
+                    <a href="${whatsappUrl}" target="_blank" class="whatsapp-btn">💬 اطلب عبر واتساب</a>
+                    <br>
+                    <button class="delete-btn" id="del-btn-${product.id}" style="display: ${isAdminLoggedIn ? 'inline-block' : 'none'};" onclick="deleteProduct(${product.id})">🗑️ حذف المنتج</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.currentImgIndexes = {};
+        function changeImage(cardIndex, direction, imagesArray) {
+            if (!window.currentImgIndexes[cardIndex]) window.currentImgIndexes[cardIndex] = 0;
+            
+            window.currentImgIndexes[cardIndex] += direction;
+            if (window.currentImgIndexes[cardIndex] >= imagesArray.length) {
+                window.currentImgIndexes[cardIndex] = 0;
+            } else if (window.currentImgIndexes[cardIndex] < 0) {
+                window.currentImgIndexes[cardIndex] = imagesArray.length - 1;
+            }
+
+            const curr = window.currentImgIndexes[cardIndex];
+            const imgElement = document.getElementById(`img-display-${cardIndex}`);
+            const counterElement = document.getElementById(`counter-${cardIndex}`);
+            
+            imgElement.src = imagesArray[curr];
+            imgElement.parentElement.setAttribute('onclick', `openLightbox('${imagesArray[curr]}')`);
+            if(counterElement) {
+                counterElement.innerText = `${curr + 1} / ${imagesArray.length}`;
+            }
+        }
+
+        function openLightbox(imgSrc) {
+            const modal = document.getElementById('lightboxModal');
+            const modalImg = document.getElementById('lightboxImg');
+            modal.style.display = 'flex';
+            modalImg.src = imgSrc;
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightboxModal').style.display = 'none';
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function loginAdmin() {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+
+            if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+                isAdminLoggedIn = true;
+                // حفظ حالة الدخول في ذاكرة الهاتف لتبقى مسجلة عند التحديث
+                localStorage.setItem('bma_admin_logged', 'true');
+                
+                alert('مرحباً بك يا صاحب المتجر! تم تسجيل الدخول بنجاح.');
+                checkLoginStateUI();
+                closeLoginModal();
+                document.getElementById('adminEmail').value = '';
+                document.getElementById('adminPass').value = '';
+                fetchProducts();
+            } else {
+                alert('البريد الإلكتروني أو كلمة المرور غير صحيحة!');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            // مسح حالة الدخول من ذاكرة الهاتف
+            localStorage.removeItem('bma_admin_logged');
+            
+            checkLoginStateUI();
+            alert('تم تسجيل الخروج بنجاح.');
+            fetchProducts();
+        }
+
+        async function deleteProduct(productId) {
+            if(!confirm('هل أنت متأكد من رغبتك في حذف هذا المنتج نهائياً؟')) {
+                return;
+            }
+
+            const { error } = await _supabase
+                .from('bma_products')
+                .delete()
+                .eq('id', productId);
+
+            if (error) {
+                alert('حدث خطأ أثناء حذف المنتج: ' + error.message);
+                return;
+            }
+
+            alert('تم حذف المنتج بنجاح!');
+            fetchProducts();
+        }
+
+        async function addProduct() {
+            const name = document.getElementById('pName').value;
+            const desc = document.getElementById('pDesc').value;
+            const fileInput = document.getElementById('pImageFiles');
+
+            if(!name) {
+                alert('الرجاء إدخال اسم المنتج على الأقل!');
+                return;
+            }
+
+            if(fileInput.files.length === 0) {
+                alert('الرجاء اختيار صورة واحدة على الأقل من هاتفك!');
+                return;
+            }
+
+            if(fileInput.files.length > 5) {
+                alert('الحد الأقصى المسموح به هو 5 صور لكل منتج!');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveProductBtn');
+            saveBtn.innerText = "جاري رفع الصور وحفظ المنتج...";
+            saveBtn.disabled = true;
+
+            let uploadedImageUrls = [];
+
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const fileName = `${Date.now()}_${i}_${file.name}`;
+
+                const { data: uploadData, error: uploadError } = await _supabase.storage
+                    .from('product-images')
+                    .upload(fileName, file);
+
+                if (uploadError) {
+                    alert(`خطأ في رفع الصورة رقم ${i+1}: ` + uploadError.message);
+                    saveBtn.innerText = "حفظ المنتج في قاعدة البيانات";
+                    saveBtn.disabled = false;
+                    return;
+                }
+
+                const { data: publicUrlData } = _supabase.storage
+                    .from('product-images')
+                    .getPublicUrl(fileName);
+
+                if (publicUrlData && publicUrlData.publicUrl) {
+                    uploadedImageUrls.push(publicUrlData.publicUrl);
+                }
+            }
+
+            const { error: dbError } = await _supabase
+                .from('bma_products')
+                .insert([
+                    { 
+                        name: name, 
+                        description: desc, 
+                        image_url: JSON.stringify(uploadedImageUrls) 
+                    }
+                ]);
+
+            saveBtn.innerText = "حفظ المنتج في قاعدة البيانات";
+            saveBtn.disabled = false;
+
+            if (dbError) {
+                alert('حدث خطأ أثناء حفظ المنتج في جدول القاعدة: ' + dbError.message);
+                return;
+            }
+
+            alert('تمت إضافة المنتج وصوره بنجاح!');
+            
+            document.getElementById('pName').value = '';
+            document.getElementById('pDesc').value = '';
+            fileInput.value = '';
+            
+            fetchProducts();
+        }
+    </script>
+
+</body>
+</html>   
